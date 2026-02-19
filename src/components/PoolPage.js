@@ -6,8 +6,11 @@ import { getAllContentPool } from '../Services/Slices/GetContentPoolSlice';
 import { updateContentPoolStatus } from '../Services/Slices/UpdateContentPoolStatusSlice';
 import { updateAlwaysOnInsertionMode } from '../Services/Slices/UpdateAlwaysOnInsertionModeSlice';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowDown} from "@fortawesome/free-solid-svg-icons";
+import {faArrowDown, faCircleExclamation} from "@fortawesome/free-solid-svg-icons";
 import {faAngleDown} from "@fortawesome/free-solid-svg-icons/faAngleDown";
+import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
+import {faInfo} from "@fortawesome/free-solid-svg-icons/faInfo";
+import {faPlus} from "@fortawesome/free-solid-svg-icons/faPlus";
 
 const PoolsPage = ({ user }) => {
     const dispatch = useDispatch();
@@ -200,14 +203,14 @@ const PoolsPage = ({ user }) => {
                     <p>Category-based pools in fixed rotation with Always On insertion</p>
                 </div>
                 <div className="header-btns">
-                    <button className="btn btn-create" onClick={handleOpenCreateModal}>+ Create Pool</button>
+                    <button className="btn btn-create" onClick={handleOpenCreateModal}><FontAwesomeIcon icon={faPlus} style={{marginRight: '5px'}} /> Create Pool</button>
                     <button
                         className="btn btn-always"
                         onClick={() => setShowAlwaysOnSettings((prev) => !prev)}
                     >
-                        Always On Settings
+                        <FontAwesomeIcon icon={faCog} style={{marginRight: '5px'}} /> Always On Settings
                     </button>
-                    <button className="btn btn-emergency">Emergency Settings</button>
+                    <button className="btn btn-emergency"><FontAwesomeIcon icon={faCircleExclamation}  style={{marginRight: '5px'}} /> Emergency Settings</button>
                 </div>
             </div>
 
