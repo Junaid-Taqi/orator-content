@@ -1,0 +1,96 @@
+/* Navigation Styles */
+.navigation {
+  background: linear-gradient(135deg, #2d6d8f 0%, #1e4d63 100%);
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(0, 212, 212, 0.2);
+  height: 60px;
+}
+
+.tabs-container {
+  display: flex;
+  gap: 0;
+}
+
+.tab-button {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 20px 24px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  height: 100%;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.tab-button:hover {
+  color: #00d4d4;
+}
+
+.tab-button.active {
+  color: #ffffff;
+  border-bottom-color: #00d4d4;
+  background: rgba(0, 212, 212, 0.1);
+}
+
+.tab-icon {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.tab-label {
+  white-space: nowrap;
+}
+
+.connector-btn {
+  background: transparent;
+  border: 1px solid rgba(0, 212, 212, 0.5);
+  color: #00d4d4;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.connector-btn:hover {
+  background: rgba(0, 212, 212, 0.15);
+  border-color: #00d4d4;
+}
+
+.connector-icon {
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .navigation {
+    padding: 0 20px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .tab-button {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  .connector-btn {
+    margin-left: auto;
+  }
+}
