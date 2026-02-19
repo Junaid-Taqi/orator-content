@@ -4,14 +4,19 @@ import '../styles/PoolsPage.css';
 import CreatePoolModal from './CreatePoolModal';
 import { getAllContentPool } from '../Services/Slices/GetContentPoolSlice';
 import { updateContentPoolStatus } from '../Services/Slices/UpdateContentPoolStatusSlice';
+import { updateAlwaysOnInsertionMode } from '../Services/Slices/UpdateAlwaysOnInsertionModeSlice';
 
 const PoolsPage = ({ user }) => {
     const dispatch = useDispatch();
     const [showModal, setShowModal] = useState(false);
     const [editingPool, setEditingPool] = useState(null);
+    const [showAlwaysOnSettings, setShowAlwaysOnSettings] = useState(false);
+    const [selectedAlwaysOnMode, setSelectedAlwaysOnMode] = useState(2);
+    const [alwaysOnMessage, setAlwaysOnMessage] = useState('');
 
     const { contentPoolList, total, status, error } = useSelector((state) => state.GetContentPool);
     const { status: updateStatus } = useSelector((state) => state.UpdateContentPoolStatus);
+    const { status: alwaysOnUpdateStatus } = useSelector((state) => state.UpdateAlwaysOnInsertionMode);
     const groupId = user?.groups?.[0]?.id;
 
     useEffect(() => {
@@ -19,6 +24,18 @@ const PoolsPage = ({ user }) => {
             dispatch(getAllContentPool({ groupId: String(groupId) }));
         }
     }, [dispatch, groupId]);
+
+    const alwaysOnPool = useMemo(
+        () => (contentPoolList || []).find((pool) => !!pool?.isAlwaysOn),
+        [contentPoolList]
+    );
+
+    useEffect(() => {
+        if (alwaysOnPool) {
+            const mode = Number(alwaysOnPool.alwaysOnInsertionMode);
+            setSelectedAlwaysOnMode(mode === 1 ? 1 : 2);
+        }
+    }, [alwaysOnPool]);
 
     const enabledPools = useMemo(
         () => (contentPoolList || []).filter((pool) => pool?.status).length,
@@ -56,6 +73,28 @@ const PoolsPage = ({ user }) => {
     const handleCloseModal = () => {
         setShowModal(false);
         setEditingPool(null);
+    };
+
+    const handleAlwaysOnModeChange = async (mode) => {
+        if (!groupId) {
+            return;
+        }
+        const previousMode = selectedAlwaysOnMode;
+        setAlwaysOnMessage('');
+        setSelectedAlwaysOnMode(mode);
+        const result = await dispatch(
+            updateAlwaysOnInsertionMode({
+                groupId: String(groupId),
+                alwaysOnInsertionMode: String(mode),
+            })
+        );
+        if (updateAlwaysOnInsertionMode.fulfilled.match(result) && result.payload?.success) {
+            setAlwaysOnMessage('Always On insertion mode updated.');
+            dispatch(getAllContentPool({ groupId: String(groupId) }));
+            return;
+        }
+        setSelectedAlwaysOnMode(previousMode);
+        setAlwaysOnMessage(result?.payload?.message || result?.error?.message || 'Failed to update Always On setting.');
     };
 
     const renderPools = () => {
@@ -159,10 +198,60 @@ const PoolsPage = ({ user }) => {
                 </div>
                 <div className="header-btns">
                     <button className="btn btn-create" onClick={handleOpenCreateModal}>+ Create Pool</button>
-                    <button className="btn btn-always">Always On Settings</button>
+                    <button
+                        className="btn btn-always"
+                        onClick={() => setShowAlwaysOnSettings((prev) => !prev)}
+                    >
+                        Always On Settings
+                    </button>
                     <button className="btn btn-emergency">Emergency Settings</button>
                 </div>
             </div>
+
+            {showAlwaysOnSettings && (
+                <div className="always-on-settings-panel">
+                    <div className="always-on-settings-header">
+                        <h3>Always On Insertion Settings</h3>
+                        <p>Control where Always On slides appear in the playback loop.</p>
+                    </div>
+
+                    {!alwaysOnPool ? (
+                        <div className="always-on-empty">
+                            No Always On pool found. Create one first to configure insertion mode.
+                        </div>
+                    ) : (
+                        <div className="always-on-options">
+                            <label className={`always-on-option ${selectedAlwaysOnMode === 1 ? 'selected' : ''}`}>
+                                <input
+                                    type="radio"
+                                    name="alwaysOnInsertionMode"
+                                    value="1"
+                                    checked={selectedAlwaysOnMode === 1}
+                                    onChange={() => handleAlwaysOnModeChange(1)}
+                                    disabled={alwaysOnUpdateStatus === 'loading'}
+                                />
+                                <span>Show only at start of loop</span>
+                            </label>
+
+                            <label className={`always-on-option ${selectedAlwaysOnMode === 2 ? 'selected' : ''}`}>
+                                <input
+                                    type="radio"
+                                    name="alwaysOnInsertionMode"
+                                    value="2"
+                                    checked={selectedAlwaysOnMode === 2}
+                                    onChange={() => handleAlwaysOnModeChange(2)}
+                                    disabled={alwaysOnUpdateStatus === 'loading'}
+                                />
+                                <span>Show between every pool</span>
+                            </label>
+                        </div>
+                    )}
+
+                    {!!alwaysOnMessage && (
+                        <p className="always-on-message">{alwaysOnMessage}</p>
+                    )}
+                </div>
+            )}
 
             {/* 2. Purple Rotation Bar */}
             <div className="rotation-banner">
