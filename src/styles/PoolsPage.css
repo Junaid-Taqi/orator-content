@@ -158,17 +158,15 @@
     padding: 5px 15px;
     border-radius: 15px;
 }
-/* News Section Blue Background */
-.section-news {
-    background: linear-gradient(180deg, #2b5e7e 0%, #1c3d52 100%) !important;
-    margin-bottom: 20px;
+/*Blue Background */
+.pool-color-blue {
+  background: linear-gradient(180deg, #2b5e7e 0%, #1c3d52 100%) !important;
 }
 
-/* Official News Section Purple Background */
-.section-official {
-    background: linear-gradient(180deg, #5a64a3 0%, #3d4475 100%) !important;
-    margin-bottom: 20px;
+.pool-color-purple {
+  background: linear-gradient(180deg, #5a64a3 0%, #3d4475 100%) !important;
 }
+
 
 /* Specific Value Colors */
 .text-green { color: #2ecc71; }

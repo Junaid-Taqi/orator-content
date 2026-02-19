@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import '../styles/CreatePoolModal.css';
 import { addContentPool } from '../Services/Slices/AddContentPoolSlice';
 import { getAllContentPool } from '../Services/Slices/GetContentPoolSlice';
+import { updateContentPool } from '../Services/Slices/UpdateContentPoolSlice';
 
 const initialFormState = {
     name: '',
@@ -14,12 +15,31 @@ const initialFormState = {
 };
 const NAME_MAX_LENGTH = 255;
 
-const CreatePoolModal = ({ isOpen, onClose, user }) => {
+const mapPoolToFormData = (pool) => ({
+    name: pool?.name || '',
+    description: pool?.description || '',
+    color: pool?.color || 'Blue',
+    status: String(!!pool?.status),
+    priorityMode: pool?.priorityMode || 'By Priority',
+    isAlwaysOn: !!pool?.isAlwaysOn,
+});
+
+const CreatePoolModal = ({ isOpen, onClose, user, poolToEdit = null }) => {
     const dispatch = useDispatch();
-    const { status } = useSelector((state) => state.AddContentPool);
+    const { status: addStatus } = useSelector((state) => state.AddContentPool);
+    const { status: updateStatus } = useSelector((state) => state.UpdateContentPool);
+    const isEditMode = !!poolToEdit?.contentPoolId;
+    const isSubmitting = addStatus === 'loading' || updateStatus === 'loading';
 
     const [formData, setFormData] = useState(initialFormState);
     const [submitError, setSubmitError] = useState('');
+
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(isEditMode ? mapPoolToFormData(poolToEdit) : initialFormState);
+            setSubmitError('');
+        }
+    }, [isOpen, isEditMode, poolToEdit]);
 
     if (!isOpen) return null;
 
@@ -65,28 +85,42 @@ const CreatePoolModal = ({ isOpen, onClose, user }) => {
             isAlwaysOn: String(formData.isAlwaysOn),
         };
 
-        const result = await dispatch(addContentPool(payload));
+        const result = isEditMode
+            ? await dispatch(updateContentPool({ ...payload, contentPoolId: String(poolToEdit.contentPoolId) }))
+            : await dispatch(addContentPool(payload));
 
-        if (addContentPool.fulfilled.match(result) && result.payload?.success) {
+        const isSuccess = isEditMode
+            ? updateContentPool.fulfilled.match(result) && result.payload?.success
+            : addContentPool.fulfilled.match(result) && result.payload?.success;
+
+        if (isSuccess) {
             dispatch(getAllContentPool({ groupId: String(groupId) }));
             handleClose();
             return;
         }
 
-        setSubmitError(result?.payload?.message || result?.error?.message || 'Unable to create content pool.');
+        setSubmitError(
+            result?.payload?.message
+            || result?.error?.message
+            || (isEditMode ? 'Unable to update content pool.' : 'Unable to create content pool.')
+        );
     };
 
     return (
         <div className="modal-overlay" onClick={handleClose}>
             <div className="modal-card" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2>Create New Content Pool</h2>
+                    <h2>{isEditMode ? 'Update Content Pool' : 'Create New Content Pool'}</h2>
                     <button className="close-btn" onClick={handleClose}>&times;</button>
                 </div>
 
                 <form className="modal-body" onSubmit={handleSubmit}>
                     <div className="info-alert blue-tint">
-                        <p><strong>Create a new pool:</strong> Each pool name is unique and represents a category. You can add slides to your pool after creation.</p>
+                        <p>
+                            <strong>{isEditMode ? 'Update this pool:' : 'Create a new pool:'}</strong>
+                            {' '}
+                            Each pool name is unique and represents a category.
+                        </p>
                     </div>
 
                     <div className="form-group">
@@ -177,8 +211,8 @@ const CreatePoolModal = ({ isOpen, onClose, user }) => {
 
                     <div className="modal-footer">
                         <button type="button" className="footer-btn btn-cancel" onClick={handleClose}>Cancel</button>
-                        <button type="submit" className="footer-btn btn-submit" disabled={status === 'loading'}>
-                            {status === 'loading' ? 'Creating...' : '+ Create Pool'}
+                        <button type="submit" className="footer-btn btn-submit" disabled={isSubmitting}>
+                            {isSubmitting ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Pool' : '+ Create Pool')}
                         </button>
                     </div>
                 </form>

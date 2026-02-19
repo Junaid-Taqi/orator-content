@@ -1,9 +1,154 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import '../styles/PoolsPage.css';
 import CreatePoolModal from './CreatePoolModal';
+import { getAllContentPool } from '../Services/Slices/GetContentPoolSlice';
+import { updateContentPoolStatus } from '../Services/Slices/UpdateContentPoolStatusSlice';
 
 const PoolsPage = ({ user }) => {
+    const dispatch = useDispatch();
     const [showModal, setShowModal] = useState(false);
+    const [editingPool, setEditingPool] = useState(null);
+
+    const { contentPoolList, total, status, error } = useSelector((state) => state.GetContentPool);
+    const { status: updateStatus } = useSelector((state) => state.UpdateContentPoolStatus);
+    const groupId = user?.groups?.[0]?.id;
+
+    useEffect(() => {
+        if (groupId) {
+            dispatch(getAllContentPool({ groupId: String(groupId) }));
+        }
+    }, [dispatch, groupId]);
+
+    const enabledPools = useMemo(
+        () => (contentPoolList || []).filter((pool) => pool?.status).length,
+        [contentPoolList]
+    );
+
+    const handlePoolStatusChange = async (pool) => {
+        if (!groupId || !pool?.contentPoolId) {
+            return;
+        }
+
+        const nextStatus = !pool?.status;
+        const payload = {
+            groupId: String(groupId),
+            contentPoolId: String(pool.contentPoolId),
+            status: String(nextStatus),
+        };
+
+        const result = await dispatch(updateContentPoolStatus(payload));
+        if (updateContentPoolStatus.fulfilled.match(result) && result.payload?.success) {
+            dispatch(getAllContentPool({ groupId: String(groupId) }));
+        }
+    };
+
+    const handleOpenCreateModal = () => {
+        setEditingPool(null);
+        setShowModal(true);
+    };
+
+    const handleOpenEditModal = (pool) => {
+        setEditingPool(pool);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setEditingPool(null);
+    };
+
+    const renderPools = () => {
+        if (status === 'loading') {
+            return <div className="pool-accordion"><p>Loading content pools...</p></div>;
+        }
+
+        if (status === 'failed') {
+            return <div className="pool-accordion"><p>{error || 'Unable to load content pools.'}</p></div>;
+        }
+
+        if (!contentPoolList?.length) {
+            return <div className="pool-accordion"><p>No content pools found.</p></div>;
+        }
+
+        return contentPoolList.map((pool) => {
+            const isEnabled = !!pool?.status;
+            const badgeClass = isEnabled ? 'badge-enabled' : 'badge-disabled';
+            const badgeText = isEnabled ? 'Enabled' : 'Disabled';
+            const title = pool?.name || 'Untitled Pool';
+            const sortOrder = pool?.sortOrder || '-';
+            const priorityMode = pool?.priorityMode || 'By Priority';
+            const isAlwaysOn = !!pool?.isAlwaysOn;
+            const colorClass = `pool-color-${String(pool?.color || 'default').trim().toLowerCase().replace(/\s+/g, '-')}`;
+
+            return (
+                <div className={`pool-accordion ${colorClass}`} key={pool?.contentPoolId || `${title}-${sortOrder}`}>
+                    <div className="accordion-header">
+                        <div className="accordion-title">
+                            <span className="status-indicator"></span>
+                            <h3>{title}</h3>
+                            <span className={badgeClass}>{badgeText}</span>
+                            {isAlwaysOn && <span className="badge-enabled">Always On</span>}
+                        </div>
+                        <span className="arrow">v</span>
+                    </div>
+
+                    <p className="category-label">Category: {title}</p>
+
+                    <div className="accordion-body">
+                        <div className="sub-stat">
+                            <label>Active</label>
+                            <span className="sub-val text-green">2</span>
+                        </div>
+                        <div className="sub-stat">
+                            <label>Scheduled</label>
+                            <span className="sub-val text-orange">0</span>
+                        </div>
+                        <div className="sub-stat">
+                            <label>Archived</label>
+                            <span className="sub-val text-muted">3</span>
+                        </div>
+                        <div className="sub-stat">
+                            <label>Pool Status</label>
+                            <div className="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    checked={isEnabled}
+                                    onChange={() => handlePoolStatusChange(pool)}
+                                    disabled={updateStatus === 'loading'}
+                                />
+                                <span className="slider"></span>
+                            </div>
+                        </div>
+                        <div className="sub-stat">
+                            <label>Order</label>
+                            <span className="sub-val">#{sortOrder}</span>
+                        </div>
+                    </div>
+
+                    <div className="accordion-footer">
+                        <div className="priority-mode">
+                            <span>Slide Priority Mode:</span>
+                            <p>{priorityMode}</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <select className="priority-dropdown" value={priorityMode} disabled>
+                                <option>{priorityMode}</option>
+                            </select>
+                            <button
+                                type="button"
+                                className="btn btn-create"
+                                onClick={() => handleOpenEditModal(pool)}
+                            >
+                                Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        });
+    };
+
     return (
         <div className="pools-container">
             {/* 1. Header Section */}
@@ -13,7 +158,7 @@ const PoolsPage = ({ user }) => {
                     <p>Category-based pools in fixed rotation with Always On insertion</p>
                 </div>
                 <div className="header-btns">
-                    <button className="btn btn-create" onClick={() => setShowModal(true)}>+ Create Pool</button>
+                    <button className="btn btn-create" onClick={handleOpenCreateModal}>+ Create Pool</button>
                     <button className="btn btn-always">Always On Settings</button>
                     <button className="btn btn-emergency">Emergency Settings</button>
                 </div>
@@ -65,259 +210,13 @@ const PoolsPage = ({ user }) => {
                 </select>
             </div>
 
-            {/* 5. Always On Card */}
-            <div className="pool-accordion">
-                <div className="accordion-header">
-                    <div className="accordion-title">
-                        <span className="status-indicator"></span>
-                        <h3>Always On</h3>
-                        <span className="badge-enabled">Enabled</span>
-                    </div>
-                    <span className="arrow">▼</span>
-                </div>
+            {renderPools()}
 
-                <p className="category-label">Category: Always On</p>
-
-                <div className="accordion-body">
-                    <div className="sub-stat">
-                        <label>Active</label>
-                        <span className="sub-val">4</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Scheduled</label>
-                        <span className="sub-val">0</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Archived</label>
-                        <span className="sub-val">0</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Pool Status</label>
-                        <div className="toggle-switch">
-                            <input type="checkbox" defaultChecked />
-                            <span className="slider"></span>
-                        </div>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Order</label>
-                        <span className="sub-val">#1</span>
-                    </div>
-                </div>
-
-                <div className="accordion-footer">
-                    <div className="priority-mode">
-                        <span>🔄 Slide Priority Mode:</span>
-                        <p>Slides play in priority order (High → Medium → Low)</p>
-                    </div>
-                    <select className="priority-dropdown">
-                        <option>By Priority</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* --- NEWS SECTION --- */}
-            <div className="pool-accordion section-news">
-                <div className="accordion-header">
-                    <div className="accordion-title">
-                        <span className="icon-main">📰</span>
-                        <h3>News</h3>
-                        <span className="badge-enabled">Enabled</span>
-                    </div>
-                    <span className="arrow">▼</span>
-                </div>
-
-                <p className="category-label">Category: News</p>
-
-                <div className="accordion-body">
-                    <div className="sub-stat">
-                        <label>Active</label>
-                        <span className="sub-val text-green">8</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Scheduled</label>
-                        <span className="sub-val text-orange">3</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Archived</label>
-                        <span className="sub-val text-muted">12</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Pool Status</label>
-                        <div className="toggle-switch">
-                            <input type="checkbox" defaultChecked />
-                            <span className="slider"></span>
-                        </div>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Order</label>
-                        <span className="sub-val">#2</span>
-                    </div>
-                </div>
-
-                <div className="accordion-footer">
-                    <div className="priority-mode">
-                        <span>🔄 Slide Priority Mode:</span>
-                        <p>Slides play in priority order (High → Medium → Low)</p>
-                    </div>
-                    <select className="priority-dropdown">
-                        <option>By Priority</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* --- OFFICIAL NEWS SECTION --- */}
-            <div className="pool-accordion section-official">
-                <div className="accordion-header">
-                    <div className="accordion-title">
-                        <span className="icon-main">🏛️</span>
-                        <h3>Official News</h3>
-                        <span className="badge-enabled">Enabled</span>
-                    </div>
-                    <span className="arrow">▼</span>
-                </div>
-
-                <p className="category-label">Category: Official News</p>
-
-                <div className="accordion-body">
-                    <div className="sub-stat">
-                        <label>Active</label>
-                        <span className="sub-val text-green">5</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Scheduled</label>
-                        <span className="sub-val text-orange">2</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Archived</label>
-                        <span className="sub-val text-muted">8</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Pool Status</label>
-                        <div className="toggle-switch">
-                            <input type="checkbox" defaultChecked />
-                            <span className="slider"></span>
-                        </div>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Order</label>
-                        <span className="sub-val">#3</span>
-                    </div>
-                </div>
-
-                <div className="accordion-footer">
-                    <div className="priority-mode">
-                        <span>🔄 Slide Priority Mode:</span>
-                        <p>Slides play in priority order (High → Medium → Low)</p>
-                    </div>
-                    <select className="priority-dropdown">
-                        <option>By Priority</option>
-                    </select>
-                </div>
-            </div>
-            {/* --- EVENTS SECTION --- */}
-            <div className="pool-accordion section-events">
-                <div className="accordion-header">
-                    <div className="accordion-title">
-                        <span className="icon-main">🎉</span>
-                        <h3>Events</h3>
-                        <span className="badge-enabled">Enabled</span>
-                    </div>
-                    <span className="arrow">▼</span>
-                </div>
-
-                <p className="category-label">Category: Events</p>
-
-                <div className="accordion-body">
-                    <div className="sub-stat">
-                        <label>Active</label>
-                        <span className="sub-val text-green">6</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Scheduled</label>
-                        <span className="sub-val text-orange">4</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Archived</label>
-                        <span className="sub-val text-muted">15</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Pool Status</label>
-                        <div className="toggle-switch">
-                            <input type="checkbox" defaultChecked />
-                            <span className="slider"></span>
-                        </div>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Order</label>
-                        <span className="sub-val">#4</span>
-                    </div>
-                </div>
-
-                <div className="accordion-footer">
-                    <div className="priority-mode">
-                        <span>🔄 Slide Priority Mode:</span>
-                        <p>Slides play in priority order (High → Medium → Low)</p>
-                    </div>
-                    <select className="priority-dropdown">
-                        <option>By Priority</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* --- EMERGENCY SECTION --- */}
-            <div className="pool-accordion section-emergency">
-                <div className="accordion-header">
-                    <div className="accordion-title">
-                        <span className="icon-main">🚨</span>
-                        <h3>Emergency</h3>
-                        <span className="badge-disabled">Disabled</span>
-                    </div>
-                    <span className="arrow">▼</span>
-                </div>
-
-                <p className="category-label">Category: Emergency</p>
-
-                <div className="accordion-body">
-                    <div className="sub-stat">
-                        <label>Active</label>
-                        <span className="sub-val text-green">2</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Scheduled</label>
-                        <span className="sub-val text-orange">0</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Archived</label>
-                        <span className="sub-val text-muted">3</span>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Pool Status</label>
-                        <div className="toggle-switch">
-                            <input type="checkbox" />
-                            <span className="slider"></span>
-                        </div>
-                    </div>
-                    <div className="sub-stat">
-                        <label>Order</label>
-                        <span className="sub-val">#5</span>
-                    </div>
-                </div>
-
-                <div className="accordion-footer">
-                    <div className="priority-mode">
-                        <span>🔄 Slide Priority Mode:</span>
-                        <p>Slides play in priority order (High → Medium → Low)</p>
-                    </div>
-                    <select className="priority-dropdown">
-                        <option>By Priority</option>
-                    </select>
-                </div>
-            </div>
-            {/* Modal ko yahan render karein */}
-            <CreatePoolModal 
-                isOpen={showModal} 
-                onClose={() => setShowModal(false)}
+            <CreatePoolModal
+                isOpen={showModal}
+                onClose={handleCloseModal}
                 user={user}
+                poolToEdit={editingPool}
             />
         </div>
     );
