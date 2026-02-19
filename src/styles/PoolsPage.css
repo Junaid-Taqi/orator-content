@@ -158,3 +158,62 @@
     padding: 5px 15px;
     border-radius: 15px;
 }
+/* News Section Blue Background */
+.section-news {
+    background: linear-gradient(180deg, #2b5e7e 0%, #1c3d52 100%) !important;
+    margin-bottom: 20px;
+}
+
+/* Official News Section Purple Background */
+.section-official {
+    background: linear-gradient(180deg, #5a64a3 0%, #3d4475 100%) !important;
+    margin-bottom: 20px;
+}
+
+/* Specific Value Colors */
+.text-green { color: #2ecc71; }
+.text-orange { color: #f39c12; }
+.text-muted { color: #95a5a6; }
+
+/* Icon adjustment */
+.icon-main {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+/* Pehle wali CSS mein toggle slider ka green color fix karein */
+input:checked + .slider {
+    background-color: #2ecc71;
+}
+
+/* Events Section - Khaki/Olive Gradient */
+.section-events {
+    background: linear-gradient(180deg, #5c5c42 0%, #444431 100%) !important;
+    margin-bottom: 20px;
+}
+
+/* Emergency Section - Muted Purple/Grey Gradient */
+.section-emergency {
+    background: linear-gradient(180deg, #4d4352 0%, #3a323d 100%) !important;
+    margin-bottom: 20px;
+}
+
+/* Disabled Badge Style */
+.badge-disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: #bdc3c7;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    margin-left: 10px;
+}
+
+/* Toggle switch ko disable dikhane ke liye (jab checked na ho) */
+.section-emergency .slider {
+    background-color: #7f8c8d;
+}
+
+/* Text colors for numbers */
+.text-green { color: #2ecc71 !important; }
+.text-orange { color: #e67e22 !important; }
+.text-muted { color: #95a5a6 !important; }
