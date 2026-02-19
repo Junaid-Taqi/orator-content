@@ -4,10 +4,12 @@ import StatsCard from './StatsCard';
 import Modal from './Modal';
 import SlideTypeSelector from './SlideTypeSelector';
 import CategorySelector from './CategorySelector';
+import FullscreenSlideForm from './FullscreenSlideForm';
 
 const SlidesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState('type'); // 'type' | 'category'
+  const [modalContent, setModalContent] = useState('type'); // 'type' | 'category' | 'form'
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleAddSlide = () => {
     setModalContent('type');
@@ -59,16 +61,26 @@ const SlidesPage = () => {
             onSelectType={handleSelectType}
             onCancel={handleCancelModal}
           />
-        ) : (
+        ) : modalContent === 'category' ? (
           <CategorySelector
             onSelectCategory={(catId) => {
-              console.log('Selected category:', catId);
-              // TODO: create slide with selected category
-              setIsModalOpen(false);
-              setModalContent('type');
+              setSelectedCategory(catId);
+              setModalContent('form');
             }}
             onBack={() => setModalContent('type')}
             onCancel={() => setIsModalOpen(false)}
+          />
+        ) : (
+          <FullscreenSlideForm
+            category={selectedCategory}
+            onCancel={handleCancelModal}
+            onSubmit={(slideData) => {
+              console.log('Creating slide:', slideData);
+              // TODO: Handle slide creation
+              setIsModalOpen(false);
+              setModalContent('type');
+              setSelectedCategory(null);
+            }}
           />
         )}
       </Modal>
