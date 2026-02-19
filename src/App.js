@@ -3,6 +3,7 @@ import './App.css';
 import Header from './components/Header';
 import Navigation from './components/Navigation';
 import SlidesPage from './components/SlidesPage';
+import PoolsPage from './components/PoolPage';
 
 function App() {
   const [activeTab, setActiveTab] = useState('slides');
@@ -15,8 +16,7 @@ function App() {
         {activeTab === 'slides' && <SlidesPage />}
         {activeTab === 'pools' && (
           <div className="content-placeholder">
-            <h2>Content Pools</h2>
-            <p>Coming soon...</p>
+            <PoolsPage />
           </div>
         )}
         {activeTab === 'timeline' && (
