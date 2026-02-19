@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '../styles/PoolsPage.css';
+import CreatePoolModal from './CreatePoolModal';
 
 const PoolsPage = () => {
+    const [showModal, setShowModal] = useState(false);
     return (
         <div className="pools-container">
             {/* 1. Header Section */}
@@ -11,7 +13,7 @@ const PoolsPage = () => {
                     <p>Category-based pools in fixed rotation with Always On insertion</p>
                 </div>
                 <div className="header-btns">
-                    <button className="btn btn-create">+ Create Pool</button>
+                    <button className="btn btn-create" onClick={() => setShowModal(true)}>+ Create Pool</button>
                     <button className="btn btn-always">Always On Settings</button>
                     <button className="btn btn-emergency">Emergency Settings</button>
                 </div>
@@ -311,6 +313,11 @@ const PoolsPage = () => {
                     </select>
                 </div>
             </div>
+            {/* Modal ko yahan render karein */}
+            <CreatePoolModal 
+                isOpen={showModal} 
+                onClose={() => setShowModal(false)} 
+            />
         </div>
     );
 };
