@@ -1,8 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '../styles/SlidesPage.css';
 import StatsCard from './StatsCard';
+import Modal from './Modal';
+import SlideTypeSelector from './SlideTypeSelector';
 
 const SlidesPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAddSlide = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleSelectType = (typeId) => {
+    console.log('Selected slide type:', typeId);
+    setIsModalOpen(false);
+    // TODO: Handle the selected slide type
+  };
+
+  const handleCancelModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="slides-page">
       <div className="slides-header">
@@ -12,7 +30,7 @@ const SlidesPage = () => {
             Category-driven templates. Priority determines duration: Low=15s, Medium=30s, High=45s
           </p>
         </div>
-        <button className="add-slide-btn">
+        <button className="add-slide-btn" onClick={handleAddSlide}>
           <span className="plus-icon">+</span>
           Add Slide
         </button>
@@ -24,6 +42,13 @@ const SlidesPage = () => {
         <StatsCard title="Scheduled" count="1" bgColor="warning" />
         <StatsCard title="Archived" count="1" bgColor="muted" />
       </div>
+
+      <Modal isOpen={isModalOpen} onClose={handleCancelModal}>
+        <SlideTypeSelector
+          onSelectType={handleSelectType}
+          onCancel={handleCancelModal}
+        />
+      </Modal>
     </div>
   );
 };
