@@ -5,11 +5,11 @@ import { serverUrl } from '../Constants/Constants';
 const initialState = {
     status: 'idle',
     error: null,
-    addedDisplay: null,
+    updatedAlwaysOnInsertionMode: null,
 };
 
-export const addDisplay = createAsyncThunk(
-    'AddDisplay/addDisplay',
+export const updateAlwaysOnInsertionMode = createAsyncThunk(
+    'UpdateAlwaysOnInsertionMode/updateAlwaysOnInsertionMode',
     async (payload, { rejectWithValue }) => {
         try {
             const config = {
@@ -19,42 +19,42 @@ export const addDisplay = createAsyncThunk(
                 },
             };
 
-            const response = await axios.post(`${serverUrl}/o/displayManagementApplication/addNewDisplay`, payload, config);
+            const response = await axios.post(`${serverUrl}/o/contentPoolApplication/updateAlwaysOnInsertionMode`, payload, config);
             if (!response.data?.success) {
                 return rejectWithValue(response.data);
             }
             return response.data;
         } catch (error) {
             return rejectWithValue(
-                error?.response?.data || { message: error.message || 'Failed to add display' }
+                error?.response?.data || { message: error.message || 'Failed to update Always On insertion mode' }
             );
         }
     }
 );
 
-const AddDisplaySlice = createSlice({
-    name: 'AddDisplay',
+const UpdateAlwaysOnInsertionModeSlice = createSlice({
+    name: 'UpdateAlwaysOnInsertionMode',
     initialState,
     reducers: {
-        resetAddDisplayState: (state) => initialState,
+        resetUpdateAlwaysOnInsertionModeState: () => initialState,
     },
     extraReducers: (builder) => {
         builder
-            .addCase(addDisplay.pending, (state) => {
+            .addCase(updateAlwaysOnInsertionMode.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
             })
-            .addCase(addDisplay.fulfilled, (state, action) => {
+            .addCase(updateAlwaysOnInsertionMode.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.addedDisplay = action.payload;
+                state.updatedAlwaysOnInsertionMode = action.payload;
                 state.error = null;
             })
-            .addCase(addDisplay.rejected, (state, action) => {
+            .addCase(updateAlwaysOnInsertionMode.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload?.message || action.error.message;
             });
     },
 });
 
-export const { resetAddDisplayState } = AddDisplaySlice.actions;
-export default AddDisplaySlice.reducer;
+export const { resetUpdateAlwaysOnInsertionModeState } = UpdateAlwaysOnInsertionModeSlice.actions;
+export default UpdateAlwaysOnInsertionModeSlice.reducer;

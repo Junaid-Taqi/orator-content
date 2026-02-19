@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../styles/PoolsPage.css';
 import CreatePoolModal from './CreatePoolModal';
 
-const PoolsPage = () => {
+const PoolsPage = ({ user }) => {
     const [showModal, setShowModal] = useState(false);
     return (
         <div className="pools-container">
@@ -316,7 +316,8 @@ const PoolsPage = () => {
             {/* Modal ko yahan render karein */}
             <CreatePoolModal 
                 isOpen={showModal} 
-                onClose={() => setShowModal(false)} 
+                onClose={() => setShowModal(false)}
+                user={user}
             />
         </div>
     );

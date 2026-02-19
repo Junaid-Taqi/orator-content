@@ -1,73 +1,187 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import '../styles/CreatePoolModal.css';
+import { addContentPool } from '../Services/Slices/AddContentPoolSlice';
+import { getAllContentPool } from '../Services/Slices/GetContentPoolSlice';
 
-const CreatePoolModal = ({ isOpen, onClose }) => {
+const initialFormState = {
+    name: '',
+    description: '',
+    color: 'Blue',
+    status: 'true',
+    priorityMode: 'By Priority',
+    isAlwaysOn: false,
+};
+const NAME_MAX_LENGTH = 255;
+
+const CreatePoolModal = ({ isOpen, onClose, user }) => {
+    const dispatch = useDispatch();
+    const { status } = useSelector((state) => state.AddContentPool);
+
+    const [formData, setFormData] = useState(initialFormState);
+    const [submitError, setSubmitError] = useState('');
+
     if (!isOpen) return null;
 
+    const handleFormChange = (field, value) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleClose = () => {
+        setFormData(initialFormState);
+        setSubmitError('');
+        onClose();
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitError('');
+
+        const trimmedName = formData.name.trim();
+        if (!trimmedName) {
+            setSubmitError('Pool name is required.');
+            return;
+        }
+        if (trimmedName.length > NAME_MAX_LENGTH) {
+            setSubmitError(`Pool name must be ${NAME_MAX_LENGTH} characters or fewer.`);
+            return;
+        }
+
+        const groupId = user?.groups?.[0]?.id;
+        const userId = user?.userId;
+        if (!groupId || !userId) {
+            setSubmitError('Unable to identify logged-in user or group.');
+            return;
+        }
+
+        const payload = {
+            groupId: String(groupId),
+            userId: String(userId),
+            name: trimmedName,
+            description: formData.description.trim(),
+            color: formData.color,
+            status: formData.status,
+            priorityMode: formData.priorityMode,
+            isAlwaysOn: String(formData.isAlwaysOn),
+        };
+
+        const result = await dispatch(addContentPool(payload));
+
+        if (addContentPool.fulfilled.match(result) && result.payload?.success) {
+            dispatch(getAllContentPool({ groupId: String(groupId) }));
+            handleClose();
+            return;
+        }
+
+        setSubmitError(result?.payload?.message || result?.error?.message || 'Unable to create content pool.');
+    };
+
     return (
-        <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-overlay" onClick={handleClose}>
             <div className="modal-card" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <h2>Create New Content Pool</h2>
-                    <button className="close-btn" onClick={onClose}>&times;</button>
+                    <button className="close-btn" onClick={handleClose}>&times;</button>
                 </div>
 
-                <div className="modal-body">
+                <form className="modal-body" onSubmit={handleSubmit}>
                     <div className="info-alert blue-tint">
                         <p><strong>Create a new pool:</strong> Each pool name is unique and represents a category. You can add slides to your pool after creation.</p>
                     </div>
 
                     <div className="form-group">
                         <label>Pool Name (This is also the category name)</label>
-                        <input type="text" placeholder="e.g., 📅 Holiday Specials, 📢 Promotions, etc." className="modal-input" />
-                        <small className="form-tip">Tip: Include an emoji to make your pool easily identifiable</small>
+                        <input
+                            type="text"
+                            placeholder="e.g., Holiday Specials, Promotions"
+                            className="modal-input"
+                            value={formData.name}
+                            onChange={(e) => handleFormChange('name', e.target.value)}
+                            maxLength={NAME_MAX_LENGTH}
+                            required
+                        />
+                        <small className="form-tip">Max {NAME_MAX_LENGTH} characters</small>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Description</label>
+                        <input
+                            type="text"
+                            placeholder="Short description for this pool"
+                            className="modal-input"
+                            value={formData.description}
+                            onChange={(e) => handleFormChange('description', e.target.value)}
+                        />
                     </div>
 
                     <div className="config-section">
                         <h3>Pool Configuration</h3>
-                        
+
                         <div className="form-group">
                             <label>Pool Color</label>
-                            <select className="modal-select">
-                                <option>Blue</option>
-                                <option>Green</option>
-                                <option>Purple</option>
+                            <select
+                                className="modal-select"
+                                value={formData.color}
+                                onChange={(e) => handleFormChange('color', e.target.value)}
+                            >
+                                <option value="Blue">Blue</option>
+                                <option value="Purple">Purple</option>
+                                <option value="Orange">Orange</option>
+                                <option value="Green">Green</option>
+                                <option value="Red">Red</option>
                             </select>
                         </div>
 
                         <div className="form-group">
                             <label>Initial Status</label>
-                            <select className="modal-select">
-                                <option>Enabled (Active in rotation)</option>
-                                <option>Disabled</option>
+                            <select
+                                className="modal-select"
+                                value={formData.status}
+                                onChange={(e) => handleFormChange('status', e.target.value)}
+                            >
+                                <option value="true">Enabled (Active in rotation)</option>
+                                <option value="false">Disabled</option>
                             </select>
                         </div>
 
                         <div className="form-group">
                             <label>Priority Mode</label>
-                            <select className="modal-select">
-                                <option>By Priority (High → Medium → Low)</option>
+                            <select
+                                className="modal-select"
+                                value={formData.priorityMode}
+                                onChange={(e) => handleFormChange('priorityMode', e.target.value)}
+                            >
+                                <option value="By Priority">By Priority (High to Medium to Low)</option>
                             </select>
                         </div>
 
                         <div className="checkbox-group">
                             <div className="checkbox-row">
-                                <input type="checkbox" id="alwaysOn" />
-                                <label htmlFor="alwaysOn">Insert Always On slides between this pool and others</label>
+                                <input
+                                    type="checkbox"
+                                    id="alwaysOn"
+                                    checked={formData.isAlwaysOn}
+                                    onChange={(e) => handleFormChange('isAlwaysOn', e.target.checked)}
+                                />
+                                <label htmlFor="alwaysOn">Create this as the Always On pool</label>
                             </div>
-                            <p className="checkbox-hint">When enabled, Always On content will appear before this pool in the playback sequence</p>
+                            <p className="checkbox-hint">Only one Always On pool can exist per group. Enable this only when creating that dedicated pool.</p>
                         </div>
                     </div>
 
                     <div className="info-alert green-tint">
                         <p><strong>Next steps:</strong> After creating the pool, you can add slides from the Slides tab or import content from the Connector.</p>
                     </div>
-                </div>
 
-                <div className="modal-footer">
-                    <button className="footer-btn btn-cancel" onClick={onClose}>Cancel</button>
-                    <button className="footer-btn btn-submit">+ Create Pool</button>
-                </div>
+                    {submitError && <p className="form-tip" style={{ color: '#d93025' }}>{submitError}</p>}
+
+                    <div className="modal-footer">
+                        <button type="button" className="footer-btn btn-cancel" onClick={handleClose}>Cancel</button>
+                        <button type="submit" className="footer-btn btn-submit" disabled={status === 'loading'}>
+                            {status === 'loading' ? 'Creating...' : '+ Create Pool'}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

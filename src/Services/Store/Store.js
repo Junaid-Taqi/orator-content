@@ -1,12 +1,16 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import authReducer from "../Slices/AuthSlice";
-import addDisplayReducer from "../Slices/AddDisplaySlice";
-import getDisplaysReducer from "../Slices/GetDisplaysSlice";
+import authReducer from '../Slices/AuthSlice';
+import addContentPoolReducer from '../Slices/AddContentPoolSlice';
+import getContentPoolReducer from '../Slices/GetContentPoolSlice';
+import updateContentPoolStatusReducer from '../Slices/UpdateContentPoolStatusSlice';
+import updateAlwaysOnInsertionModeReducer from '../Slices/UpdateAlwaysOnInsertionModeSlice';
 
 const rootReducer = combineReducers({
     auth: authReducer,
-    AddDisplay: addDisplayReducer,
-    GetDisplays: getDisplaysReducer,
+    AddContentPool: addContentPoolReducer,
+    GetContentPool: getContentPoolReducer,
+    UpdateContentPoolStatus: updateContentPoolStatusReducer,
+    UpdateAlwaysOnInsertionMode: updateAlwaysOnInsertionModeReducer,
 });
 
 const Store = configureStore({
