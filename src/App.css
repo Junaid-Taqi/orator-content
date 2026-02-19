@@ -17,15 +17,15 @@
   background: linear-gradient(135deg, #2d6d8f 0%, #1e4d63 100%);
 }
 
-.content-placeholder {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: rgba(255, 255, 255, 0.6);
-  padding: 40px;
-}
+/*.content-placeholder {*/
+/*  flex: 1;*/
+/*  display: flex;*/
+/*  flex-direction: column;*/
+/*  justify-content: center;*/
+/*  align-items: center;*/
+/*  color: rgba(255, 255, 255, 0.6);*/
+/*  padding: 40px;*/
+/*}*/
 
 .content-placeholder h2 {
   margin: 0 0 20px 0;
@@ -34,8 +34,8 @@
 }
 
 .content-placeholder p {
-  margin: 0;
-  font-size: 16px;
+  margin: 8px 0px;
+  font-size: 12px;
 }
 
 /* Scrollbar styling */

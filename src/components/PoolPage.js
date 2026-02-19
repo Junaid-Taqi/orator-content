@@ -5,6 +5,9 @@ import CreatePoolModal from './CreatePoolModal';
 import { getAllContentPool } from '../Services/Slices/GetContentPoolSlice';
 import { updateContentPoolStatus } from '../Services/Slices/UpdateContentPoolStatusSlice';
 import { updateAlwaysOnInsertionMode } from '../Services/Slices/UpdateAlwaysOnInsertionModeSlice';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faArrowDown} from "@fortawesome/free-solid-svg-icons";
+import {faAngleDown} from "@fortawesome/free-solid-svg-icons/faAngleDown";
 
 const PoolsPage = ({ user }) => {
     const dispatch = useDispatch();
@@ -129,7 +132,7 @@ const PoolsPage = ({ user }) => {
                             <span className={badgeClass}>{badgeText}</span>
                             {isAlwaysOn && <span className="badge-enabled">Always On</span>}
                         </div>
-                        <span className="arrow">v</span>
+                        <span className="arrow"><FontAwesomeIcon icon={faAngleDown}/>  </span>
                     </div>
 
                     <p className="category-label">Category: {title}</p>

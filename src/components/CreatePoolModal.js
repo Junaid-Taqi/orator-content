@@ -212,7 +212,7 @@ const CreatePoolModal = ({ isOpen, onClose, user, poolToEdit = null }) => {
                     <div className="modal-footer">
                         <button type="button" className="footer-btn btn-cancel" onClick={handleClose}>Cancel</button>
                         <button type="submit" className="footer-btn btn-submit" disabled={isSubmitting}>
-                            {isSubmitting ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Pool' : '+ Create Pool')}
+                            {isSubmitting ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Pool' : 'Create Pool')}
                         </button>
                     </div>
                 </form>
