@@ -57,6 +57,8 @@ const SlidesPage = ({user}) => {
     const [slideToDelete, setSlideToDelete] = useState(null);
     const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
     const [slideToArchive, setSlideToArchive] = useState(null);
+    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+    const [selectedSlide, setSelectedSlide] = useState(null);
 
     const {status: createSlideStatus, error: createSlideError} = useSelector((state) => state.AddFullScreenSlide);
     const {slides, counters, status: slidesStatus, error: slidesError} = useSelector((state) => state.GetAllSlides);
@@ -114,6 +116,16 @@ const SlidesPage = ({user}) => {
     const handleCancelArchive = () => {
         setIsArchiveModalOpen(false);
         setSlideToArchive(null);
+    };
+
+    const handlePreviewClick = (slide) => {
+        setSelectedSlide(slide);
+        setIsPreviewModalOpen(true);
+    };
+
+    const handleClosePreview = () => {
+        setIsPreviewModalOpen(false);
+        setSelectedSlide(null);
     };
 
     const handleSelectType = (typeId) => {
@@ -262,7 +274,7 @@ const SlidesPage = ({user}) => {
                                 <div className="info-row"><span>Archive:</span> <span>{slide.archive}</span></div>
                             </div>
                             <div className="slide-card-footer">
-                                <button className="btn-preview-outline"><FontAwesomeIcon icon={faEye} style={{marginRight: '5px'}}/>Preview</button>
+                                <button className="btn-preview-outline" onClick={() => handlePreviewClick(slide)}><FontAwesomeIcon icon={faEye} style={{marginRight: '5px'}}/>Preview</button>
                                 <div className="footer-icons">
                                     <button className="icon-btn-small"><FontAwesomeIcon icon={faCog}/></button>
                                     <button className="icon-btn-small" onClick={() => handleArchiveClick(slide)}><FontAwesomeIcon icon={faBoxArchive}/></button>
@@ -273,6 +285,82 @@ const SlidesPage = ({user}) => {
                     </div>
                 ))}
             </div>
+
+            <Modal
+                isOpen={isPreviewModalOpen}
+                onClose={handleClosePreview}
+            >
+                {selectedSlide && (
+                    <div className="preview-dialog">
+                        <div className="preview-top">
+                            <h2 className="preview-title">{selectedSlide.title}</h2>
+
+                            <div className="preview-tags">
+                                <span className="tag-cat">{selectedSlide.category}</span>
+                                <span className={`tag-priority ${selectedSlide.priority.split(' ')[0].toLowerCase()}`}>
+                        {selectedSlide.priority}
+                    </span>
+                                <span className={`tag-status ${selectedSlide.status}`}>
+                        {selectedSlide.status}
+                    </span>
+                            </div>
+                        </div>
+
+                        {/* Tabs */}
+                        <div className="preview-tabs">
+                            <button className="tab inactive">Totem View</button>
+                            <button className="tab active">Web Portal View</button>
+                        </div>
+
+                        {/* Big Preview Box */}
+                        <div className="preview-main-box">
+                            {selectedSlide.url ? (
+                                isVideoUrl(selectedSlide.url) ? (
+                                    <video
+                                        src={selectedSlide.url}
+                                        autoPlay
+                                        muted
+                                        loop
+                                        className="preview-media"
+                                    />
+                                ) : (
+                                    <img
+                                        src={selectedSlide.url}
+                                        alt={selectedSlide.title}
+                                        className="preview-media"
+                                    />
+                                )
+                            ) : (
+                                <div className="preview-placeholder">
+                                    Web Portal Preview
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Info Section */}
+                        <div className="preview-info-grid">
+                            <div className="info-box">
+                                <label>Start Date</label>
+                                <div>{selectedSlide.start}</div>
+                            </div>
+
+                            <div className="info-box">
+                                <label>Archive Date</label>
+                                <div>{selectedSlide.archive}</div>
+                            </div>
+
+                            <div className="info-box full">
+                                <label>Devices</label>
+                                <div>Totem 1, Totem 2</div>
+                            </div>
+                        </div>
+
+                        <button className="preview-close-btn" onClick={handleClosePreview}>
+                            Close Preview
+                        </button>
+                    </div>
+                )}
+            </Modal>
 
             <Modal
                 size="small"
