@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import authReducer from '../Slices/AuthSlice';
 import addContentPoolReducer from '../Slices/AddContentPoolSlice';
 import getContentPoolReducer from '../Slices/GetContentPoolSlice';
+import getAllSlidesReducer from '../Slices/GetAllSlidesSlice';
 import updateContentPoolReducer from '../Slices/UpdateContentPoolSlice';
 import updateContentPoolStatusReducer from '../Slices/UpdateContentPoolStatusSlice';
 import updateAlwaysOnInsertionModeReducer from '../Slices/UpdateAlwaysOnInsertionModeSlice';
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
     auth: authReducer,
     AddContentPool: addContentPoolReducer,
     GetContentPool: getContentPoolReducer,
+    GetAllSlides: getAllSlidesReducer,
     UpdateContentPool: updateContentPoolReducer,
     UpdateContentPoolStatus: updateContentPoolStatusReducer,
     UpdateAlwaysOnInsertionMode: updateAlwaysOnInsertionModeReducer,

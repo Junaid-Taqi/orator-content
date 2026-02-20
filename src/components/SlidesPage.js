@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import '../styles/SlidesPage.css';
 import StatsCard from './StatsCard';
@@ -11,12 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter } from '@fortawesome/free-solid-svg-icons/faFilter';
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
 import { addNewFullScreenSlide } from '../Services/Slices/AddFullScreenSlideSlice';
-
-const initialSlides = [
-  { id: 1, title: 'Spring Festival 2026', category: 'Events', priority: 'High (45s)', status: 'active', start: '2026-02-15', archive: '2026-04-30', icon: 'EV' },
-  { id: 2, title: 'Road Maintenance Alert', category: 'Official News', priority: 'Medium (30s)', status: 'active', start: '2026-02-01', archive: '2026-03-15', icon: 'ON' },
-  { id: 3, title: 'Summer Campaign Banner', category: 'News', priority: 'Low (15s)', status: 'archived', start: '2026-01-01', archive: '2026-02-10', icon: 'NW' },
-];
+import { getAllSlides } from '../Services/Slices/GetAllSlidesSlice';
 
 const priorityMap = {
   low: 1,
@@ -30,6 +25,19 @@ const durationMap = {
   high: 45,
 };
 
+const formatDateOnly = (value) => {
+  if (!value) return '-';
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  const parts = String(value).split(',');
+  if (parts.length >= 2) {
+    return `${parts[0].trim()}, ${parts[1].trim()}`;
+  }
+  return String(value);
+};
+
 const SlidesPage = ({ user }) => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,9 +45,17 @@ const SlidesPage = ({ user }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSlideType, setSelectedSlideType] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
-  const [slides] = useState(initialSlides);
 
   const { status: createSlideStatus, error: createSlideError } = useSelector((state) => state.AddFullScreenSlide);
+  const { slides, counters, status: slidesStatus, error: slidesError } = useSelector((state) => state.GetAllSlides);
+
+  const groupId = user?.groups?.[0]?.id;
+
+  useEffect(() => {
+    if (groupId) {
+      dispatch(getAllSlides({ groupId: String(groupId) }));
+    }
+  }, [dispatch, groupId]);
 
   const handleAddSlide = () => {
     setModalContent('type');
@@ -103,10 +119,29 @@ const SlidesPage = ({ user }) => {
       setModalContent('type');
       setSelectedSlideType(null);
       setSelectedCategory(null);
+      dispatch(getAllSlides({ groupId: String(groupId) }));
     }
   };
 
-  const filteredSlides = slides.filter((slide) =>
+  const normalizedSlides = useMemo(
+    () => (slides || []).map((slide) => {
+      const statusLabel = slide.status === 2 ? 'active' : slide.status === 1 ? 'scheduled' : 'archived';
+      const priorityLabel = slide.priority === 3 ? 'High (45s)' : slide.priority === 1 ? 'Low (15s)' : 'Medium (30s)';
+      return {
+        id: slide.slideId,
+        title: slide.title,
+        category: slide.contentPoolName,
+        priority: priorityLabel,
+        status: statusLabel,
+        start: formatDateOnly(slide.startDate),
+        archive: formatDateOnly(slide.archiveDate),
+        url: slide.url,
+      };
+    }),
+    [slides]
+  );
+
+  const filteredSlides = normalizedSlides.filter((slide) =>
     activeFilter === 'all' ? true : slide.status === activeFilter
   );
 
@@ -123,10 +158,10 @@ const SlidesPage = ({ user }) => {
       </div>
 
       <div className="stats-grid">
-        <StatsCard title="Total Slides" count="5" bgColor="primary" />
-        <StatsCard title="Active" count="3" bgColor="success" />
-        <StatsCard title="Scheduled" count="1" bgColor="warning" />
-        <StatsCard title="Archived" count="1" bgColor="muted" />
+        <StatsCard title="Total Slides" count={String(counters?.totalSlides || 0)} bgColor="primary" />
+        <StatsCard title="Active" count={String(counters?.active || 0)} bgColor="success" />
+        <StatsCard title="Scheduled" count={String(counters?.scheduled || 0)} bgColor="warning" />
+        <StatsCard title="Archived" count={String(counters?.archived || 0)} bgColor="muted" />
       </div>
 
       <div className="filter-bar">
@@ -145,10 +180,13 @@ const SlidesPage = ({ user }) => {
       </div>
 
       <div className="slides-grid-container">
+        {slidesStatus === 'loading' && <p>Loading slides...</p>}
+        {slidesStatus === 'failed' && <p>{slidesError || 'Unable to load slides.'}</p>}
+        {slidesStatus === 'succeeded' && filteredSlides.length === 0 && <p>No slides found.</p>}
         {filteredSlides.map((slide) => (
           <div key={slide.id} className="slide-card-item">
             <div className="slide-card-visual">
-              <span className="visual-emoji">{slide.icon}</span>
+              {slide.url ? <img src={slide.url} alt={slide.title} className="visual-emoji" /> : <span className="visual-emoji">SL</span>}
             </div>
             <div className="slide-card-body">
               <h3 className="slide-card-name">{slide.title}</h3>
