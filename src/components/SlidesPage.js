@@ -38,6 +38,11 @@ const formatDateOnly = (value) => {
   return String(value);
 };
 
+const isVideoUrl = (url) => {
+  if (!url) return false;
+  return /\.(mp4|webm|ogg|mov|m4v)(?:$|[/?#])/i.test(url);
+};
+
 const SlidesPage = ({ user }) => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -186,7 +191,15 @@ const SlidesPage = ({ user }) => {
         {filteredSlides.map((slide) => (
           <div key={slide.id} className="slide-card-item">
             <div className="slide-card-visual">
-              {slide.url ? <img src={slide.url} alt={slide.title} className="visual-emoji" /> : <span className="visual-emoji">SL</span>}
+              {slide.url ? (
+                isVideoUrl(slide.url) ? (
+                  <video src={slide.url} className="visual-emoji" muted playsInline preload="metadata" />
+                ) : (
+                  <img src={slide.url} alt={slide.title} className="visual-emoji" />
+                )
+              ) : (
+                <span className="visual-emoji">SL</span>
+              )}
             </div>
             <div className="slide-card-body">
               <h3 className="slide-card-name">{slide.title}</h3>
