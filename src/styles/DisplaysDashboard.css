@@ -12,7 +12,7 @@
 /* Top navigation bar */
 .displays-dashboard__nav {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   gap: 1rem;
   padding: 0.75rem 1.5rem;

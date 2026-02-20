@@ -26,10 +26,11 @@ const DisplayNav = ({ user }) => {
 
     return (
         <nav className="displays-dashboard__nav">
-            <span className="displays-dashboard__nav-bell">
-                <FontAwesomeIcon icon={faBell} />
-                <span className="nav-bell-dot" aria-hidden />
-            </span>
+            <div className="header-left">
+                <h1 className="header-title">MUNICIPALITY OF TISNO</h1>
+                <p className="header-subtitle">Monitor your digital signage network</p>
+            </div>
+
             <div className="displays-dashboard__nav-user-wrap" ref={userMenuRef}>
                 <button
                     type="button"
