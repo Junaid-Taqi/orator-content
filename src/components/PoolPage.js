@@ -129,7 +129,6 @@ const PoolsPage = ({user}) => {
                 <div className={`pool-accordion ${colorClass}`} key={pool?.contentPoolId || `${title}-${sortOrder}`}>
                     <div className="accordion-header">
                         <div className="accordion-title">
-                            <span className="status-indicator"></span>
                             <h3>{title}</h3>
                             <span className={badgeClass}>{badgeText}</span>
                             {isAlwaysOn && <span className="badge-enabled">Always On</span>}

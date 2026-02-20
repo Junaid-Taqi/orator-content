@@ -49,7 +49,7 @@ function AppContent() {
       <Header />
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
       <main className="main-content">
-        {activeTab === 'slides' && <SlidesPage />}
+        {activeTab === 'slides' && <SlidesPage user={user} />}
         {activeTab === 'pools' && (
           <div className="content-placeholder">
             <PoolsPage user={user} />
