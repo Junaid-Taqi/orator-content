@@ -216,7 +216,6 @@
 /* View Mode Logic */
 .preview-container.totem {
   border: 10px solid #1a1a1a;
-  border-bottom: 10px solid #1a1a1a;
   border-radius: 20px;
   box-shadow: 0 0 25px rgba(0, 212, 212, 0.3);
 }
