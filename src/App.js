@@ -47,29 +47,23 @@ function AppContent() {
 
   return (
     <>
-      {
-        token && (
-          <>
-            {/*<Header />*/}
-            <DisplayNav user={user} />
-            <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
-            <main className="main-content">
-              {activeTab === 'slides' && <SlidesPage user={user} />}
-              {activeTab === 'pools' && (
-                <div className="content-placeholder">
-                  <PoolsPage user={user} />
-                </div>
-              )}
-              {activeTab === 'timeline' && (
-                <div className="content-placeholder">
-                  <h2>Timeline</h2>
-                  <p>Coming soon...</p>
-                </div>
-              )}
-            </main>
-          </>
-        )
-      }
+      {/*<Header />*/}
+      <DisplayNav user={user} />
+      <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
+      <main className="main-content">
+        {activeTab === 'slides' && <SlidesPage user={user} />}
+        {activeTab === 'pools' && (
+          <div className="content-placeholder">
+            <PoolsPage user={user} />
+          </div>
+        )}
+        {activeTab === 'timeline' && (
+          <div className="content-placeholder">
+            <h2>Timeline</h2>
+            <p>Coming soon...</p>
+          </div>
+        )}
+      </main>
     </>
   );
 }
