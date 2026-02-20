@@ -1,12 +1,13 @@
 import React, { useRef, useState, useEffect } from 'react';
-import DisplaysDashboard from '../styles/DisplaysDashboard.css';
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faBell} from "@fortawesome/free-solid-svg-icons/faBell";
+import '../styles/DisplaysDashboard.css'; // Path check kar lein apne structure ke hisaab se
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronUp, faUser, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 
 const DisplayNav = ({ user }) => {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const userMenuRef = useRef(null);
 
+    // Click outside to close menu logic
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
@@ -39,17 +40,30 @@ const DisplayNav = ({ user }) => {
                     aria-expanded={userMenuOpen}
                     aria-haspopup="true"
                 >
-                    <i className="pi pi-user nav-user-icon" />
-                    <div className="nav-user-info">
-                        <span className="nav-user-name">{user?.fullName}</span>
-                        <span className="nav-user-email">{user?.email}</span>
+                    {/* User Profile Icon */}
+                    <div className="nav-user-avatar">
+                        <FontAwesomeIcon icon={faUser} className="nav-user-icon" />
                     </div>
-                    <i className={`pi pi-chevron-down nav-user-chevron ${userMenuOpen ? 'is-open' : ''}`} />
+
+                    <div className="nav-user-info">
+                        <span className="nav-user-name">{user?.fullName || "User Name"}</span>
+                        <span className="nav-user-email">{user?.email || "user@email.com"}</span>
+                    </div>
+
+                    {/* Toggle Arrow Logic */}
+                    <div className="nav-user-chevron-box">
+                        <FontAwesomeIcon
+                            icon={userMenuOpen ? faChevronUp : faChevronDown}
+                            className="nav-user-chevron"
+                        />
+                    </div>
                 </button>
+
+                {/* Dropdown Menu */}
                 {userMenuOpen && (
                     <div className="displays-dashboard__nav-user-menu" role="menu">
                         <button type="button" className="displays-dashboard__nav-user-menu-item" role="menuitem">
-                            <i className="pi pi-user" />
+                            <FontAwesomeIcon icon={faUser} style={{marginRight: '10px'}} />
                             Profile
                         </button>
                         <button
@@ -58,7 +72,7 @@ const DisplayNav = ({ user }) => {
                             role="menuitem"
                             onClick={handleLogout}
                         >
-                            <i className="pi pi-sign-out" />
+                            <FontAwesomeIcon icon={faSignOutAlt} style={{marginRight: '10px'}} />
                             Logout
                         </button>
                     </div>
