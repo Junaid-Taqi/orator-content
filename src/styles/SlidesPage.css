@@ -102,6 +102,18 @@
   }
 }
 
+.orange {
+  background: #FC6C00;
+  color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+}
+.purple {
+  background: #A749FF;
+  color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+}
 
 
 /* --- Filter Bar Styles --- */
