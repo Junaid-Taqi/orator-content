@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import '../styles/SlidesPage.css';
 import StatsCard from './StatsCard';
 import Modal from './Modal';
@@ -9,6 +10,7 @@ import TemplateSlideForm from './TemplateSlideForm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter } from '@fortawesome/free-solid-svg-icons/faFilter';
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
+import { addNewFullScreenSlide } from '../Services/Slices/AddFullScreenSlideSlice';
 
 const initialSlides = [
   { id: 1, title: 'Spring Festival 2026', category: 'Events', priority: 'High (45s)', status: 'active', start: '2026-02-15', archive: '2026-04-30', icon: 'EV' },
@@ -16,13 +18,28 @@ const initialSlides = [
   { id: 3, title: 'Summer Campaign Banner', category: 'News', priority: 'Low (15s)', status: 'archived', start: '2026-01-01', archive: '2026-02-10', icon: 'NW' },
 ];
 
+const priorityMap = {
+  low: 1,
+  medium: 2,
+  high: 3,
+};
+
+const durationMap = {
+  low: 15,
+  medium: 30,
+  high: 45,
+};
+
 const SlidesPage = ({ user }) => {
+  const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState('type');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSlideType, setSelectedSlideType] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [slides] = useState(initialSlides);
+
+  const { status: createSlideStatus, error: createSlideError } = useSelector((state) => state.AddFullScreenSlide);
 
   const handleAddSlide = () => {
     setModalContent('type');
@@ -42,6 +59,51 @@ const SlidesPage = ({ user }) => {
     setIsModalOpen(false);
     setModalContent('type');
     setSelectedSlideType(null);
+  };
+
+  const handleCreateFullScreenSlide = async (slideData) => {
+    const groupId = user?.groups?.[0]?.id;
+    const userId = user?.userId;
+    const contentPoolId = slideData?.contentPoolId;
+
+    if (!groupId || !userId || !contentPoolId || !slideData?.file) {
+      return;
+    }
+
+    const availableDevices = slideData.availableDevices || [];
+    const selectedDevices = slideData.devices.includes('all-devices')
+      ? availableDevices
+      : availableDevices.filter((device) => slideData.devices.includes(device.id));
+
+    const targetDevices = selectedDevices.map((device) => ({
+      displayId: String(device.id),
+      startTime: device.wakeTime,
+      endTime: device.sleepTime,
+      startDate: slideData.startDate,
+      archiveDate: slideData.archiveDate,
+    }));
+
+    const payload = {
+      groupId: String(groupId),
+      userId: String(userId),
+      contentPoolId: String(contentPoolId),
+      title: slideData.title,
+      priority: priorityMap[slideData.priority] || 2,
+      durationSeconds: durationMap[slideData.priority] || 30,
+      startDate: slideData.startDate,
+      archiveDate: slideData.archiveDate,
+      mediaName: slideData.mediaName || slideData.title,
+      targetDevices,
+      file: slideData.file,
+    };
+
+    const result = await dispatch(addNewFullScreenSlide(payload));
+    if (addNewFullScreenSlide.fulfilled.match(result) && result.payload?.success) {
+      setIsModalOpen(false);
+      setModalContent('type');
+      setSelectedSlideType(null);
+      setSelectedCategory(null);
+    }
   };
 
   const filteredSlides = slides.filter((slide) =>
@@ -132,7 +194,14 @@ const SlidesPage = ({ user }) => {
         ) : modalContent === 'form' && selectedSlideType === 'template' ? (
           <TemplateSlideForm category={selectedCategory} user={user} onCancel={handleCancelModal} onSubmit={() => setIsModalOpen(false)} />
         ) : (
-          <FullscreenSlideForm category={selectedCategory} user={user} onCancel={handleCancelModal} onSubmit={() => setIsModalOpen(false)} />
+          <FullscreenSlideForm
+            category={selectedCategory}
+            user={user}
+            onCancel={handleCancelModal}
+            onSubmit={handleCreateFullScreenSlide}
+            submitting={createSlideStatus === 'loading'}
+            submitError={createSlideStatus === 'failed' ? createSlideError : ''}
+          />
         )}
       </Modal>
     </div>

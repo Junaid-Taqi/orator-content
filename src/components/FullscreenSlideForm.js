@@ -3,7 +3,7 @@ import axios from 'axios';
 import '../styles/FullscreenSlideForm.css';
 import { serverUrl } from '../Services/Constants/Constants';
 
-const FullscreenSlideForm = ({ category, user, onCancel, onSubmit }) => {
+const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = false, submitError = '' }) => {
   const [formData, setFormData] = useState({
     title: '',
     priority: 'medium',
@@ -16,10 +16,12 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit }) => {
   const [devicesError, setDevicesError] = useState('');
 
   const [preview, setPreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [validationError, setValidationError] = useState('');
   const [orientation, setOrientation] = useState('landscape');
   const [viewMode, setViewMode] = useState('web');
 
-  const categoryName = category?.title || category?.name
+  const categoryName = category?.title || category?.name;
 
   const priorities = [
     { id: 'low', label: 'Low', duration: '15s' },
@@ -59,7 +61,9 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit }) => {
 
         const mappedDevices = (response.data?.displays || []).map((display) => ({
           id: String(display.displayId),
-          label: display.name || display.playerId || `Display ${display.displayId}`,
+          label: display.name,
+          wakeTime: display.wakeTime,
+          sleepTime: display.sleepTime,
         }));
 
         setDevices([{ id: 'all-devices', label: 'All Devices' }, ...mappedDevices]);
@@ -73,11 +77,21 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit }) => {
     fetchDevices();
   }, [user]);
 
-  const handleTitleChange = (e) => setFormData({ ...formData, title: e.target.value });
-  const handlePriorityChange = (priority) => setFormData({ ...formData, priority });
-  const handleDateChange = (field, value) => setFormData({ ...formData, [field]: value });
+  const handleTitleChange = (e) => {
+    setValidationError('');
+    setFormData({ ...formData, title: e.target.value });
+  };
+  const handlePriorityChange = (priority) => {
+    setValidationError('');
+    setFormData({ ...formData, priority });
+  };
+  const handleDateChange = (field, value) => {
+    setValidationError('');
+    setFormData({ ...formData, [field]: value });
+  };
 
   const handleDeviceToggle = (deviceId) => {
+    setValidationError('');
     let updated = [...formData.devices];
     if (deviceId === 'all-devices') {
       updated = updated.includes('all-devices') ? [] : ['all-devices'];
@@ -94,8 +108,10 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit }) => {
   };
 
   const handleFileUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
+      setValidationError('');
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (event) => setPreview(event.target.result);
       reader.readAsDataURL(file);
@@ -103,16 +119,36 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit }) => {
   };
 
   const handleSubmit = () => {
-    if (!formData.title.trim() || !preview) {
-      alert('Please fill title and upload media');
+    if (!formData.title.trim()) {
+      setValidationError('Slide title is required.');
       return;
     }
+    if (!selectedFile) {
+      setValidationError('Media file is required.');
+      return;
+    }
+    if (!formData.startDate) {
+      setValidationError('Start date is required.');
+      return;
+    }
+    if (!formData.archiveDate) {
+      setValidationError('Archive date is required.');
+      return;
+    }
+    if (!formData.devices.length) {
+      setValidationError('Please select at least one target device.');
+      return;
+    }
+
+    setValidationError('');
     onSubmit({
       ...formData,
+      file: selectedFile,
       category,
       categoryName,
       contentPoolId: category?.id,
-      preview,
+      mediaName: selectedFile.name,
+      availableDevices: devices.filter((d) => d.id !== 'all-devices'),
       orientation,
       viewMode,
     });
@@ -156,11 +192,11 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit }) => {
           <div className="date-row">
             <div className="form-group">
               <label className="form-label">Start Date</label>
-              <input type="text" className="form-input date-input" placeholder="mm/dd/yyyy" value={formData.startDate} onChange={(e) => handleDateChange('startDate', e.target.value)} />
+              <input type="date" className="form-input date-input" value={formData.startDate} onChange={(e) => handleDateChange('startDate', e.target.value)} />
             </div>
             <div className="form-group">
               <label className="form-label">Archive Date</label>
-              <input type="text" className="form-input date-input" placeholder="mm/dd/yyyy" value={formData.archiveDate} onChange={(e) => handleDateChange('archiveDate', e.target.value)} />
+              <input type="date" className="form-input date-input" value={formData.archiveDate} onChange={(e) => handleDateChange('archiveDate', e.target.value)} />
             </div>
           </div>
 
@@ -177,6 +213,9 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit }) => {
               ))}
             </div>
           </div>
+
+          {!!validationError && <p className="upload-text" style={{ color: '#ff9aa2' }}>{validationError}</p>}
+          {!validationError && !!submitError && <p className="upload-text" style={{ color: '#ff9aa2' }}>{submitError}</p>}
         </div>
 
         <div className="form-right">
@@ -219,7 +258,7 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit }) => {
 
       <div className="form-actions">
         <button className="btn-cancel" onClick={onCancel}>Cancel</button>
-        <button className="btn-submit" onClick={handleSubmit}>Create Slide</button>
+        <button className="btn-submit" onClick={handleSubmit} disabled={submitting}>{submitting ? 'Creating...' : 'Create Slide'}</button>
       </div>
     </div>
   );
