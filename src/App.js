@@ -7,6 +7,7 @@ import Header from './components/Header';
 import Navigation from './components/Navigation';
 import SlidesPage from './components/SlidesPage';
 import PoolsPage from './components/PoolPage';
+import DisplayNav from "./components/DisplayNav";
 
 function AppContent() {
   const dispatch = useDispatch();
@@ -46,7 +47,8 @@ function AppContent() {
 
   return (
     <>
-      <Header />
+      {/*<Header />*/}
+      <DisplayNav user={user} />
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
       <main className="main-content">
         {activeTab === 'slides' && <SlidesPage user={user} />}
