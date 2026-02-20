@@ -27,6 +27,62 @@
   animation: slideUp 0.3s ease;
 }
 
+
+.delete-modal {
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.delete-icon {
+  width: 70px;
+  height: 70px;
+  background: rgba(255, 0, 0, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 28px;
+  color: #ff4d4f;
+}
+
+.delete-modal h2 {
+  margin-bottom: 10px;
+}
+
+.delete-modal p {
+  color: #aaa;
+  margin-bottom: 25px;
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn-cancel {
+  padding: 10px 25px;
+  border-radius: 25px;
+  border: none;
+  background: #3a4a63;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-delete {
+  padding: 10px 25px;
+  border-radius: 25px;
+  border: none;
+  background: #ff4d4f;
+  color: white;
+  cursor: pointer;
+}
+
+.modal-content.modal-small {
+  width: 500px;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

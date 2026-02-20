@@ -53,6 +53,8 @@ const SlidesPage = ({user}) => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedSlideType, setSelectedSlideType] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [slideToDelete, setSlideToDelete] = useState(null);
 
     const {status: createSlideStatus, error: createSlideError} = useSelector((state) => state.AddFullScreenSlide);
     const {slides, counters, status: slidesStatus, error: slidesError} = useSelector((state) => state.GetAllSlides);
@@ -68,6 +70,27 @@ const SlidesPage = ({user}) => {
     const handleAddSlide = () => {
         setModalContent('type');
         setIsModalOpen(true);
+    };
+
+    const handleDeleteClick = (slide) => {
+        setSlideToDelete(slide);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (!slideToDelete) return;
+
+        // Yahan future me tum delete API call kar sakte ho
+
+        console.log("Deleting slide:", slideToDelete.id);
+
+        setIsDeleteModalOpen(false);
+        setSlideToDelete(null);
+    };
+
+    const handleCancelDelete = () => {
+        setIsDeleteModalOpen(false);
+        setSlideToDelete(null);
     };
 
     const handleSelectType = (typeId) => {
@@ -220,13 +243,35 @@ const SlidesPage = ({user}) => {
                                 <div className="footer-icons">
                                     <button className="icon-btn-small"><FontAwesomeIcon icon={faCog}/></button>
                                     <button className="icon-btn-small"><FontAwesomeIcon icon={faBoxArchive}/></button>
-                                    <button className="icon-btn-small delete"><FontAwesomeIcon icon={faTrashAlt}/></button>
+                                    <button className="icon-btn-small delete" onClick={() => handleDeleteClick(slide)}><FontAwesomeIcon icon={faTrashAlt}/></button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
+
+            <Modal size="small" isOpen={isDeleteModalOpen} onClose={handleCancelDelete} className="delete-modal-wrapper">
+                <div className="delete-modal">
+                    <div className="delete-icon">
+                        <FontAwesomeIcon icon={faTrashAlt} />
+                    </div>
+
+                    <h2>Delete Slide?</h2>
+                    <p>
+                        This action cannot be undone. The slide will be permanently deleted from the system.
+                    </p>
+
+                    <div className="delete-modal-actions">
+                        <button className="btn-cancel" onClick={handleCancelDelete}>
+                            Cancel
+                        </button>
+                        <button className="btn-delete" onClick={handleConfirmDelete}>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </Modal>
 
             <Modal isOpen={isModalOpen} onClose={handleCancelModal}>
                 {modalContent === 'type' ? (
