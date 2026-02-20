@@ -212,3 +212,6 @@
   color: white;
   cursor: pointer;
 }
+.modal-content.modal-large {
+  padding: 20px;
+}

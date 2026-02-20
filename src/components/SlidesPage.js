@@ -287,6 +287,7 @@ const SlidesPage = ({user}) => {
             </div>
 
             <Modal
+                size="large"
                 isOpen={isPreviewModalOpen}
                 onClose={handleClosePreview}
             >
