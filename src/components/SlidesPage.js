@@ -5,11 +5,13 @@ import Modal from './Modal';
 import SlideTypeSelector from './SlideTypeSelector';
 import CategorySelector from './CategorySelector';
 import FullscreenSlideForm from './FullscreenSlideForm';
+import TemplateSlideForm from './TemplateSlideForm';
 
 const SlidesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState('type'); // 'type' | 'category' | 'form'
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedSlideType, setSelectedSlideType] = useState(null);
 
   const handleAddSlide = () => {
     setModalContent('type');
@@ -17,20 +19,19 @@ const SlidesPage = () => {
   };
 
   const handleSelectType = (typeId) => {
-    if (typeId === 'fullscreen') {
+    if (typeId === 'fullscreen' || typeId === 'template') {
+      setSelectedSlideType(typeId);
       // switch to category selector while keeping modal open
       setModalContent('category');
       return;
     }
-
-    console.log('Selected slide type:', typeId);
     setIsModalOpen(false);
-    // TODO: Handle the selected slide type (non-fullscreen)
   };
 
   const handleCancelModal = () => {
     setIsModalOpen(false);
     setModalContent('type');
+    setSelectedSlideType(null);
   };
 
   return (
@@ -67,8 +68,29 @@ const SlidesPage = () => {
               setSelectedCategory(catId);
               setModalContent('form');
             }}
-            onBack={() => setModalContent('type')}
-            onCancel={() => setIsModalOpen(false)}
+            onBack={() => {
+              setModalContent('type');
+              setSelectedCategory(null);
+              setSelectedSlideType(null);
+            }}
+            onCancel={() => {
+              setIsModalOpen(false);
+              setSelectedCategory(null);
+              setSelectedSlideType(null);
+            }}
+          />
+        ) : modalContent === 'form' && selectedSlideType === 'template' ? (
+          <TemplateSlideForm
+            category={selectedCategory}
+            onCancel={handleCancelModal}
+            onSubmit={(slideData) => {
+              console.log('Creating template slide:', slideData);
+              // TODO: Handle slide creation
+              setIsModalOpen(false);
+              setModalContent('type');
+              setSelectedCategory(null);
+              setSelectedSlideType(null);
+            }}
           />
         ) : (
           <FullscreenSlideForm
@@ -80,6 +102,7 @@ const SlidesPage = () => {
               setIsModalOpen(false);
               setModalContent('type');
               setSelectedCategory(null);
+              setSelectedSlideType(null);
             }}
           />
         )}
