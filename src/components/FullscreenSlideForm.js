@@ -14,17 +14,7 @@ const FullscreenSlideForm = ({ category, onCancel, onSubmit }) => {
   const [orientation, setOrientation] = useState('landscape');
   const [viewMode, setViewMode] = useState('web');
 
-  const categoryLabels = {
-    news: 'News',
-    official: 'Official News',
-    events: 'Events',
-    emergency: 'Emergency',
-    always: 'Always On',
-  };
-
-  const categoryName = typeof category === 'object'
-    ? category?.title || category?.name || 'Unknown'
-    : (categoryLabels[category] || category || 'Unknown');
+  const categoryName = category?.title || category?.name
 
   const priorities = [
     { id: 'low', label: 'Low', duration: '15s' },
