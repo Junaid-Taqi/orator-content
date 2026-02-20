@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import '../styles/FullscreenSlideForm.css';
+import { serverUrl } from '../Services/Constants/Constants';
 
-const FullscreenSlideForm = ({ category, onCancel, onSubmit }) => {
+const FullscreenSlideForm = ({ category, user, onCancel, onSubmit }) => {
   const [formData, setFormData] = useState({
     title: '',
     priority: 'medium',
@@ -9,6 +11,9 @@ const FullscreenSlideForm = ({ category, onCancel, onSubmit }) => {
     archiveDate: '',
     devices: ['all-devices'],
   });
+  const [devices, setDevices] = useState([{ id: 'all-devices', label: 'All Devices' }]);
+  const [devicesStatus, setDevicesStatus] = useState('idle');
+  const [devicesError, setDevicesError] = useState('');
 
   const [preview, setPreview] = useState(null);
   const [orientation, setOrientation] = useState('landscape');
@@ -22,11 +27,51 @@ const FullscreenSlideForm = ({ category, onCancel, onSubmit }) => {
     { id: 'high', label: 'High', duration: '45s' },
   ];
 
-  const devices = [
-    { id: 'all-devices', label: 'All Devices' },
-    { id: 'totem-1', label: 'Totem 1' },
-    { id: 'indoor-1', label: 'Indoor Display 1' },
-  ];
+  useEffect(() => {
+    const fetchDevices = async () => {
+      const groupId = user?.groups?.[0]?.id;
+      if (!groupId) {
+        setDevicesError('Group not found for current user.');
+        return;
+      }
+
+      setDevicesStatus('loading');
+      setDevicesError('');
+      try {
+        const config = {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+          },
+        };
+        const payload = { groupId: String(groupId) };
+        const response = await axios.post(
+          `${serverUrl}/o/displayManagementApplication/getAllDisplays`,
+          payload,
+          config
+        );
+
+        if (!response.data?.success) {
+          setDevicesStatus('failed');
+          setDevicesError(response.data?.message || 'Unable to load devices.');
+          return;
+        }
+
+        const mappedDevices = (response.data?.displays || []).map((display) => ({
+          id: String(display.displayId),
+          label: display.name || display.playerId || `Display ${display.displayId}`,
+        }));
+
+        setDevices([{ id: 'all-devices', label: 'All Devices' }, ...mappedDevices]);
+        setDevicesStatus('succeeded');
+      } catch (error) {
+        setDevicesStatus('failed');
+        setDevicesError(error?.response?.data?.message || error.message || 'Unable to load devices.');
+      }
+    };
+
+    fetchDevices();
+  }, [user]);
 
   const handleTitleChange = (e) => setFormData({ ...formData, title: e.target.value });
   const handlePriorityChange = (priority) => setFormData({ ...formData, priority });
@@ -38,8 +83,12 @@ const FullscreenSlideForm = ({ category, onCancel, onSubmit }) => {
       updated = updated.includes('all-devices') ? [] : ['all-devices'];
     } else if (updated.includes(deviceId)) {
       updated = updated.filter((id) => id !== deviceId);
+      if (!updated.length) {
+        updated = ['all-devices'];
+      }
     } else {
-      updated = [deviceId].filter((id) => id !== 'all-devices');
+      updated = updated.filter((id) => id !== 'all-devices');
+      updated.push(deviceId);
     }
     setFormData({ ...formData, devices: updated });
   };
@@ -117,6 +166,8 @@ const FullscreenSlideForm = ({ category, onCancel, onSubmit }) => {
 
           <div className="form-group">
             <label className="form-label">Target Devices</label>
+            {devicesStatus === 'loading' && <p className="upload-text">Loading devices...</p>}
+            {devicesStatus === 'failed' && <p className="upload-text">{devicesError}</p>}
             <div className="device-list">
               {devices.map((device) => (
                 <label key={device.id} className="device-checkbox">

@@ -130,9 +130,9 @@ const SlidesPage = ({ user }) => {
             onCancel={handleCancelModal}
           />
         ) : modalContent === 'form' && selectedSlideType === 'template' ? (
-          <TemplateSlideForm category={selectedCategory} onCancel={handleCancelModal} onSubmit={() => setIsModalOpen(false)} />
+          <TemplateSlideForm category={selectedCategory} user={user} onCancel={handleCancelModal} onSubmit={() => setIsModalOpen(false)} />
         ) : (
-          <FullscreenSlideForm category={selectedCategory} onCancel={handleCancelModal} onSubmit={() => setIsModalOpen(false)} />
+          <FullscreenSlideForm category={selectedCategory} user={user} onCancel={handleCancelModal} onSubmit={() => setIsModalOpen(false)} />
         )}
       </Modal>
     </div>
