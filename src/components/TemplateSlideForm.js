@@ -99,61 +99,63 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit }) => {
 
   return (
     <div className="fullscreen-slide-form">
-      <h2 className="form-title">Create Template Slide</h2>
+      {/*<h2 className="form-title">Create Template Slide</h2>*/}
 
-      <div className="category-badge">
-        Category: <span className="badge-value">{categoryName}</span>
-      </div>
+      {/*<div className="category-badge">*/}
+      {/*  Category: <span className="badge-value">{categoryName}</span>*/}
+      {/*</div>*/}
 
-      <div className="form-container">
-        <div className="form-left">
-          <div className="form-group">
-            <label className="form-label">Slide Title *</label>
-            <input type="text" className="form-input" placeholder="Enter slide title" value={formData.title} onChange={handleTitleChange} />
-          </div>
+      {/*<div className="form-container">*/}
+      {/*  <div className="form-left">*/}
+      {/*    <div className="form-group">*/}
+      {/*      <label className="form-label">Slide Title *</label>*/}
+      {/*      <input type="text" className="form-input" placeholder="Enter slide title" value={formData.title} onChange={handleTitleChange} />*/}
+      {/*    </div>*/}
 
-          <div className="form-group">
-            <label className="form-label">Priority</label>
-            <div className="priority-buttons">
-              {priorities.map((p) => (
-                <button key={p.id} className={`priority-btn priority-${p.id} ${formData.priority === p.id ? 'active' : ''}`} onClick={() => handlePriorityChange(p.id)}>
-                  {p.label} <span className="duration">{p.duration}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+      {/*    <div className="form-group">*/}
+      {/*      <label className="form-label">Priority</label>*/}
+      {/*      <div className="priority-buttons">*/}
+      {/*        {priorities.map((p) => (*/}
+      {/*          <button key={p.id} className={`priority-btn priority-${p.id} ${formData.priority === p.id ? 'active' : ''}`} onClick={() => handlePriorityChange(p.id)}>*/}
+      {/*            {p.label} <span className="duration">{p.duration}</span>*/}
+      {/*          </button>*/}
+      {/*        ))}*/}
+      {/*      </div>*/}
+      {/*    </div>*/}
 
-          <div className="date-row">
-            <div className="form-group">
-              <label className="form-label">Start Date</label>
-              <input type="text" className="form-input date-input" placeholder="mm/dd/yyyy" value={formData.startDate} onChange={(e) => handleDateChange('startDate', e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Archive Date</label>
-              <input type="text" className="form-input date-input" placeholder="mm/dd/yyyy" value={formData.archiveDate} onChange={(e) => handleDateChange('archiveDate', e.target.value)} />
-            </div>
-          </div>
+      {/*    <div className="date-row">*/}
+      {/*      <div className="form-group">*/}
+      {/*        <label className="form-label">Start Date</label>*/}
+      {/*        <input type="text" className="form-input date-input" placeholder="mm/dd/yyyy" value={formData.startDate} onChange={(e) => handleDateChange('startDate', e.target.value)} />*/}
+      {/*      </div>*/}
+      {/*      <div className="form-group">*/}
+      {/*        <label className="form-label">Archive Date</label>*/}
+      {/*        <input type="text" className="form-input date-input" placeholder="mm/dd/yyyy" value={formData.archiveDate} onChange={(e) => handleDateChange('archiveDate', e.target.value)} />*/}
+      {/*      </div>*/}
+      {/*    </div>*/}
 
-          <div className="form-group">
-            <label className="form-label">Target Devices</label>
-            {devicesStatus === 'loading' && <p className="upload-text">Loading devices...</p>}
-            {devicesStatus === 'failed' && <p className="upload-text">{devicesError}</p>}
-            <div className="device-list">
-              {devices.map((device) => (
-                <label key={device.id} className="device-checkbox">
-                  <input type="checkbox" checked={formData.devices.includes(device.id)} onChange={() => handleDeviceToggle(device.id)} />
-                  <span>{device.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/*    <div className="form-group">*/}
+      {/*      <label className="form-label">Target Devices</label>*/}
+      {/*      {devicesStatus === 'loading' && <p className="upload-text">Loading devices...</p>}*/}
+      {/*      {devicesStatus === 'failed' && <p className="upload-text">{devicesError}</p>}*/}
+      {/*      <div className="device-list">*/}
+      {/*        {devices.map((device) => (*/}
+      {/*          <label key={device.id} className="device-checkbox">*/}
+      {/*            <input type="checkbox" checked={formData.devices.includes(device.id)} onChange={() => handleDeviceToggle(device.id)} />*/}
+      {/*            <span>{device.label}</span>*/}
+      {/*          </label>*/}
+      {/*        ))}*/}
+      {/*      </div>*/}
+      {/*    </div>*/}
+      {/*  </div>*/}
+      {/*</div>*/}
 
-      <div className="form-actions">
-        <button className="btn-cancel" onClick={onCancel}>Cancel</button>
-        <button className="btn-submit" onClick={handleSubmit}>Create Slide</button>
-      </div>
+      {/*<div className="form-actions">*/}
+      {/*  <button className="btn-cancel" onClick={onCancel}>Cancel</button>*/}
+      {/*  <button className="btn-submit" onClick={handleSubmit}>Create Slide</button>*/}
+      {/*</div>*/}
+
+      <h3>Coming Soon</h3>
     </div>
   );
 };
