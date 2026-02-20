@@ -1,18 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useEffect, useMemo, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import '../styles/PoolsPage.css';
 import CreatePoolModal from './CreatePoolModal';
-import { getAllContentPool } from '../Services/Slices/GetContentPoolSlice';
-import { updateContentPoolStatus } from '../Services/Slices/UpdateContentPoolStatusSlice';
-import { updateAlwaysOnInsertionMode } from '../Services/Slices/UpdateAlwaysOnInsertionModeSlice';
+import {getAllContentPool} from '../Services/Slices/GetContentPoolSlice';
+import {updateContentPoolStatus} from '../Services/Slices/UpdateContentPoolStatusSlice';
+import {updateAlwaysOnInsertionMode} from '../Services/Slices/UpdateAlwaysOnInsertionModeSlice';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowDown, faCircleExclamation} from "@fortawesome/free-solid-svg-icons";
+import {faCircleExclamation} from "@fortawesome/free-solid-svg-icons";
 import {faAngleDown} from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
-import {faInfo} from "@fortawesome/free-solid-svg-icons/faInfo";
 import {faPlus} from "@fortawesome/free-solid-svg-icons/faPlus";
 
-const PoolsPage = ({ user }) => {
+const PoolsPage = ({user}) => {
     const dispatch = useDispatch();
     const [showModal, setShowModal] = useState(false);
     const [editingPool, setEditingPool] = useState(null);
@@ -20,14 +19,14 @@ const PoolsPage = ({ user }) => {
     const [selectedAlwaysOnMode, setSelectedAlwaysOnMode] = useState(2);
     const [alwaysOnMessage, setAlwaysOnMessage] = useState('');
 
-    const { contentPoolList, total, status, error } = useSelector((state) => state.GetContentPool);
-    const { status: updateStatus } = useSelector((state) => state.UpdateContentPoolStatus);
-    const { status: alwaysOnUpdateStatus } = useSelector((state) => state.UpdateAlwaysOnInsertionMode);
+    const {contentPoolList, total, status, error} = useSelector((state) => state.GetContentPool);
+    const {status: updateStatus} = useSelector((state) => state.UpdateContentPoolStatus);
+    const {status: alwaysOnUpdateStatus} = useSelector((state) => state.UpdateAlwaysOnInsertionMode);
     const groupId = user?.groups?.[0]?.id;
 
     useEffect(() => {
         if (groupId) {
-            dispatch(getAllContentPool({ groupId: String(groupId) }));
+            dispatch(getAllContentPool({groupId: String(groupId)}));
         }
     }, [dispatch, groupId]);
 
@@ -62,7 +61,7 @@ const PoolsPage = ({ user }) => {
 
         const result = await dispatch(updateContentPoolStatus(payload));
         if (updateContentPoolStatus.fulfilled.match(result) && result.payload?.success) {
-            dispatch(getAllContentPool({ groupId: String(groupId) }));
+            dispatch(getAllContentPool({groupId: String(groupId)}));
         }
     };
 
@@ -96,7 +95,7 @@ const PoolsPage = ({ user }) => {
         );
         if (updateAlwaysOnInsertionMode.fulfilled.match(result) && result.payload?.success) {
             setAlwaysOnMessage('Always On insertion mode updated.');
-            dispatch(getAllContentPool({ groupId: String(groupId) }));
+            dispatch(getAllContentPool({groupId: String(groupId)}));
             return;
         }
         setSelectedAlwaysOnMode(previousMode);
@@ -176,7 +175,7 @@ const PoolsPage = ({ user }) => {
                             <span>Slide Priority Mode:</span>
                             <p>{priorityMode}</p>
                         </div>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
                             <select className="priority-dropdown" value={priorityMode} disabled>
                                 <option>{priorityMode}</option>
                             </select>
@@ -203,14 +202,14 @@ const PoolsPage = ({ user }) => {
                     <p>Category-based pools in fixed rotation with Always On insertion</p>
                 </div>
                 <div className="header-btns">
-                    <button className="btn btn-create" onClick={handleOpenCreateModal}><FontAwesomeIcon icon={faPlus} style={{marginRight: '5px'}} /> Create Pool</button>
+                    <button className="btn btn-create" onClick={handleOpenCreateModal}><FontAwesomeIcon icon={faPlus} style={{marginRight: '5px'}}/> Create Pool</button>
                     <button
                         className="btn btn-always"
                         onClick={() => setShowAlwaysOnSettings((prev) => !prev)}
                     >
-                        <FontAwesomeIcon icon={faCog} style={{marginRight: '5px'}} /> Always On Settings
+                        <FontAwesomeIcon icon={faCog} style={{marginRight: '5px'}}/> Always On Settings
                     </button>
-                    <button className="btn btn-emergency"><FontAwesomeIcon icon={faCircleExclamation}  style={{marginRight: '5px'}} /> Emergency Settings</button>
+                    <button className="btn btn-emergency"><FontAwesomeIcon icon={faCircleExclamation} style={{marginRight: '5px'}}/> Emergency Settings</button>
                 </div>
             </div>
 

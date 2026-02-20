@@ -101,3 +101,130 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+
+/* --- Filter Bar Styles --- */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 30px 0;
+}
+
+.filter-pill {
+  padding: 8px 22px;
+  border-radius: 25px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #a0aec0;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.filter-pill.active {
+  background: #00bcd4;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+}
+
+/* --- Grid & Card Styles --- */
+.slides-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 25px;
+}
+
+.slide-card-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.slide-card-visual {
+  height: 140px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+  font-size: 3.5rem;
+}
+
+.slide-card-body {
+  padding: 24px;
+}
+
+.slide-card-name {
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.slide-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tag-cat, .tag-priority, .tag-status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tag-priority.high { color: #ff5252; background: rgba(255, 82, 82, 0.15); }
+.tag-priority.medium { color: #ffab40; background: rgba(255, 171, 64, 0.15); }
+.tag-status.active { color: #00e676; background: rgba(0, 230, 118, 0.15); }
+.tag-status.archived { color: #90a4ae; background: rgba(144, 164, 174, 0.15); }
+
+.slide-card-info {
+  margin-bottom: 20px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.slide-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-preview-outline {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.footer-icons {
+  display: flex;
+  gap: 10px;
+}
+
+.icon-btn-small {
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+}
+
+.icon-btn-small.delete {
+  color: #ff5252;
+}
