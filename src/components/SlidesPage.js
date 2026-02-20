@@ -12,6 +12,9 @@ import { faFilter } from '@fortawesome/free-solid-svg-icons/faFilter';
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
 import { addNewFullScreenSlide } from '../Services/Slices/AddFullScreenSlideSlice';
 import { getAllSlides } from '../Services/Slices/GetAllSlidesSlice';
+import {faTrashAlt} from "@fortawesome/free-solid-svg-icons/faTrashAlt";
+import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
+import {faBoxArchive, faEye} from "@fortawesome/free-solid-svg-icons";
 
 const priorityMap = {
   low: 1,
@@ -213,11 +216,11 @@ const SlidesPage = ({ user }) => {
                 <div className="info-row"><span>Archive:</span> <span>{slide.archive}</span></div>
               </div>
               <div className="slide-card-footer">
-                <button className="btn-preview-outline">Preview</button>
+                <button className="btn-preview-outline"><FontAwesomeIcon icon={faEye} style={{marginRight: '5px'}} />Preview</button>
                 <div className="footer-icons">
-                  <button className="icon-btn-small">CFG</button>
-                  <button className="icon-btn-small">DOC</button>
-                  <button className="icon-btn-small delete">DEL</button>
+                  <button className="icon-btn-small"><FontAwesomeIcon icon={faCog} /></button>
+                  <button className="icon-btn-small"><FontAwesomeIcon icon={faBoxArchive} /></button>
+                  <button className="icon-btn-small delete"><FontAwesomeIcon icon={faTrashAlt}/></button>
                 </div>
               </div>
             </div>
