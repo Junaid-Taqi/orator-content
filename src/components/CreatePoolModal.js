@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import '../styles/CreatePoolModal.css';
-import { addContentPool } from '../Services/Slices/AddContentPoolSlice';
-import { getAllContentPool } from '../Services/Slices/GetContentPoolSlice';
-import { updateContentPool } from '../Services/Slices/UpdateContentPoolSlice';
+import {addContentPool} from '../Services/Slices/AddContentPoolSlice';
+import {getAllContentPool} from '../Services/Slices/GetContentPoolSlice';
+import {updateContentPool} from '../Services/Slices/UpdateContentPoolSlice';
 
 const initialFormState = {
     name: '',
@@ -24,10 +24,10 @@ const mapPoolToFormData = (pool) => ({
     isAlwaysOn: !!pool?.isAlwaysOn,
 });
 
-const CreatePoolModal = ({ isOpen, onClose, user, poolToEdit = null }) => {
+const CreatePoolModal = ({isOpen, onClose, user, poolToEdit = null}) => {
     const dispatch = useDispatch();
-    const { status: addStatus } = useSelector((state) => state.AddContentPool);
-    const { status: updateStatus } = useSelector((state) => state.UpdateContentPool);
+    const {status: addStatus} = useSelector((state) => state.AddContentPool);
+    const {status: updateStatus} = useSelector((state) => state.UpdateContentPool);
     const isEditMode = !!poolToEdit?.contentPoolId;
     const isSubmitting = addStatus === 'loading' || updateStatus === 'loading';
 
@@ -44,7 +44,7 @@ const CreatePoolModal = ({ isOpen, onClose, user, poolToEdit = null }) => {
     if (!isOpen) return null;
 
     const handleFormChange = (field, value) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+        setFormData((prev) => ({...prev, [field]: value}));
     };
 
     const handleClose = () => {
@@ -86,7 +86,7 @@ const CreatePoolModal = ({ isOpen, onClose, user, poolToEdit = null }) => {
         };
 
         const result = isEditMode
-            ? await dispatch(updateContentPool({ ...payload, contentPoolId: String(poolToEdit.contentPoolId) }))
+            ? await dispatch(updateContentPool({...payload, contentPoolId: String(poolToEdit.contentPoolId)}))
             : await dispatch(addContentPool(payload));
 
         const isSuccess = isEditMode
@@ -94,7 +94,7 @@ const CreatePoolModal = ({ isOpen, onClose, user, poolToEdit = null }) => {
             : addContentPool.fulfilled.match(result) && result.payload?.success;
 
         if (isSuccess) {
-            dispatch(getAllContentPool({ groupId: String(groupId) }));
+            dispatch(getAllContentPool({groupId: String(groupId)}));
             handleClose();
             return;
         }
@@ -207,7 +207,7 @@ const CreatePoolModal = ({ isOpen, onClose, user, poolToEdit = null }) => {
                         <p><strong>Next steps:</strong> After creating the pool, you can add slides from the Slides tab or import content from the Connector.</p>
                     </div>
 
-                    {submitError && <p className="form-tip" style={{ color: '#d93025' }}>{submitError}</p>}
+                    {submitError && <p className="form-tip" style={{color: '#d93025'}}>{submitError}</p>}
 
                     <div className="modal-footer">
                         <button type="button" className="footer-btn btn-cancel" onClick={handleClose}>Cancel</button>

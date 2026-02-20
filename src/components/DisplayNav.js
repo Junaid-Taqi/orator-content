@@ -1,9 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import '../styles/DisplaysDashboard.css'; // Path check kar lein apne structure ke hisaab se
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faChevronUp, faUser, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faChevronDown, faChevronUp, faSignOutAlt, faUser} from "@fortawesome/free-solid-svg-icons";
 
-const DisplayNav = ({ user }) => {
+const DisplayNav = ({user}) => {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const userMenuRef = useRef(null);
 
@@ -40,7 +40,7 @@ const DisplayNav = ({ user }) => {
                     aria-expanded={userMenuOpen}
                     aria-haspopup="true"
                 >
-                    <i className="pi pi-user nav-user-icon" />
+                    <i className="pi pi-user nav-user-icon"/>
 
                     <div className="nav-user-info">
                         <span className="nav-user-name">{user?.fullName || "User Name"}</span>
@@ -60,7 +60,7 @@ const DisplayNav = ({ user }) => {
                 {userMenuOpen && (
                     <div className="displays-dashboard__nav-user-menu" role="menu">
                         <button type="button" className="displays-dashboard__nav-user-menu-item" role="menuitem">
-                            <FontAwesomeIcon icon={faUser} style={{marginRight: '10px'}} />
+                            <FontAwesomeIcon icon={faUser} style={{marginRight: '10px'}}/>
                             Profile
                         </button>
                         <button
@@ -69,7 +69,7 @@ const DisplayNav = ({ user }) => {
                             role="menuitem"
                             onClick={handleLogout}
                         >
-                            <FontAwesomeIcon icon={faSignOutAlt} style={{marginRight: '10px'}} />
+                            <FontAwesomeIcon icon={faSignOutAlt} style={{marginRight: '10px'}}/>
                             Logout
                         </button>
                     </div>
