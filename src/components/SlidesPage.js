@@ -55,6 +55,8 @@ const SlidesPage = ({user}) => {
     const [activeFilter, setActiveFilter] = useState('all');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [slideToDelete, setSlideToDelete] = useState(null);
+    const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+    const [slideToArchive, setSlideToArchive] = useState(null);
 
     const {status: createSlideStatus, error: createSlideError} = useSelector((state) => state.AddFullScreenSlide);
     const {slides, counters, status: slidesStatus, error: slidesError} = useSelector((state) => state.GetAllSlides);
@@ -91,6 +93,27 @@ const SlidesPage = ({user}) => {
     const handleCancelDelete = () => {
         setIsDeleteModalOpen(false);
         setSlideToDelete(null);
+    };
+
+    const handleArchiveClick = (slide) => {
+        setSlideToArchive(slide);
+        setIsArchiveModalOpen(true);
+    };
+
+    const handleConfirmArchive = () => {
+        if (!slideToArchive) return;
+
+        console.log("Archiving slide:", slideToArchive.id);
+
+        // Yahan future me archive API call kar sakte ho
+
+        setIsArchiveModalOpen(false);
+        setSlideToArchive(null);
+    };
+
+    const handleCancelArchive = () => {
+        setIsArchiveModalOpen(false);
+        setSlideToArchive(null);
     };
 
     const handleSelectType = (typeId) => {
@@ -242,7 +265,7 @@ const SlidesPage = ({user}) => {
                                 <button className="btn-preview-outline"><FontAwesomeIcon icon={faEye} style={{marginRight: '5px'}}/>Preview</button>
                                 <div className="footer-icons">
                                     <button className="icon-btn-small"><FontAwesomeIcon icon={faCog}/></button>
-                                    <button className="icon-btn-small"><FontAwesomeIcon icon={faBoxArchive}/></button>
+                                    <button className="icon-btn-small" onClick={() => handleArchiveClick(slide)}><FontAwesomeIcon icon={faBoxArchive}/></button>
                                     <button className="icon-btn-small delete" onClick={() => handleDeleteClick(slide)}><FontAwesomeIcon icon={faTrashAlt}/></button>
                                 </div>
                             </div>
@@ -250,6 +273,33 @@ const SlidesPage = ({user}) => {
                     </div>
                 ))}
             </div>
+
+            <Modal
+                size="small"
+                isOpen={isArchiveModalOpen}
+                onClose={handleCancelArchive}
+            >
+                <div className="delete-modal">
+                    <div className="delete-icon">
+                        <FontAwesomeIcon icon={faBoxArchive} />
+                    </div>
+
+                    <h2>Archive Slide?</h2>
+                    <p>
+                        This slide will be moved to archived status and won't be
+                        displayed on any devices.
+                    </p>
+
+                    <div className="delete-modal-actions">
+                        <button className="btn-cancel" onClick={handleCancelArchive}>
+                            Cancel
+                        </button>
+                        <button className="btn-delete btn-archive" onClick={handleConfirmArchive}>
+                            Archive
+                        </button>
+                    </div>
+                </div>
+            </Modal>
 
             <Modal size="small" isOpen={isDeleteModalOpen} onClose={handleCancelDelete} className="delete-modal-wrapper">
                 <div className="delete-modal">

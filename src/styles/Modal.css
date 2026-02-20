@@ -81,6 +81,7 @@
 
 .modal-content.modal-small {
   width: 500px;
+  color: white;
 }
 
 @keyframes fadeIn {
