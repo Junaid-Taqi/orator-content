@@ -40,10 +40,7 @@ const DisplayNav = ({ user }) => {
                     aria-expanded={userMenuOpen}
                     aria-haspopup="true"
                 >
-                    {/* User Profile Icon */}
-                    <div className="nav-user-avatar">
-                        <FontAwesomeIcon icon={faUser} className="nav-user-icon" />
-                    </div>
+                    <i className="pi pi-user nav-user-icon" />
 
                     <div className="nav-user-info">
                         <span className="nav-user-name">{user?.fullName || "User Name"}</span>
