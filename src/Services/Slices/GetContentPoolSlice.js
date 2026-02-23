@@ -5,6 +5,14 @@ import { serverUrl } from '../Constants/Constants';
 const initialState = {
     contentPoolList: [],
     total: 0,
+    summary: {
+        activeSlides: 0,
+        scheduled: 0,
+        archived: 0,
+        enabledPools: 0,
+        emergencyReady: 0,
+    },
+    fixedPlaybackPreview: '',
     status: 'idle',
     error: null,
 };
@@ -49,6 +57,8 @@ const GetContentPoolSlice = createSlice({
                 state.status = 'succeeded';
                 state.contentPoolList = action.payload?.data || [];
                 state.total = action.payload?.total || 0;
+                state.summary = action.payload?.summary || initialState.summary;
+                state.fixedPlaybackPreview = action.payload?.fixedPlaybackRotation?.preview || '';
                 state.error = null;
             })
             .addCase(getAllContentPool.rejected, (state, action) => {

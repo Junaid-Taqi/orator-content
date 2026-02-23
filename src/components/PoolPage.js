@@ -18,8 +18,9 @@ const PoolsPage = ({user}) => {
     const [showAlwaysOnSettings, setShowAlwaysOnSettings] = useState(false);
     const [selectedAlwaysOnMode, setSelectedAlwaysOnMode] = useState(2);
     const [alwaysOnMessage, setAlwaysOnMessage] = useState('');
+    const [expandedPools, setExpandedPools] = useState({});
 
-    const {contentPoolList, total, status, error} = useSelector((state) => state.GetContentPool);
+    const {contentPoolList, summary, fixedPlaybackPreview, status, error} = useSelector((state) => state.GetContentPool);
     const {status: updateStatus} = useSelector((state) => state.UpdateContentPoolStatus);
     const {status: alwaysOnUpdateStatus} = useSelector((state) => state.UpdateAlwaysOnInsertionMode);
     const groupId = user?.groups?.[0]?.id;
@@ -42,10 +43,28 @@ const PoolsPage = ({user}) => {
         }
     }, [alwaysOnPool]);
 
-    const enabledPools = useMemo(
-        () => (contentPoolList || []).filter((pool) => pool?.status).length,
-        [contentPoolList]
-    );
+    const enabledPools = summary?.enabledPools ?? (contentPoolList || []).filter((pool) => pool?.status).length;
+
+    const togglePoolExpanded = (poolId) => {
+        if (!poolId) {
+            return;
+        }
+        setExpandedPools((prev) => ({
+            ...prev,
+            [poolId]: !prev[poolId],
+        }));
+    };
+
+    const formatSlideDate = (value) => {
+        if (!value || typeof value !== 'string') {
+            return '-';
+        }
+        const parts = value.split(',');
+        if (parts.length >= 2) {
+            return `${parts[0].trim()}, ${parts[1].trim()}`;
+        }
+        return value;
+    };
 
     const handlePoolStatusChange = async (pool) => {
         if (!groupId || !pool?.contentPoolId) {
@@ -124,6 +143,36 @@ const PoolsPage = ({user}) => {
             const priorityMode = pool?.priorityMode || 'By Priority';
             const isAlwaysOn = !!pool?.isAlwaysOn;
             const colorClass = `pool-color-${String(pool?.color || 'default').trim().toLowerCase().replace(/\s+/g, '-')}`;
+            const isExpanded = !!expandedPools[pool?.contentPoolId];
+            const activeSlides = pool?.slidesActive || [];
+            const scheduledSlides = pool?.slidesScheduled || [];
+            const archivedSlides = pool?.slidesArchived || [];
+
+            const renderSlideColumn = (label, slides, typeClass) => (
+                <div className={`slides-column ${typeClass}`}>
+                    <div className="slides-column-header">
+                        <strong>{label}</strong>
+                        <span className="slides-count">{slides.length}</span>
+                    </div>
+                    {!slides.length ? (
+                        <p className="slides-empty">No slides</p>
+                    ) : (
+                        <div className="slides-list">
+                            {slides.map((slide) => (
+                                <div className="slide-item" key={slide?.slideId}>
+                                    <div className="slide-item-title">{slide?.title || 'Untitled Slide'}</div>
+                                    <div className="slide-item-meta">
+                                        <span>{slide?.durationSeconds || 0}s</span>
+                                        <span>Priority {slide?.priority || '-'}</span>
+                                        <span>Start {formatSlideDate(slide?.startDate)}</span>
+                                        <span>Archive {formatSlideDate(slide?.archiveDate)}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
 
             return (
                 <div className={`pool-accordion ${colorClass}`} key={pool?.contentPoolId || `${title}-${sortOrder}`}>
@@ -133,7 +182,13 @@ const PoolsPage = ({user}) => {
                             <span className={badgeClass}>{badgeText}</span>
                             {isAlwaysOn && <span className="badge-enabled">Always On</span>}
                         </div>
-                        <span className="arrow"><FontAwesomeIcon icon={faAngleDown}/>  </span>
+                        <button
+                            type="button"
+                            className={`accordion-toggle ${isExpanded ? 'expanded' : ''}`}
+                            onClick={() => togglePoolExpanded(pool?.contentPoolId)}
+                        >
+                            <FontAwesomeIcon icon={faAngleDown}/>
+                        </button>
                     </div>
 
                     <p className="category-label">Category: {title}</p>
@@ -141,15 +196,15 @@ const PoolsPage = ({user}) => {
                     <div className="accordion-body">
                         <div className="sub-stat">
                             <label>Active</label>
-                            <span className="sub-val text-green">2</span>
+                            <span className="sub-val text-green">{pool?.activeCount ?? 0}</span>
                         </div>
                         <div className="sub-stat">
                             <label>Scheduled</label>
-                            <span className="sub-val text-orange">0</span>
+                            <span className="sub-val text-orange">{pool?.scheduledCount ?? 0}</span>
                         </div>
                         <div className="sub-stat">
                             <label>Archived</label>
-                            <span className="sub-val text-muted">3</span>
+                            <span className="sub-val text-muted">{pool?.archivedCount ?? 0}</span>
                         </div>
                         <div className="sub-stat">
                             <label>Pool Status</label>
@@ -187,6 +242,14 @@ const PoolsPage = ({user}) => {
                             </button>
                         </div>
                     </div>
+
+                    {isExpanded && (
+                        <div className="pool-slides-details">
+                            {renderSlideColumn('Active', activeSlides, 'slides-active')}
+                            {renderSlideColumn('Scheduled', scheduledSlides, 'slides-scheduled')}
+                            {renderSlideColumn('Archived', archivedSlides, 'slides-archived')}
+                        </div>
+                    )}
                 </div>
             );
         });
@@ -264,7 +327,7 @@ const PoolsPage = ({user}) => {
                 </div>
                 <div className="rotation-details">
                     <strong>Fixed Playback Rotation</strong>
-                    <p>News → Always On → Official News → Always On → Events → Always On → (repeat)</p>
+                    <p>{fixedPlaybackPreview || 'No rotation preview available.'}</p>
                 </div>
             </div>
 
@@ -272,23 +335,23 @@ const PoolsPage = ({user}) => {
             <div className="stats-grid">
                 <div className="stat-card">
                     <label>Active Slides</label>
-                    <span className="value text-green">25</span>
+                    <span className="value text-green">{summary?.activeSlides ?? 0}</span>
                 </div>
                 <div className="stat-card">
                     <label>Scheduled</label>
-                    <span className="value text-orange">9</span>
+                    <span className="value text-orange">{summary?.scheduled ?? 0}</span>
                 </div>
                 <div className="stat-card">
                     <label>Archived</label>
-                    <span className="value">38</span>
+                    <span className="value">{summary?.archived ?? 0}</span>
                 </div>
                 <div className="stat-card">
                     <label>Enabled Pools</label>
-                    <span className="value text-purple">4</span>
+                    <span className="value text-purple">{enabledPools}</span>
                 </div>
                 <div className="stat-card">
                     <label>Emergency Ready</label>
-                    <span className="value text-red">2</span>
+                    <span className="value text-red">{summary?.emergencyReady ?? 0}</span>
                 </div>
             </div>
 
@@ -316,3 +379,6 @@ const PoolsPage = ({user}) => {
 };
 
 export default PoolsPage;
+
+
+
