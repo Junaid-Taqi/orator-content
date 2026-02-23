@@ -193,6 +193,9 @@ const SlidesPage = ({user}) => {
         () => (slides || []).map((slide) => {
             const statusLabel = slide.status === 2 ? 'active' : slide.status === 1 ? 'scheduled' : 'archived';
             const priorityLabel = slide.priority === 3 ? 'High (45s)' : slide.priority === 1 ? 'Low (15s)' : 'Medium (30s)';
+            const displayNames = (slide.displays || [])
+                .map((d) => d?.displayName)
+                .filter(Boolean);
             return {
                 id: slide.slideId,
                 title: slide.title,
@@ -202,6 +205,7 @@ const SlidesPage = ({user}) => {
                 start: formatDateOnly(slide.startDate),
                 archive: formatDateOnly(slide.archiveDate),
                 url: slide.url,
+                devicesText: displayNames.length ? displayNames.join(', ') : '-',
             };
         }),
         [slides]
@@ -352,7 +356,7 @@ const SlidesPage = ({user}) => {
 
                             <div className="info-box full">
                                 <label>Devices</label>
-                                <div>Totem 1, Totem 2</div>
+                                <div>{selectedSlide.devicesText}</div>
                             </div>
                         </div>
 
