@@ -7,6 +7,8 @@ import updateContentPoolReducer from '../Slices/UpdateContentPoolSlice';
 import updateContentPoolStatusReducer from '../Slices/UpdateContentPoolStatusSlice';
 import updateAlwaysOnInsertionModeReducer from '../Slices/UpdateAlwaysOnInsertionModeSlice';
 import addFullScreenSlideReducer from '../Slices/AddFullScreenSlideSlice';
+import archiveSlideByUserReducer from '../Slices/ArchiveSlideByUserSlice';
+import deleteSlideByUserReducer from '../Slices/DeleteSlideByUserSlice';
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -17,6 +19,8 @@ const rootReducer = combineReducers({
     UpdateContentPoolStatus: updateContentPoolStatusReducer,
     UpdateAlwaysOnInsertionMode: updateAlwaysOnInsertionModeReducer,
     AddFullScreenSlide: addFullScreenSlideReducer,
+    ArchiveSlideByUser: archiveSlideByUserReducer,
+    DeleteSlideByUser: deleteSlideByUserReducer,
 });
 
 const Store = configureStore({

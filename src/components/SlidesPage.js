@@ -12,6 +12,8 @@ import {faFilter} from '@fortawesome/free-solid-svg-icons/faFilter';
 import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
 import {addNewFullScreenSlide} from '../Services/Slices/AddFullScreenSlideSlice';
 import {getAllSlides} from '../Services/Slices/GetAllSlidesSlice';
+import {archiveSlideByUser} from '../Services/Slices/ArchiveSlideByUserSlice';
+import {deleteSlideByUser} from '../Services/Slices/DeleteSlideByUserSlice';
 import {faTrashAlt} from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
 import {faBoxArchive, faEye} from "@fortawesome/free-solid-svg-icons";
@@ -62,6 +64,8 @@ const SlidesPage = ({user}) => {
 
     const {status: createSlideStatus, error: createSlideError} = useSelector((state) => state.AddFullScreenSlide);
     const {slides, counters, status: slidesStatus, error: slidesError} = useSelector((state) => state.GetAllSlides);
+    const {status: archiveStatus} = useSelector((state) => state.ArchiveSlideByUser);
+    const {status: deleteStatus} = useSelector((state) => state.DeleteSlideByUser);
 
     const groupId = user?.groups?.[0]?.id;
 
@@ -81,12 +85,22 @@ const SlidesPage = ({user}) => {
         setIsDeleteModalOpen(true);
     };
 
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async () => {
         if (!slideToDelete) return;
 
-        // Yahan future me tum delete API call kar sakte ho
+        const currentGroupId = user?.groups?.[0]?.id;
+        const userId = user?.userId;
+        if (!currentGroupId || !userId) return;
 
-        console.log("Deleting slide:", slideToDelete.id);
+        const result = await dispatch(deleteSlideByUser({
+            groupId: String(currentGroupId),
+            userId: String(userId),
+            slideId: String(slideToDelete.id),
+        }));
+
+        if (deleteSlideByUser.fulfilled.match(result) && result.payload?.success) {
+            dispatch(getAllSlides({groupId: String(currentGroupId)}));
+        }
 
         setIsDeleteModalOpen(false);
         setSlideToDelete(null);
@@ -102,12 +116,22 @@ const SlidesPage = ({user}) => {
         setIsArchiveModalOpen(true);
     };
 
-    const handleConfirmArchive = () => {
+    const handleConfirmArchive = async () => {
         if (!slideToArchive) return;
 
-        console.log("Archiving slide:", slideToArchive.id);
+        const currentGroupId = user?.groups?.[0]?.id;
+        const userId = user?.userId;
+        if (!currentGroupId || !userId) return;
 
-        // Yahan future me archive API call kar sakte ho
+        const result = await dispatch(archiveSlideByUser({
+            groupId: String(currentGroupId),
+            userId: String(userId),
+            slideId: String(slideToArchive.id),
+        }));
+
+        if (archiveSlideByUser.fulfilled.match(result) && result.payload?.success) {
+            await dispatch(getAllSlides({groupId: String(currentGroupId)}));
+        }
 
         setIsArchiveModalOpen(false);
         setSlideToArchive(null);
@@ -387,8 +411,8 @@ const SlidesPage = ({user}) => {
                         <button className="btn-cancel" onClick={handleCancelArchive}>
                             Cancel
                         </button>
-                        <button className="btn-delete btn-archive" onClick={handleConfirmArchive}>
-                            Archive
+                        <button className="btn-delete btn-archive" onClick={handleConfirmArchive} disabled={archiveStatus === 'loading'}>
+                            {archiveStatus === 'loading' ? 'Archiving...' : 'Archive'}
                         </button>
                     </div>
                 </div>
@@ -409,8 +433,8 @@ const SlidesPage = ({user}) => {
                         <button className="btn-cancel" onClick={handleCancelDelete}>
                             Cancel
                         </button>
-                        <button className="btn-delete" onClick={handleConfirmDelete}>
-                            Delete
+                        <button className="btn-delete" onClick={handleConfirmDelete} disabled={deleteStatus === 'loading'}>
+                            {deleteStatus === 'loading' ? 'Deleting...' : 'Delete'}
                         </button>
                     </div>
                 </div>
