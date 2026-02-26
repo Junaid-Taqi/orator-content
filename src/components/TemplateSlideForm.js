@@ -240,7 +240,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                         </div>
                     </div>
 
-                    <div className="form-group">
+                    {/* <div className="form-group">
                         <label className="form-label">Config JSON (optional)</label>
                         <textarea
                             className="form-input template-textarea"
@@ -248,7 +248,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                             value={formData.configJSON}
                             onChange={(e) => handleChange('configJSON', e.target.value)}
                         />
-                    </div>
+                    </div> */}
 
                     <div className="form-group">
                         <label className="form-label">Priority</label>

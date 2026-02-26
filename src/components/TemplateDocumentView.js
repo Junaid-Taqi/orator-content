@@ -1,4 +1,5 @@
 import React from 'react';
+import {QRCodeSVG} from 'qrcode.react';
 import '../styles/TemplateDocumentView.css';
 
 const formatDisplayDate = (value) => {
@@ -18,9 +19,9 @@ const TemplateDocumentView = ({
     description = '',
     startDate = '',
     archiveDate = '',
-    linkUrl = '',
     viewMode = 'web',
 }) => {
+    const SCAN_QR_HARDCODED_URL = 'https://orator.hr/';
     const now = new Date();
     const timeValue = now.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
     const currentDate = formatDisplayDate(startDate || now.toISOString().slice(0, 10));
@@ -73,18 +74,17 @@ const TemplateDocumentView = ({
 
             <div className="template-footer">
                 <div className="template-qr">
-                    <div className="qr-dot" />
-                    <div className="qr-dot" />
-                    <div className="qr-dot" />
-                    <div className="qr-dot" />
-                    <div className="qr-dot" />
-                    <div className="qr-dot" />
-                    <div className="qr-dot" />
-                    <div className="qr-dot" />
-                    <div className="qr-dot" />
+                    <QRCodeSVG
+                        value={SCAN_QR_HARDCODED_URL}
+                        size={122}
+                        bgColor="#ffffff"
+                        fgColor="#111111"
+                        level="M"
+                        includeMargin={false}
+                    />
                 </div>
                 <div className="template-footer-text">
-                    {linkUrl ? `"${linkUrl}"` : '"SCAN FOR MORE INFORMATION"'}
+                    "SCAN FOR MORE INFORMATION"
                 </div>
             </div>
         </div>
