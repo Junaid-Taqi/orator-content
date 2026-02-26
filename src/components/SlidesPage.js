@@ -11,6 +11,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faFilter} from '@fortawesome/free-solid-svg-icons/faFilter';
 import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
 import {addNewFullScreenSlide} from '../Services/Slices/AddFullScreenSlideSlice';
+import {addNewTemplateSlide} from '../Services/Slices/AddTemplateSlideSlice';
 import {getAllSlides} from '../Services/Slices/GetAllSlidesSlice';
 import {archiveSlideByUser} from '../Services/Slices/ArchiveSlideByUserSlice';
 import {deleteSlideByUser} from '../Services/Slices/DeleteSlideByUserSlice';
@@ -62,7 +63,8 @@ const SlidesPage = ({user}) => {
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
     const [selectedSlide, setSelectedSlide] = useState(null);
 
-    const {status: createSlideStatus, error: createSlideError} = useSelector((state) => state.AddFullScreenSlide);
+    const {status: createFullscreenStatus, error: createFullscreenError} = useSelector((state) => state.AddFullScreenSlide);
+    const {status: createTemplateStatus, error: createTemplateError} = useSelector((state) => state.AddTemplateSlide);
     const {slides, counters, status: slidesStatus, error: slidesError} = useSelector((state) => state.GetAllSlides);
     const {status: archiveStatus} = useSelector((state) => state.ArchiveSlideByUser);
     const {status: deleteStatus} = useSelector((state) => state.DeleteSlideByUser);
@@ -210,6 +212,57 @@ const SlidesPage = ({user}) => {
             setSelectedSlideType(null);
             setSelectedCategory(null);
             dispatch(getAllSlides({groupId: String(groupId)}));
+        }
+    };
+
+    const handleCreateTemplateSlide = async (slideData) => {
+        const currentGroupId = user?.groups?.[0]?.id;
+        const userId = user?.userId;
+        const contentPoolId = slideData?.contentPoolId;
+
+        if (!currentGroupId || !userId || !contentPoolId || !slideData?.renderedTemplateFile) {
+            return;
+        }
+
+        const availableDevices = slideData.availableDevices || [];
+        const selectedDevices = slideData.devices.includes('all-devices')
+            ? availableDevices
+            : availableDevices.filter((device) => slideData.devices.includes(device.id));
+
+        const targetDevices = selectedDevices.map((device) => ({
+            displayId: String(device.id),
+            startTime: device.wakeTime,
+            endTime: device.sleepTime,
+            startDate: slideData.startDate,
+            archiveDate: slideData.archiveDate,
+        }));
+
+        const payload = {
+            groupId: String(currentGroupId),
+            userId: String(userId),
+            contentPoolId: String(contentPoolId),
+            title: slideData.title,
+            subtitle: slideData.subtitle,
+            articleUrl: slideData.articleUrl,
+            webDescription: slideData.webDescription,
+            totemDescription: slideData.totemDescription,
+            linkUrl: slideData.linkUrl,
+            configJSON: slideData.configJSON,
+            priority: priorityMap[slideData.priority] || 2,
+            durationSeconds: durationMap[slideData.priority] || 30,
+            startDate: slideData.startDate,
+            archiveDate: slideData.archiveDate,
+            targetDevices,
+            renderedTemplateFile: slideData.renderedTemplateFile,
+        };
+
+        const result = await dispatch(addNewTemplateSlide(payload));
+        if (addNewTemplateSlide.fulfilled.match(result) && result.payload?.success) {
+            setIsModalOpen(false);
+            setModalContent('type');
+            setSelectedSlideType(null);
+            setSelectedCategory(null);
+            dispatch(getAllSlides({groupId: String(currentGroupId)}));
         }
     };
 
@@ -458,15 +511,22 @@ const SlidesPage = ({user}) => {
                         onCancel={handleCancelModal}
                     />
                 ) : modalContent === 'form' && selectedSlideType === 'template' ? (
-                    <TemplateSlideForm category={selectedCategory} user={user} onCancel={handleCancelModal} onSubmit={() => setIsModalOpen(false)}/>
+                    <TemplateSlideForm
+                        category={selectedCategory}
+                        user={user}
+                        onCancel={handleCancelModal}
+                        onSubmit={handleCreateTemplateSlide}
+                        submitting={createTemplateStatus === 'loading'}
+                        submitError={createTemplateStatus === 'failed' ? createTemplateError : ''}
+                    />
                 ) : (
                     <FullscreenSlideForm
                         category={selectedCategory}
                         user={user}
                         onCancel={handleCancelModal}
                         onSubmit={handleCreateFullScreenSlide}
-                        submitting={createSlideStatus === 'loading'}
-                        submitError={createSlideStatus === 'failed' ? createSlideError : ''}
+                        submitting={createFullscreenStatus === 'loading'}
+                        submitError={createFullscreenStatus === 'failed' ? createFullscreenError : ''}
                     />
                 )}
             </Modal>

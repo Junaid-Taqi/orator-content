@@ -7,6 +7,7 @@ import updateContentPoolReducer from '../Slices/UpdateContentPoolSlice';
 import updateContentPoolStatusReducer from '../Slices/UpdateContentPoolStatusSlice';
 import updateAlwaysOnInsertionModeReducer from '../Slices/UpdateAlwaysOnInsertionModeSlice';
 import addFullScreenSlideReducer from '../Slices/AddFullScreenSlideSlice';
+import addTemplateSlideReducer from '../Slices/AddTemplateSlideSlice';
 import archiveSlideByUserReducer from '../Slices/ArchiveSlideByUserSlice';
 import deleteSlideByUserReducer from '../Slices/DeleteSlideByUserSlice';
 
@@ -19,6 +20,7 @@ const rootReducer = combineReducers({
     UpdateContentPoolStatus: updateContentPoolStatusReducer,
     UpdateAlwaysOnInsertionMode: updateAlwaysOnInsertionModeReducer,
     AddFullScreenSlide: addFullScreenSlideReducer,
+    AddTemplateSlide: addTemplateSlideReducer,
     ArchiveSlideByUser: archiveSlideByUserReducer,
     DeleteSlideByUser: deleteSlideByUserReducer,
 });
