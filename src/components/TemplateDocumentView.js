@@ -24,11 +24,11 @@ const TemplateDocumentView = ({
     const SCAN_QR_HARDCODED_URL = 'https://orator.hr/';
     const now = new Date();
     const timeValue = now.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
-    const currentDate = formatDisplayDate(startDate || now.toISOString().slice(0, 10));
+    const currentDate = formatDisplayDate(startDate);
     const archiveDateText = formatDisplayDate(archiveDate);
-    const mainTitle = (title || 'Community').toUpperCase();
-    const subTitle = (subtitle || 'Festival 2026').toUpperCase();
-    const bodyText = description || 'Main text - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+    const mainTitle = (title || 'Title');
+    const subTitle = (subtitle || 'Sub Title');
+    const bodyText = description || 'Main text';
 
     return (
         <div className={`template-document ${viewMode}`}>
