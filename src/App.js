@@ -14,16 +14,16 @@ function AppContent() {
   const { token, expiresIn, status, error } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('slides');
   const user = JSON.parse(sessionStorage.getItem("liferayUser")) || {
-    "userId": "32533",
+    "userId": "24608",
     "fullName": "admin lahore",
     "email": "admin@lahore.com",
     "groups": [
       {
-        "id": "32394",
-        "name": "Municipality One"
+        "id": "24593",
+        "name": "Municipility One"
       }
     ]
-  };
+  }
 
   useEffect(() => {
     dispatch(fetchToken());
