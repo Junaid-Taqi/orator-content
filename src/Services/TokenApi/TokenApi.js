@@ -3,8 +3,8 @@ import axios from "axios";
 
 class TokenApi {
     constructor() {
-        this.clientId = "id-f2e91174-927c-b315-8316-b249c32ee39";
-        this.clientSecret = "secret-3b7a9364-5498-3a98-2492-104feeafbd19";
+        this.clientId = "id-92c229e9-f2e3-c271-b92f-cd6aa8e7073";
+        this.clientSecret = "secret-43ce33b8-3c7f-9bfa-d288-21ce8052f";
 
         axios.interceptors.response.use(
             (response) => response,

@@ -4,6 +4,11 @@ import '../styles/FullscreenSlideForm.css';
 import {serverUrl} from '../Services/Constants/Constants';
 
 const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = false, submitError = ''}) => {
+    const priorityMap = {
+        high: 1,
+        medium: 2,
+        low: 3,
+    };
     const [formData, setFormData] = useState({
         title: '',
         priority: 'medium',
@@ -143,6 +148,7 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
         setValidationError('');
         onSubmit({
             ...formData,
+            priority: priorityMap[formData.priority] ?? 2,
             file: selectedFile,
             category,
             categoryName,
