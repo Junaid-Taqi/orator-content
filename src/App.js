@@ -11,7 +11,7 @@ import DisplayNav from "./components/DisplayNav";
 
 function AppContent() {
   const dispatch = useDispatch();
-  const { token, expiresIn } = useSelector((state) => state.auth);
+  const { token, expiresIn, status, error } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('slides');
   const user = JSON.parse(sessionStorage.getItem("liferayUser")) || {
     "userId": "32533",
@@ -44,6 +44,22 @@ function AppContent() {
       }
     }
   }, [token, expiresIn, dispatch]);
+
+  if (status === 'idle' || status === 'loading') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+        <div style={{ fontSize: '16px', fontWeight: 600 }}>Loading...</div>
+      </div>
+    );
+  }
+
+  if (status === 'failed') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', color: '#b91c1c' }}>
+        <div>Failed to load token{error ? `: ${error}` : ''}</div>
+      </div>
+    );
+  }
 
   return (
     <>
