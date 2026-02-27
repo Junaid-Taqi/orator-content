@@ -20,15 +20,25 @@ import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
 import {faBoxArchive, faEye} from "@fortawesome/free-solid-svg-icons";
 
 const priorityMap = {
-    low: 1,
+    high: 1,
     medium: 2,
-    high: 3,
+    low: 3,
 };
 
 const durationMap = {
     low: 15,
     medium: 30,
     high: 45,
+};
+
+const normalizePriorityKey = (priority) => {
+    if (priority === 'high' || priority === 'medium' || priority === 'low') {
+        return priority;
+    }
+    if (priority === 1 || priority === '1') return 'high';
+    if (priority === 2 || priority === '2') return 'medium';
+    if (priority === 3 || priority === '3') return 'low';
+    return 'medium';
 };
 
 const formatDateOnly = (value) => {
@@ -196,8 +206,8 @@ const SlidesPage = ({user}) => {
             userId: String(userId),
             contentPoolId: String(contentPoolId),
             title: slideData.title,
-            priority: priorityMap[slideData.priority] || 2,
-            durationSeconds: durationMap[slideData.priority] || 30,
+            priority: priorityMap[normalizePriorityKey(slideData.priority)] || 2,
+            durationSeconds: slideData.durationSeconds || durationMap[normalizePriorityKey(slideData.priority)] || 30,
             startDate: slideData.startDate,
             archiveDate: slideData.archiveDate,
             mediaName: slideData.mediaName || slideData.title,
@@ -248,8 +258,8 @@ const SlidesPage = ({user}) => {
             totemDescription: slideData.totemDescription,
             linkUrl: slideData.linkUrl,
             configJSON: slideData.configJSON,
-            priority: priorityMap[slideData.priority] || 2,
-            durationSeconds: durationMap[slideData.priority] || 30,
+            priority: priorityMap[normalizePriorityKey(slideData.priority)] || 2,
+            durationSeconds: slideData.durationSeconds || durationMap[normalizePriorityKey(slideData.priority)] || 30,
             startDate: slideData.startDate,
             archiveDate: slideData.archiveDate,
             targetDevices,
@@ -269,7 +279,7 @@ const SlidesPage = ({user}) => {
     const normalizedSlides = useMemo(
         () => (slides || []).map((slide) => {
             const statusLabel = slide.status === 2 ? 'active' : slide.status === 1 ? 'scheduled' : 'archived';
-            const priorityLabel = slide.priority === 3 ? 'High (45s)' : slide.priority === 1 ? 'Low (15s)' : 'Medium (30s)';
+            const priorityLabel = slide.priority === 1 ? 'High (45s)' : slide.priority === 3 ? 'Low (15s)' : 'Medium (30s)';
             const displayNames = (slide.displays || [])
                 .map((d) => d?.displayName)
                 .filter(Boolean);

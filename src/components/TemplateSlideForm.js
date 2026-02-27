@@ -7,10 +7,10 @@ import {serverUrl} from '../Services/Constants/Constants';
 import TemplateDocumentView from './TemplateDocumentView';
 
 const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = false, submitError = ''}) => {
-    const priorityMap = {
-        high: 1,
-        medium: 2,
-        low: 3,
+    const durationMap = {
+        low: 15,
+        medium: 30,
+        high: 45,
     };
     const [formData, setFormData] = useState({
         title: '',
@@ -157,7 +157,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
             const renderedTemplateFile = await createTemplateImageFile();
             onSubmit({
                 ...formData,
-                priority: priorityMap[formData.priority] ?? 2,
+                durationSeconds: durationMap[formData.priority] ?? 30,
                 category,
                 categoryName,
                 contentPoolId: category?.id,
