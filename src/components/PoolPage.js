@@ -19,6 +19,7 @@ const PoolsPage = ({ user }) => {
     const [selectedAlwaysOnMode, setSelectedAlwaysOnMode] = useState(2);
     const [alwaysOnMessage, setAlwaysOnMessage] = useState('');
     const [expandedPools, setExpandedPools] = useState({});
+    const [activeSlideFilters, setActiveSlideFilters] = useState({});
     const [visibleCount, setVisibleCount] = useState(5);
 
     const { contentPoolList, summary, fixedPlaybackPreview, status, error } = useSelector((state) => state.GetContentPool);
@@ -153,31 +154,69 @@ const PoolsPage = ({ user }) => {
             const scheduledSlides = pool?.slidesScheduled || [];
             const archivedSlides = pool?.slidesArchived || [];
 
-            const renderSlideColumn = (label, slides, typeClass) => (
-                <div className={`slides-column ${typeClass}`}>
-                    <div className="slides-column-header">
-                        <strong>{label}</strong>
-                        <span className="slides-count">{slides.length}</span>
-                    </div>
-                    {!slides.length ? (
-                        <p className="slides-empty">No slides</p>
-                    ) : (
-                        <div className="slides-list">
-                            {slides.map((slide) => (
-                                <div className="slide-item" key={slide?.slideId}>
-                                    <div className="slide-item-title text-capitalize">{slide?.title || 'Untitled Slide'}</div>
-                                    <div className="slide-item-meta">
-                                        <span>{slide?.durationSeconds || 0}s</span>
-                                        <span>Priority {slide?.priority === 1 ? 'High' : slide?.priority === 2 ? 'Medium' : slide?.priority === 3 ? 'Low' : slide?.priority || '-'}</span>
-                                        <span>Start {formatSlideDate(slide?.startDate)}</span>
-                                        <span>Archive {formatSlideDate(slide?.archiveDate)}</span>
-                                    </div>
-                                </div>
-                            ))}
+            const renderSlidesSection = (pool) => {
+                const currentFilter = activeSlideFilters[pool?.contentPoolId] || 'active';
+                const slidesMap = {
+                    active: pool?.slidesActive || [],
+                    scheduled: pool?.slidesScheduled || [],
+                    archived: pool?.slidesArchived || []
+                };
+                const currentSlides = slidesMap[currentFilter];
+
+                return (
+                    <div className="manage-slides-section">
+                        <div className="manage-slides-header">
+                            <h4>Manage Slides</h4>
+                            <div className="manage-slides-tabs">
+                                {[
+                                    { id: 'active', label: 'Active', count: pool?.slidesActive?.length || 0 },
+                                    { id: 'scheduled', label: 'Scheduled', count: pool?.slidesScheduled?.length || 0 },
+                                    { id: 'archived', label: 'Archived', count: pool?.slidesArchived?.length || 0 }
+                                ].map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        className={`slide-tab-btn ${currentFilter === tab.id ? 'active' : ''}`}
+                                        onClick={() => setActiveSlideFilters(prev => ({ ...prev, [pool.contentPoolId]: tab.id }))}
+                                    >
+                                        <span className="tab-label">{tab.label}</span>
+                                        <span className="tab-badge">{tab.count}</span>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    )}
-                </div>
-            );
+
+                        <div className="slides-list-vertical">
+                            {!currentSlides.length ? (
+                                <p className="slides-empty">No slides in this section</p>
+                            ) : (
+                                currentSlides.map((slide) => {
+                                    const priorityLabel = slide?.priority === 1 ? 'High' : slide?.priority === 2 ? 'Medium' : slide?.priority === 3 ? 'Low' : '';
+                                    const durationText = slide?.durationSeconds ? ` (${slide.durationSeconds}s)` : '';
+                                    const isPermanent = !slide?.startDate && !slide?.archiveDate;
+
+                                    return (
+                                        <div className="slide-card-compact" key={slide?.slideId}>
+                                            <div className="slide-card-main">
+                                                <div className="slide-card-title-row">
+                                                    <span className="slide-title text-capitalize">{slide?.title || 'Untitled Slide'}</span>
+                                                    {priorityLabel && (
+                                                        <span className={`slide-priority-pill ${priorityLabel.toLowerCase()}`}>
+                                                            {priorityLabel}{durationText}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="slide-card-subtext">
+                                                    {isPermanent ? 'Permanent' : `${formatSlideDate(slide?.startDate)} - ${formatSlideDate(slide?.archiveDate)}`}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+                );
+            };
 
             return (
                 <div className={`pool-accordion ${colorClass}`} key={pool?.contentPoolId || `${title}-${sortOrder}`}>
@@ -249,10 +288,8 @@ const PoolsPage = ({ user }) => {
                     </div>
 
                     {isExpanded && (
-                        <div className="pool-slides-details">
-                            {renderSlideColumn('Active', activeSlides, 'slides-active')}
-                            {renderSlideColumn('Scheduled', scheduledSlides, 'slides-scheduled')}
-                            {renderSlideColumn('Archived', archivedSlides, 'slides-archived')}
+                        <div className="pool-slides-details-full">
+                            {renderSlidesSection(pool)}
                         </div>
                     )}
                 </div>
