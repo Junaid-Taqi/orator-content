@@ -181,6 +181,7 @@
   font-size: 1.25rem;
   margin-bottom: 12px;
   color: #fff;
+  text-transform: capitalize;
 }
 
 .slide-card-tags {
@@ -195,6 +196,7 @@
   border-radius: 12px;
   font-size: 0.75rem;
   background: rgba(255, 255, 255, 0.1);
+  text-transform: capitalize;
 }
 
 .tag-priority.high { color: #ff5252; background: rgba(255, 82, 82, 0.15); }

@@ -161,7 +161,7 @@ const PoolsPage = ({ user }) => {
                         <div className="slides-list">
                             {slides.map((slide) => (
                                 <div className="slide-item" key={slide?.slideId}>
-                                    <div className="slide-item-title">{slide?.title || 'Untitled Slide'}</div>
+                                    <div className="slide-item-title text-capitalize">{slide?.title || 'Untitled Slide'}</div>
                                     <div className="slide-item-meta">
                                         <span>{slide?.durationSeconds || 0}s</span>
                                         <span>Priority {slide?.priority || '-'}</span>
@@ -179,7 +179,7 @@ const PoolsPage = ({ user }) => {
                 <div className={`pool-accordion ${colorClass}`} key={pool?.contentPoolId || `${title}-${sortOrder}`}>
                     <div className="accordion-header">
                         <div className="accordion-title">
-                            <h3>{title}</h3>
+                            <h3 className='text-capitalize'>{title}</h3>
                             <span className={badgeClass}>{badgeText}</span>
                             {isAlwaysOn && <span className="badge-enabled">Always On</span>}
                         </div>
@@ -192,7 +192,7 @@ const PoolsPage = ({ user }) => {
                         </button>
                     </div>
 
-                    <p className="category-label">Category: {title}</p>
+                    <p className="category-label text-capitalize">Category: {title}</p>
 
                     <div className="accordion-body">
                         <div className="sub-stat">

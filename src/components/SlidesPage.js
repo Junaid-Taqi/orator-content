@@ -398,7 +398,7 @@ const SlidesPage = ({ user }) => {
                 {selectedSlide && (
                     <div className="preview-dialog">
                         <div className="preview-top">
-                            <h2 className="preview-title">{selectedSlide.title}</h2>
+                            <h2 className="preview-title text-capitalize">{selectedSlide.title}</h2>
 
                             <div className="preview-tags">
                                 <span className="tag-cat">{selectedSlide.category}</span>
@@ -456,7 +456,7 @@ const SlidesPage = ({ user }) => {
 
                             <div className="info-box full">
                                 <label>Devices</label>
-                                <div>{selectedSlide.devicesText}</div>
+                                <div className='text-capitalize'>{selectedSlide.devicesText}</div>
                             </div>
                         </div>
 
