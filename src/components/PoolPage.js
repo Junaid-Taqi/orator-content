@@ -57,12 +57,16 @@ const PoolsPage = ({ user }) => {
     };
 
     const formatSlideDate = (value) => {
-        if (!value || typeof value !== 'string') {
-            return '-';
+        if (!value) return '-';
+        const parsed = new Date(value);
+        if (!Number.isNaN(parsed.getTime())) {
+            return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
-        const parts = value.split(',');
-        if (parts.length >= 2) {
-            return `${parts[0].trim()}, ${parts[1].trim()}`;
+        if (typeof value === 'string') {
+            const parts = value.split(',');
+            if (parts.length >= 2) {
+                return `${parts[0].trim()}, ${parts[1].trim()}`;
+            }
         }
         return value;
     };
@@ -164,7 +168,7 @@ const PoolsPage = ({ user }) => {
                                     <div className="slide-item-title text-capitalize">{slide?.title || 'Untitled Slide'}</div>
                                     <div className="slide-item-meta">
                                         <span>{slide?.durationSeconds || 0}s</span>
-                                        <span>Priority {slide?.priority || '-'}</span>
+                                        <span>Priority {slide?.priority === 1 ? 'High' : slide?.priority === 2 ? 'Medium' : slide?.priority === 3 ? 'Low' : slide?.priority || '-'}</span>
                                         <span>Start {formatSlideDate(slide?.startDate)}</span>
                                         <span>Archive {formatSlideDate(slide?.archiveDate)}</span>
                                     </div>
