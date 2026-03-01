@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
 import '../styles/PoolsPage.css';
 import CreatePoolModal from './CreatePoolModal';
+import { serverUrl } from '../Services/Constants/Constants';
 import { getAllContentPool } from '../Services/Slices/GetContentPoolSlice';
 import { updateContentPoolStatus } from '../Services/Slices/UpdateContentPoolStatusSlice';
 import { updateAlwaysOnInsertionMode } from '../Services/Slices/UpdateAlwaysOnInsertionModeSlice';
@@ -21,6 +23,8 @@ const PoolsPage = ({ user }) => {
     const [expandedPools, setExpandedPools] = useState({});
     const [activeSlideFilters, setActiveSlideFilters] = useState({});
     const [visibleCount, setVisibleCount] = useState(5);
+    const [devices, setDevices] = useState([{ id: 'all-devices', label: 'All Devices (Global)' }]);
+    const [selectedDeviceId, setSelectedDeviceId] = useState('all-devices');
 
     const { contentPoolList, summary, fixedPlaybackPreview, status, error } = useSelector((state) => state.GetContentPool);
     const { status: updateStatus } = useSelector((state) => state.UpdateContentPoolStatus);
@@ -28,10 +32,38 @@ const PoolsPage = ({ user }) => {
     const groupId = user?.groups?.[0]?.id;
 
     useEffect(() => {
+        const fetchDevices = async () => {
+            const currentGroupId = user?.groups?.[0]?.id;
+            if (!currentGroupId) return;
+
+            try {
+                const config = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+                    },
+                };
+                const response = await axios.post(`${serverUrl}/o/displayManagementApplication/getAllDisplays`, { groupId: String(currentGroupId) }, config);
+                if (response.data?.success) {
+                    const mapped = (response.data?.displays || []).map(d => ({ id: String(d.displayId), label: d.name }));
+                    setDevices([{ id: 'all-devices', label: 'All Devices (Global)' }, ...mapped]);
+                }
+            } catch (err) {
+                console.error('Failed to fetch devices:', err);
+            }
+        };
+        fetchDevices();
+    }, [user]);
+
+    useEffect(() => {
         if (groupId) {
-            dispatch(getAllContentPool({ groupId: String(groupId) }));
+            const payload = { groupId: String(groupId) };
+            if (selectedDeviceId !== 'all-devices') {
+                payload.displayId = selectedDeviceId;
+            }
+            dispatch(getAllContentPool(payload));
         }
-    }, [dispatch, groupId]);
+    }, [dispatch, groupId, selectedDeviceId]);
 
     const alwaysOnPool = useMemo(
         () => (contentPoolList || []).find((pool) => !!pool?.isAlwaysOn),
@@ -403,8 +435,14 @@ const PoolsPage = ({ user }) => {
                     <span>🖥️ Device-Specific Content</span>
                     <p>View and manage pool content for specific displays</p>
                 </div>
-                <select className="device-dropdown">
-                    <option>All Devices (Global)</option>
+                <select
+                    className="device-dropdown"
+                    value={selectedDeviceId}
+                    onChange={(e) => setSelectedDeviceId(e.target.value)}
+                >
+                    {devices.map(device => (
+                        <option key={device.id} value={device.id}>{device.label}</option>
+                    ))}
                 </select>
             </div>
 
