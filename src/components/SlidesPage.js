@@ -1,5 +1,5 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import '../styles/SlidesPage.css';
 import StatsCard from './StatsCard';
 import Modal from './Modal';
@@ -7,17 +7,17 @@ import SlideTypeSelector from './SlideTypeSelector';
 import CategorySelector from './CategorySelector';
 import FullscreenSlideForm from './FullscreenSlideForm';
 import TemplateSlideForm from './TemplateSlideForm';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faFilter} from '@fortawesome/free-solid-svg-icons/faFilter';
-import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
-import {addNewFullScreenSlide} from '../Services/Slices/AddFullScreenSlideSlice';
-import {addNewTemplateSlide} from '../Services/Slices/AddTemplateSlideSlice';
-import {getAllSlides} from '../Services/Slices/GetAllSlidesSlice';
-import {archiveSlideByUser} from '../Services/Slices/ArchiveSlideByUserSlice';
-import {deleteSlideByUser} from '../Services/Slices/DeleteSlideByUserSlice';
-import {faTrashAlt} from "@fortawesome/free-solid-svg-icons/faTrashAlt";
-import {faCog} from "@fortawesome/free-solid-svg-icons/faCog";
-import {faBoxArchive, faEye} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFilter } from '@fortawesome/free-solid-svg-icons/faFilter';
+import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
+import { addNewFullScreenSlide } from '../Services/Slices/AddFullScreenSlideSlice';
+import { addNewTemplateSlide } from '../Services/Slices/AddTemplateSlideSlice';
+import { getAllSlides } from '../Services/Slices/GetAllSlidesSlice';
+import { archiveSlideByUser } from '../Services/Slices/ArchiveSlideByUserSlice';
+import { deleteSlideByUser } from '../Services/Slices/DeleteSlideByUserSlice';
+import { faTrashAlt } from "@fortawesome/free-solid-svg-icons/faTrashAlt";
+import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
+import { faBoxArchive, faEye } from "@fortawesome/free-solid-svg-icons";
 
 const priorityMap = {
     high: 1,
@@ -45,7 +45,7 @@ const formatDateOnly = (value) => {
     if (!value) return '-';
     const parsed = new Date(value);
     if (!Number.isNaN(parsed.getTime())) {
-        return parsed.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+        return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
     const parts = String(value).split(',');
     if (parts.length >= 2) {
@@ -59,7 +59,7 @@ const isVideoUrl = (url) => {
     return /\.(mp4|webm|ogg|mov|m4v)(?:$|[/?#])/i.test(url);
 };
 
-const SlidesPage = ({user}) => {
+const SlidesPage = ({ user }) => {
     const dispatch = useDispatch();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState('type');
@@ -72,18 +72,19 @@ const SlidesPage = ({user}) => {
     const [slideToArchive, setSlideToArchive] = useState(null);
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
     const [selectedSlide, setSelectedSlide] = useState(null);
+    const [visibleCount, setVisibleCount] = useState(12);
 
-    const {status: createFullscreenStatus, error: createFullscreenError} = useSelector((state) => state.AddFullScreenSlide);
-    const {status: createTemplateStatus, error: createTemplateError} = useSelector((state) => state.AddTemplateSlide);
-    const {slides, counters, status: slidesStatus, error: slidesError} = useSelector((state) => state.GetAllSlides);
-    const {status: archiveStatus} = useSelector((state) => state.ArchiveSlideByUser);
-    const {status: deleteStatus} = useSelector((state) => state.DeleteSlideByUser);
+    const { status: createFullscreenStatus, error: createFullscreenError } = useSelector((state) => state.AddFullScreenSlide);
+    const { status: createTemplateStatus, error: createTemplateError } = useSelector((state) => state.AddTemplateSlide);
+    const { slides, counters, status: slidesStatus, error: slidesError } = useSelector((state) => state.GetAllSlides);
+    const { status: archiveStatus } = useSelector((state) => state.ArchiveSlideByUser);
+    const { status: deleteStatus } = useSelector((state) => state.DeleteSlideByUser);
 
     const groupId = user?.groups?.[0]?.id;
 
     useEffect(() => {
         if (groupId) {
-            dispatch(getAllSlides({groupId: String(groupId)}));
+            dispatch(getAllSlides({ groupId: String(groupId) }));
         }
     }, [dispatch, groupId]);
 
@@ -111,7 +112,7 @@ const SlidesPage = ({user}) => {
         }));
 
         if (deleteSlideByUser.fulfilled.match(result) && result.payload?.success) {
-            dispatch(getAllSlides({groupId: String(currentGroupId)}));
+            dispatch(getAllSlides({ groupId: String(currentGroupId) }));
         }
 
         setIsDeleteModalOpen(false);
@@ -142,7 +143,7 @@ const SlidesPage = ({user}) => {
         }));
 
         if (archiveSlideByUser.fulfilled.match(result) && result.payload?.success) {
-            await dispatch(getAllSlides({groupId: String(currentGroupId)}));
+            await dispatch(getAllSlides({ groupId: String(currentGroupId) }));
         }
 
         setIsArchiveModalOpen(false);
@@ -221,7 +222,7 @@ const SlidesPage = ({user}) => {
             setModalContent('type');
             setSelectedSlideType(null);
             setSelectedCategory(null);
-            dispatch(getAllSlides({groupId: String(groupId)}));
+            dispatch(getAllSlides({ groupId: String(groupId) }));
         }
     };
 
@@ -272,7 +273,7 @@ const SlidesPage = ({user}) => {
             setModalContent('type');
             setSelectedSlideType(null);
             setSelectedCategory(null);
-            dispatch(getAllSlides({groupId: String(currentGroupId)}));
+            dispatch(getAllSlides({ groupId: String(currentGroupId) }));
         }
     };
 
@@ -311,19 +312,19 @@ const SlidesPage = ({user}) => {
                         Category-driven templates. Priority determines duration: Low=15s, Medium=30s, High=45s
                     </p>
                 </div>
-                <button className="btn btn-create" onClick={handleAddSlide}><FontAwesomeIcon icon={faPlus} style={{marginRight: '5px'}}/> Create Slides</button>
+                <button className="btn btn-create" onClick={handleAddSlide}><FontAwesomeIcon icon={faPlus} style={{ marginRight: '5px' }} /> Create Slides</button>
             </div>
 
             <div className="stats-grid">
-                <StatsCard title="Total Slides" count={String(counters?.totalSlides || 0)} bgColor="primary"/>
-                <StatsCard title="Active" count={String(counters?.active || 0)} bgColor="success"/>
-                <StatsCard title="Scheduled" count={String(counters?.scheduled || 0)} bgColor="warning"/>
-                <StatsCard title="Archived" count={String(counters?.archived || 0)} bgColor="muted"/>
+                <StatsCard title="Total Slides" count={String(counters?.totalSlides || 0)} bgColor="primary" />
+                <StatsCard title="Active" count={String(counters?.active || 0)} bgColor="success" />
+                <StatsCard title="Scheduled" count={String(counters?.scheduled || 0)} bgColor="warning" />
+                <StatsCard title="Archived" count={String(counters?.archived || 0)} bgColor="muted" />
             </div>
 
             <div className="filter-bar">
                 <div className="filter-icon-box">
-                    <FontAwesomeIcon icon={faFilter} style={{color: '#00bcd4'}}/>
+                    <FontAwesomeIcon icon={faFilter} style={{ color: '#00bcd4' }} />
                 </div>
                 {['all', 'active', 'scheduled', 'archived'].map((f) => (
                     <button
@@ -340,14 +341,14 @@ const SlidesPage = ({user}) => {
                 {slidesStatus === 'loading' && <p>Loading slides...</p>}
                 {slidesStatus === 'failed' && <p>{slidesError || 'Unable to load slides.'}</p>}
                 {slidesStatus === 'succeeded' && filteredSlides.length === 0 && <p>No slides found.</p>}
-                {filteredSlides.map((slide) => (
+                {filteredSlides.slice(0, visibleCount).map((slide) => (
                     <div key={slide.id} className="slide-card-item">
                         <div className="slide-card-visual">
                             {slide.url ? (
                                 isVideoUrl(slide.url) ? (
-                                    <video src={slide.url} className="visual-emoji" muted playsInline preload="metadata"/>
+                                    <video src={slide.url} className="visual-emoji" muted playsInline preload="metadata" />
                                 ) : (
-                                    <img src={slide.url} alt={slide.title} className="visual-emoji"/>
+                                    <img src={slide.url} alt={slide.title} className="visual-emoji" />
                                 )
                             ) : (
                                 <span className="visual-emoji">SL</span>
@@ -365,17 +366,29 @@ const SlidesPage = ({user}) => {
                                 <div className="info-row"><span>Archive:</span> <span>{slide.archive}</span></div>
                             </div>
                             <div className="slide-card-footer">
-                                <button className="btn-preview-outline" onClick={() => handlePreviewClick(slide)}><FontAwesomeIcon icon={faEye} style={{marginRight: '5px'}}/>Preview</button>
+                                <button className="btn-preview-outline" onClick={() => handlePreviewClick(slide)}><FontAwesomeIcon icon={faEye} style={{ marginRight: '5px' }} />Preview</button>
                                 <div className="footer-icons">
-                                    <button className="icon-btn-small"><FontAwesomeIcon icon={faCog}/></button>
-                                    <button className="icon-btn-small" onClick={() => handleArchiveClick(slide)}><FontAwesomeIcon icon={faBoxArchive}/></button>
-                                    <button className="icon-btn-small delete" onClick={() => handleDeleteClick(slide)}><FontAwesomeIcon icon={faTrashAlt}/></button>
+                                    <button className="icon-btn-small"><FontAwesomeIcon icon={faCog} /></button>
+                                    <button className="icon-btn-small" onClick={() => handleArchiveClick(slide)}><FontAwesomeIcon icon={faBoxArchive} /></button>
+                                    <button className="icon-btn-small delete" onClick={() => handleDeleteClick(slide)}><FontAwesomeIcon icon={faTrashAlt} /></button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
+
+            {visibleCount < filteredSlides.length && (
+                <div style={{ textAlign: 'center' }}>
+                    <button
+                        className="btn btn-outline-primary px-4 py-2 my-5"
+                        onClick={() => setVisibleCount(prev => prev + 12)}
+                        style={{ fontWeight: 500, borderRadius: '50rem', border: '1px solid' }}
+                    >
+                        Load More Slides
+                    </button>
+                </div>
+            )}
 
             <Modal
                 size="large"
@@ -390,11 +403,11 @@ const SlidesPage = ({user}) => {
                             <div className="preview-tags">
                                 <span className="tag-cat">{selectedSlide.category}</span>
                                 <span className={`tag-priority ${selectedSlide.priority.split(' ')[0].toLowerCase()}`}>
-                        {selectedSlide.priority}
-                    </span>
+                                    {selectedSlide.priority}
+                                </span>
                                 <span className={`tag-status ${selectedSlide.status}`}>
-                        {selectedSlide.status}
-                    </span>
+                                    {selectedSlide.status}
+                                </span>
                             </div>
                         </div>
 
@@ -505,7 +518,7 @@ const SlidesPage = ({user}) => {
 
             <Modal isOpen={isModalOpen} onClose={handleCancelModal}>
                 {modalContent === 'type' ? (
-                    <SlideTypeSelector onSelectType={handleSelectType} onCancel={handleCancelModal}/>
+                    <SlideTypeSelector onSelectType={handleSelectType} onCancel={handleCancelModal} />
                 ) : modalContent === 'category' ? (
                     <CategorySelector
                         user={user}

@@ -3,7 +3,8 @@ import './App.css';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import store from './Services/Store/Store';
 import { fetchToken } from './Services/Slices/AuthSlice';
-import Header from './components/Header';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './styles/Header.css';
 import Navigation from './components/Navigation';
 import SlidesPage from './components/SlidesPage';
 import PoolsPage from './components/PoolPage';
@@ -63,7 +64,6 @@ function AppContent() {
 
   return (
     <>
-      {/*<Header />*/}
       <DisplayNav user={user} />
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
       <main className="main-content">
