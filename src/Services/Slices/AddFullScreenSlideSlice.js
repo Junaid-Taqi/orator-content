@@ -16,13 +16,31 @@ export const addNewFullScreenSlide = createAsyncThunk(
             formData.append('groupId', String(payload.groupId));
             formData.append('userId', String(payload.userId));
             formData.append('contentPoolId', String(payload.contentPoolId));
-            formData.append('title', payload.title);
+            formData.append('title', payload.title || '');
+            formData.append('subtitle', payload.subtitle || '');
+            formData.append('webDescription', payload.webDescription || '');
             formData.append('slideType', '1');
             formData.append('priority', String(payload.priority));
             formData.append('durationSeconds', String(payload.durationSeconds));
             formData.append('startDate', payload.startDate);
             formData.append('archiveDate', payload.archiveDate);
             formData.append('mediaName', payload.mediaName);
+            formData.append('publish', String(payload.publish !== false));
+            formData.append('eventEnabled', String(Boolean(payload.eventEnabled)));
+            formData.append('eventMode', String(payload.eventEnabled ? Number(payload.eventMode || 1) : 0));
+
+            if (payload.eventEnabled) {
+                const mode = Number(payload.eventMode || 1);
+                if (mode === 1) {
+                    formData.append('eventStartDate', payload.eventStartDate || '');
+                } else if (mode === 2) {
+                    formData.append('eventStartDate', payload.eventStartDate || '');
+                    formData.append('eventEndDate', payload.eventEndDate || '');
+                } else if (mode === 3) {
+                    formData.append('eventDates', JSON.stringify(payload.eventDates || []));
+                }
+            }
+
             formData.append('targetDevices', JSON.stringify(payload.targetDevices));
 
             if (payload.file) {

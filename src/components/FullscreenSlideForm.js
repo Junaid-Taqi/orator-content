@@ -11,10 +11,18 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
     };
     const [formData, setFormData] = useState({
         title: '',
+        subtitle: '',
+        webDescription: '',
         priority: 'medium',
         startDate: '',
         archiveDate: '',
         devices: ['all-devices'],
+        publish: true,
+        eventEnabled: false,
+        eventMode: 1, // 1: single, 2: range, 3: multiple
+        eventStartDate: '',
+        eventEndDate: '',
+        eventDates: [''],
     });
     const [devices, setDevices] = useState([{id: 'all-devices', label: 'All Devices'}]);
     const [devicesStatus, setDevicesStatus] = useState('idle');
@@ -86,6 +94,10 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
         setValidationError('');
         setFormData({...formData, title: e.target.value});
     };
+    const handleFieldChange = (field, value) => {
+        setValidationError('');
+        setFormData({...formData, [field]: value});
+    };
     const handlePriorityChange = (priority) => {
         setValidationError('');
         setFormData({...formData, priority});
@@ -123,6 +135,44 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
         }
     };
 
+    const handleEventEnabledChange = (checked) => {
+        setValidationError('');
+        setFormData((prev) => ({
+            ...prev,
+            eventEnabled: checked,
+            eventMode: checked ? prev.eventMode : 1,
+        }));
+    };
+
+    const handleEventModeChange = (mode) => {
+        setValidationError('');
+        setFormData((prev) => ({
+            ...prev,
+            eventMode: mode,
+            eventStartDate: mode === 3 ? '' : prev.eventStartDate,
+            eventEndDate: mode === 2 ? prev.eventEndDate : '',
+            eventDates: mode === 3 ? (prev.eventDates.length ? prev.eventDates : ['']) : [''],
+        }));
+    };
+
+    const handleEventDateChange = (index, value) => {
+        setValidationError('');
+        const updatedDates = [...formData.eventDates];
+        updatedDates[index] = value;
+        setFormData({...formData, eventDates: updatedDates});
+    };
+
+    const handleAddEventDate = () => {
+        setValidationError('');
+        setFormData({...formData, eventDates: [...formData.eventDates, '']});
+    };
+
+    const handleRemoveEventDate = (index) => {
+        setValidationError('');
+        const updatedDates = formData.eventDates.filter((_, i) => i !== index);
+        setFormData({...formData, eventDates: updatedDates.length ? updatedDates : ['']});
+    };
+
     const handleSubmit = () => {
         if (!formData.title.trim()) {
             setValidationError('Slide title is required.');
@@ -144,10 +194,37 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
             setValidationError('Please select at least one target device.');
             return;
         }
+        if (formData.eventEnabled) {
+            if (formData.eventMode === 1 && !formData.eventStartDate) {
+                setValidationError('Event single date is required.');
+                return;
+            }
+            if (formData.eventMode === 2) {
+                if (!formData.eventStartDate || !formData.eventEndDate) {
+                    setValidationError('Event start and end dates are required for date range.');
+                    return;
+                }
+                if (formData.eventEndDate < formData.eventStartDate) {
+                    setValidationError('Event end date must be greater than or equal to event start date.');
+                    return;
+                }
+            }
+            if (formData.eventMode === 3) {
+                const validEventDates = formData.eventDates.map((d) => d.trim()).filter(Boolean);
+                if (!validEventDates.length) {
+                    setValidationError('At least one event date is required for multiple dates mode.');
+                    return;
+                }
+            }
+        }
 
         setValidationError('');
+        const normalizedEventDates = formData.eventDates.map((d) => d.trim()).filter(Boolean);
         onSubmit({
             ...formData,
+            title: formData.title.trim(),
+            subtitle: formData.subtitle.trim(),
+            webDescription: formData.webDescription.trim(),
             durationSeconds: durationMap[formData.priority] ?? 30,
             file: selectedFile,
             category,
@@ -157,6 +234,7 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
             availableDevices: devices.filter((d) => d.id !== 'all-devices'),
             orientation,
             viewMode,
+            eventDates: normalizedEventDates,
         });
     };
 
@@ -173,6 +251,28 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                     <div className="form-group">
                         <label className="form-label">Slide Title *</label>
                         <input type="text" className="form-input" placeholder="Enter slide title" value={formData.title} onChange={handleTitleChange}/>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Sub Title</label>
+                        <input
+                            type="text"
+                            className="form-input"
+                            placeholder="Enter subtitle"
+                            value={formData.subtitle}
+                            onChange={(e) => handleFieldChange('subtitle', e.target.value)}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Web Description</label>
+                        <textarea
+                            className="form-input"
+                            placeholder="Enter web description"
+                            value={formData.webDescription}
+                            onChange={(e) => handleFieldChange('webDescription', e.target.value)}
+                            rows={3}
+                        />
                     </div>
 
                     <div className="form-group">
@@ -204,6 +304,115 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                             <label className="form-label">Archive Date</label>
                             <input type="date" className="form-input date-input" value={formData.archiveDate} onChange={(e) => handleDateChange('archiveDate', e.target.value)}/>
                         </div>
+                    </div>
+
+                    <div className="form-group event-dates-group">
+                        <label className="form-label">Event Date(s) (Optional)</label>
+                        <label className="device-checkbox" style={{marginBottom: '10px'}}>
+                            <input
+                                type="checkbox"
+                                checked={formData.eventEnabled}
+                                onChange={(e) => handleEventEnabledChange(e.target.checked)}
+                            />
+                            <span>Enable Event Dates</span>
+                        </label>
+
+                        {formData.eventEnabled && (
+                            <div className="event-date-block">
+                                <div className="preview-tabs" style={{marginBottom: '12px'}}>
+                                    <button
+                                        type="button"
+                                        className={`preview-tab ${formData.eventMode === 1 ? 'active' : ''}`}
+                                        onClick={() => handleEventModeChange(1)}
+                                    >
+                                        Single Date
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`preview-tab ${formData.eventMode === 2 ? 'active' : ''}`}
+                                        onClick={() => handleEventModeChange(2)}
+                                    >
+                                        Date Range
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`preview-tab ${formData.eventMode === 3 ? 'active' : ''}`}
+                                        onClick={() => handleEventModeChange(3)}
+                                    >
+                                        Multiple Dates
+                                    </button>
+                                </div>
+
+                                {formData.eventMode === 1 && (
+                                    <input
+                                        type="date"
+                                        className="form-input date-input"
+                                        value={formData.eventStartDate}
+                                        onChange={(e) => handleFieldChange('eventStartDate', e.target.value)}
+                                    />
+                                )}
+
+                                {formData.eventMode === 2 && (
+                                    <div className="date-row">
+                                        <div className="form-group">
+                                            <label className="form-label">Event Start Date</label>
+                                            <input
+                                                type="date"
+                                                className="form-input date-input"
+                                                value={formData.eventStartDate}
+                                                onChange={(e) => handleFieldChange('eventStartDate', e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Event End Date</label>
+                                            <input
+                                                type="date"
+                                                className="form-input date-input"
+                                                value={formData.eventEndDate}
+                                                onChange={(e) => handleFieldChange('eventEndDate', e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {formData.eventMode === 3 && (
+                                    <div className="multi-event-dates">
+                                        {formData.eventDates.map((date, index) => (
+                                            <div key={`event-date-${index}`} className="multi-event-row">
+                                                <input
+                                                    type="date"
+                                                    className="form-input date-input"
+                                                    value={date}
+                                                    onChange={(e) => handleEventDateChange(index, e.target.value)}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn-cancel"
+                                                    onClick={() => handleRemoveEventDate(index)}
+                                                    disabled={formData.eventDates.length === 1}
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button type="button" className="btn-submit" onClick={handleAddEventDate}>
+                                            Add Date
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="form-group">
+                        <label className="device-checkbox">
+                            <input
+                                type="checkbox"
+                                checked={formData.publish}
+                                onChange={(e) => handleFieldChange('publish', e.target.checked)}
+                            />
+                            <span>Publish</span>
+                        </label>
                     </div>
 
                     <div className="form-group">
