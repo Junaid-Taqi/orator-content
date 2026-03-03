@@ -15,6 +15,8 @@ import { addNewTemplateSlide } from '../Services/Slices/AddTemplateSlideSlice';
 import { getAllSlides } from '../Services/Slices/GetAllSlidesSlice';
 import { archiveSlideByUser } from '../Services/Slices/ArchiveSlideByUserSlice';
 import { deleteSlideByUser } from '../Services/Slices/DeleteSlideByUserSlice';
+import { editFullScreenSlide } from '../Services/Slices/EditFullScreenSlideSlice';
+import { editTemplateSlide } from '../Services/Slices/EditTemplateSlideSlice';
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import { faBoxArchive, faEye } from "@fortawesome/free-solid-svg-icons";
@@ -59,6 +61,37 @@ const isVideoUrl = (url) => {
     return /\.(mp4|webm|ogg|mov|m4v)(?:$|[/?#])/i.test(url);
 };
 
+const toInputDate = (value) => {
+    if (!value) return '';
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+        return parsed.toISOString().slice(0, 10);
+    }
+    const asString = String(value);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(asString)) {
+        return asString;
+    }
+    return '';
+};
+
+const parseEventDates = (value) => {
+    if (!value) return [''];
+    if (Array.isArray(value)) {
+        const valid = value.map((d) => String(d || '').trim()).filter(Boolean);
+        return valid.length ? valid : [''];
+    }
+    try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) {
+            const valid = parsed.map((d) => String(d || '').trim()).filter(Boolean);
+            return valid.length ? valid : [''];
+        }
+    } catch (e) {
+        // ignore and fallback
+    }
+    return [''];
+};
+
 const SlidesPage = ({ user }) => {
     const dispatch = useDispatch();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,12 +106,35 @@ const SlidesPage = ({ user }) => {
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
     const [selectedSlide, setSelectedSlide] = useState(null);
     const [visibleCount, setVisibleCount] = useState(12);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [slideToEdit, setSlideToEdit] = useState(null);
+    const [editValidationError, setEditValidationError] = useState('');
+    const [editForm, setEditForm] = useState({
+        title: '',
+        subtitle: '',
+        webDescription: '',
+        totemDescription: '',
+        articleUrl: '',
+        linkUrl: '',
+        configJSON: '',
+        priority: 'medium',
+        startDate: '',
+        archiveDate: '',
+        publish: true,
+        eventEnabled: false,
+        eventMode: 1,
+        eventStartDate: '',
+        eventEndDate: '',
+        eventDates: [''],
+    });
 
     const { status: createFullscreenStatus, error: createFullscreenError } = useSelector((state) => state.AddFullScreenSlide);
     const { status: createTemplateStatus, error: createTemplateError } = useSelector((state) => state.AddTemplateSlide);
     const { slides, counters, status: slidesStatus, error: slidesError } = useSelector((state) => state.GetAllSlides);
     const { status: archiveStatus } = useSelector((state) => state.ArchiveSlideByUser);
     const { status: deleteStatus } = useSelector((state) => state.DeleteSlideByUser);
+    const { status: editFullscreenStatus, error: editFullscreenError } = useSelector((state) => state.EditFullScreenSlide);
+    const { status: editTemplateStatus, error: editTemplateError } = useSelector((state) => state.EditTemplateSlide);
 
     const groupId = user?.groups?.[0]?.id;
 
@@ -163,6 +219,162 @@ const SlidesPage = ({ user }) => {
     const handleClosePreview = () => {
         setIsPreviewModalOpen(false);
         setSelectedSlide(null);
+    };
+
+    const handleEditClick = (slide) => {
+        setEditValidationError('');
+        setSlideToEdit(slide);
+        const normalizedPriority = normalizePriorityKey(slide.priorityRaw);
+        setEditForm({
+            title: slide.title || '',
+            subtitle: slide.subtitle || '',
+            webDescription: slide.webDescription || '',
+            totemDescription: slide.totemDescription || '',
+            articleUrl: slide.articleUrl || '',
+            linkUrl: slide.linkUrl || '',
+            configJSON: slide.configJSON || '',
+            priority: normalizedPriority,
+            startDate: toInputDate(slide.startDateRaw),
+            archiveDate: toInputDate(slide.archiveDateRaw),
+            publish: slide.publish !== false,
+            eventEnabled: Boolean(slide.eventEnabled),
+            eventMode: Number(slide.eventMode || 1),
+            eventStartDate: toInputDate(slide.eventStartDate),
+            eventEndDate: toInputDate(slide.eventEndDate),
+            eventDates: parseEventDates(slide.eventDatesJson),
+        });
+        setIsEditModalOpen(true);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditModalOpen(false);
+        setSlideToEdit(null);
+        setEditValidationError('');
+    };
+
+    const handleEditFieldChange = (field, value) => {
+        setEditValidationError('');
+        setEditForm((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleEditEventModeChange = (mode) => {
+        setEditValidationError('');
+        setEditForm((prev) => ({
+            ...prev,
+            eventMode: mode,
+            eventStartDate: mode === 3 ? '' : prev.eventStartDate,
+            eventEndDate: mode === 2 ? prev.eventEndDate : '',
+            eventDates: mode === 3 ? (prev.eventDates.length ? prev.eventDates : ['']) : [''],
+        }));
+    };
+
+    const handleEditEventDateChange = (index, value) => {
+        const updated = [...editForm.eventDates];
+        updated[index] = value;
+        handleEditFieldChange('eventDates', updated);
+    };
+
+    const handleAddEditEventDate = () => {
+        handleEditFieldChange('eventDates', [...editForm.eventDates, '']);
+    };
+
+    const handleRemoveEditEventDate = (index) => {
+        const updated = editForm.eventDates.filter((_, i) => i !== index);
+        handleEditFieldChange('eventDates', updated.length ? updated : ['']);
+    };
+
+    const handleSaveEdit = async () => {
+        if (!slideToEdit) return;
+        if (!editForm.title.trim()) {
+            setEditValidationError('Slide title is required.');
+            return;
+        }
+        if (!editForm.startDate || !editForm.archiveDate) {
+            setEditValidationError('Start date and archive date are required.');
+            return;
+        }
+        if (editForm.archiveDate < editForm.startDate) {
+            setEditValidationError('Archive date must be greater than or equal to start date.');
+            return;
+        }
+        if (editForm.eventEnabled) {
+            if (editForm.eventMode === 1 && !editForm.eventStartDate) {
+                setEditValidationError('Event single date is required.');
+                return;
+            }
+            if (editForm.eventMode === 2) {
+                if (!editForm.eventStartDate || !editForm.eventEndDate) {
+                    setEditValidationError('Event start and end dates are required for date range.');
+                    return;
+                }
+                if (editForm.eventEndDate < editForm.eventStartDate) {
+                    setEditValidationError('Event end date must be greater than or equal to event start date.');
+                    return;
+                }
+            }
+            if (editForm.eventMode === 3) {
+                const validEventDates = editForm.eventDates.map((d) => d.trim()).filter(Boolean);
+                if (!validEventDates.length) {
+                    setEditValidationError('At least one event date is required for multiple dates mode.');
+                    return;
+                }
+            }
+        }
+
+        const currentGroupId = user?.groups?.[0]?.id;
+        const userId = user?.userId;
+        if (!currentGroupId || !userId || !slideToEdit?.id) {
+            return;
+        }
+
+        const priority = priorityMap[normalizePriorityKey(editForm.priority)] || 2;
+        const durationSeconds = durationMap[normalizePriorityKey(editForm.priority)] || 30;
+        const normalizedEventDates = editForm.eventDates.map((d) => d.trim()).filter(Boolean);
+
+        const basePayload = {
+            groupId: String(currentGroupId),
+            userId: String(userId),
+            slideId: String(slideToEdit.id),
+            title: editForm.title.trim(),
+            subtitle: (editForm.subtitle || '').trim(),
+            webDescription: (editForm.webDescription || '').trim(),
+            priority,
+            durationSeconds,
+            startDate: editForm.startDate,
+            archiveDate: editForm.archiveDate,
+            publish: editForm.publish !== false,
+            eventEnabled: Boolean(editForm.eventEnabled),
+            eventMode: editForm.eventEnabled ? Number(editForm.eventMode || 1) : 0,
+            eventStartDate: editForm.eventEnabled ? (editForm.eventStartDate || '') : '',
+            eventEndDate: editForm.eventEnabled ? (editForm.eventEndDate || '') : '',
+            eventDates: editForm.eventEnabled ? normalizedEventDates : [],
+        };
+
+        let result;
+        if (slideToEdit.slideType === 2) {
+            result = await dispatch(editTemplateSlide({
+                ...basePayload,
+                articleUrl: (editForm.articleUrl || '').trim(),
+                totemDescription: (editForm.totemDescription || '').trim(),
+                linkUrl: (editForm.linkUrl || '').trim(),
+                configJSON: (editForm.configJSON || '').trim(),
+            }));
+            if (editTemplateSlide.fulfilled.match(result) && result.payload?.success) {
+                setIsEditModalOpen(false);
+                setSlideToEdit(null);
+                setEditValidationError('');
+                dispatch(getAllSlides({ groupId: String(currentGroupId) }));
+            }
+            return;
+        }
+
+        result = await dispatch(editFullScreenSlide(basePayload));
+        if (editFullScreenSlide.fulfilled.match(result) && result.payload?.success) {
+            setIsEditModalOpen(false);
+            setSlideToEdit(null);
+            setEditValidationError('');
+            dispatch(getAllSlides({ groupId: String(currentGroupId) }));
+        }
     };
 
     const handleSelectType = (typeId) => {
@@ -303,9 +515,25 @@ const SlidesPage = ({ user }) => {
                 title: slide.title,
                 category: slide.contentPoolName,
                 priority: priorityLabel,
+                priorityRaw: slide.priority,
                 status: statusLabel,
                 start: formatDateOnly(slide.startDate),
                 archive: formatDateOnly(slide.archiveDate),
+                slideType: slide.slideType,
+                subtitle: slide.subtitle || '',
+                webDescription: slide.webDescription || '',
+                totemDescription: slide.totemDescription || '',
+                articleUrl: slide.articleUrl || '',
+                linkUrl: slide.linkUrl || '',
+                configJSON: slide.configJSON || '',
+                publish: typeof slide.publish === 'boolean' ? slide.publish : true,
+                eventEnabled: Boolean(slide.eventEnabled),
+                eventMode: Number(slide.eventMode || 1),
+                eventStartDate: slide.eventStartDate || '',
+                eventEndDate: slide.eventEndDate || '',
+                eventDatesJson: slide.eventDatesJson || '',
+                startDateRaw: slide.startDate,
+                archiveDateRaw: slide.archiveDate,
                 url: slide.url,
                 devicesText: displayNames.length ? displayNames.join(', ') : '-',
             };
@@ -382,7 +610,7 @@ const SlidesPage = ({ user }) => {
                             <div className="slide-card-footer">
                                 <button className="btn-preview-outline" onClick={() => handlePreviewClick(slide)}><FontAwesomeIcon icon={faEye} style={{ marginRight: '5px' }} />Preview</button>
                                 <div className="footer-icons">
-                                    <button className="icon-btn-small"><FontAwesomeIcon icon={faCog} /></button>
+                                    <button className="icon-btn-small" onClick={() => handleEditClick(slide)}><FontAwesomeIcon icon={faCog} /></button>
                                     <button className="icon-btn-small" onClick={() => handleArchiveClick(slide)}><FontAwesomeIcon icon={faBoxArchive} /></button>
                                     {/* <button className="icon-btn-small delete" onClick={() => handleDeleteClick(slide)}><FontAwesomeIcon icon={faTrashAlt} /></button> */}
                                 </div>
@@ -477,6 +705,228 @@ const SlidesPage = ({ user }) => {
                         <button className="preview-close-btn" onClick={handleClosePreview}>
                             Close Preview
                         </button>
+                    </div>
+                )}
+            </Modal>
+
+            <Modal
+                size="large"
+                isOpen={isEditModalOpen}
+                onClose={handleCancelEdit}
+            >
+                {slideToEdit && (
+                    <div className="edit-slide-modal">
+                        <h2 className="edit-modal-title">Edit Slide</h2>
+
+                        <div className="edit-slide-info">
+                            <strong>Editing:</strong> {slideToEdit.title}
+                            <div className="edit-slide-meta">
+                                Category: {slideToEdit.category} | Type: {slideToEdit.slideType === 2 ? 'template' : 'fullscreen'}
+                            </div>
+                        </div>
+
+                        <div className="edit-grid">
+                            <div className="form-group">
+                                <label className="form-label">Slide Title *</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={editForm.title}
+                                    onChange={(e) => handleEditFieldChange('title', e.target.value)}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Sub Title</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={editForm.subtitle}
+                                    onChange={(e) => handleEditFieldChange('subtitle', e.target.value)}
+                                />
+                            </div>
+
+                            <div className="form-group edit-span-2">
+                                <label className="form-label">Web Description</label>
+                                <textarea
+                                    className="form-input"
+                                    rows={3}
+                                    value={editForm.webDescription}
+                                    onChange={(e) => handleEditFieldChange('webDescription', e.target.value)}
+                                />
+                            </div>
+
+                            {slideToEdit.slideType === 2 && (
+                                <>
+                                    <div className="form-group edit-span-2">
+                                        <label className="form-label">Totem Description</label>
+                                        <textarea
+                                            className="form-input"
+                                            rows={2}
+                                            value={editForm.totemDescription}
+                                            onChange={(e) => handleEditFieldChange('totemDescription', e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Article URL</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={editForm.articleUrl}
+                                            onChange={(e) => handleEditFieldChange('articleUrl', e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Link URL</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={editForm.linkUrl}
+                                            onChange={(e) => handleEditFieldChange('linkUrl', e.target.value)}
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            <div className="form-group">
+                                <label className="form-label">Priority</label>
+                                <select
+                                    className="form-input"
+                                    value={editForm.priority}
+                                    onChange={(e) => handleEditFieldChange('priority', e.target.value)}
+                                >
+                                    <option value="high">High (45s)</option>
+                                    <option value="medium">Medium (30s)</option>
+                                    <option value="low">Low (15s)</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group edit-checkbox-wrap">
+                                <label className="device-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        checked={editForm.publish}
+                                        onChange={(e) => handleEditFieldChange('publish', e.target.checked)}
+                                    />
+                                    <span>Publish</span>
+                                </label>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Start Date</label>
+                                <input
+                                    type="date"
+                                    className="form-input"
+                                    value={editForm.startDate}
+                                    onChange={(e) => handleEditFieldChange('startDate', e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Archive Date</label>
+                                <input
+                                    type="date"
+                                    className="form-input"
+                                    value={editForm.archiveDate}
+                                    onChange={(e) => handleEditFieldChange('archiveDate', e.target.value)}
+                                />
+                            </div>
+
+                            <div className="form-group edit-span-2">
+                                <label className="device-checkbox" style={{marginBottom: '10px'}}>
+                                    <input
+                                        type="checkbox"
+                                        checked={editForm.eventEnabled}
+                                        onChange={(e) => handleEditFieldChange('eventEnabled', e.target.checked)}
+                                    />
+                                    <span>Enable Event Dates</span>
+                                </label>
+
+                                {editForm.eventEnabled && (
+                                    <div className="event-date-block">
+                                        <div className="preview-tabs" style={{marginBottom: '12px'}}>
+                                            <button type="button" className={`preview-tab ${editForm.eventMode === 1 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(1)}>Single Date</button>
+                                            <button type="button" className={`preview-tab ${editForm.eventMode === 2 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(2)}>Date Range</button>
+                                            <button type="button" className={`preview-tab ${editForm.eventMode === 3 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(3)}>Multiple Dates</button>
+                                        </div>
+
+                                        {editForm.eventMode === 1 && (
+                                            <input
+                                                type="date"
+                                                className="form-input"
+                                                value={editForm.eventStartDate}
+                                                onChange={(e) => handleEditFieldChange('eventStartDate', e.target.value)}
+                                            />
+                                        )}
+
+                                        {editForm.eventMode === 2 && (
+                                            <div className="date-row">
+                                                <div className="form-group">
+                                                    <label className="form-label">Event Start Date</label>
+                                                    <input
+                                                        type="date"
+                                                        className="form-input"
+                                                        value={editForm.eventStartDate}
+                                                        onChange={(e) => handleEditFieldChange('eventStartDate', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label className="form-label">Event End Date</label>
+                                                    <input
+                                                        type="date"
+                                                        className="form-input"
+                                                        value={editForm.eventEndDate}
+                                                        onChange={(e) => handleEditFieldChange('eventEndDate', e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {editForm.eventMode === 3 && (
+                                            <div className="multi-event-dates">
+                                                {editForm.eventDates.map((date, index) => (
+                                                    <div key={`edit-event-date-${index}`} className="multi-event-row">
+                                                        <input
+                                                            type="date"
+                                                            className="form-input"
+                                                            value={date}
+                                                            onChange={(e) => handleEditEventDateChange(index, e.target.value)}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="btn-cancel"
+                                                            onClick={() => handleRemoveEditEventDate(index)}
+                                                            disabled={editForm.eventDates.length === 1}
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                <button type="button" className="btn-submit" onClick={handleAddEditEventDate}>
+                                                    Add Date
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                        </div>
+
+                        {!!editValidationError && <p className="upload-text template-error">{editValidationError}</p>}
+                        {!editValidationError && slideToEdit.slideType === 2 && !!editTemplateError && <p className="upload-text template-error">{editTemplateError}</p>}
+                        {!editValidationError && slideToEdit.slideType !== 2 && !!editFullscreenError && <p className="upload-text template-error">{editFullscreenError}</p>}
+
+                        <div className="edit-actions">
+                            <button className="btn-cancel" onClick={handleCancelEdit} type="button">Cancel</button>
+                            <button
+                                className="btn-submit"
+                                onClick={handleSaveEdit}
+                                type="button"
+                                disabled={editFullscreenStatus === 'loading' || editTemplateStatus === 'loading'}
+                            >
+                                {editFullscreenStatus === 'loading' || editTemplateStatus === 'loading' ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </div>
                     </div>
                 )}
             </Modal>

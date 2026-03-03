@@ -10,6 +10,8 @@ import addFullScreenSlideReducer from '../Slices/AddFullScreenSlideSlice';
 import addTemplateSlideReducer from '../Slices/AddTemplateSlideSlice';
 import archiveSlideByUserReducer from '../Slices/ArchiveSlideByUserSlice';
 import deleteSlideByUserReducer from '../Slices/DeleteSlideByUserSlice';
+import editFullScreenSlideReducer from '../Slices/EditFullScreenSlideSlice';
+import editTemplateSlideReducer from '../Slices/EditTemplateSlideSlice';
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -23,6 +25,8 @@ const rootReducer = combineReducers({
     AddTemplateSlide: addTemplateSlideReducer,
     ArchiveSlideByUser: archiveSlideByUserReducer,
     DeleteSlideByUser: deleteSlideByUserReducer,
+    EditFullScreenSlide: editFullScreenSlideReducer,
+    EditTemplateSlide: editTemplateSlideReducer,
 });
 
 const Store = configureStore({
