@@ -271,6 +271,12 @@ const SlidesPage = ({ user }) => {
             durationSeconds: slideData.durationSeconds || durationMap[normalizePriorityKey(slideData.priority)] || 30,
             startDate: slideData.startDate,
             archiveDate: slideData.archiveDate,
+            publish: slideData.publish !== false,
+            eventEnabled: Boolean(slideData.eventEnabled),
+            eventMode: slideData.eventEnabled ? Number(slideData.eventMode || 1) : 0,
+            eventStartDate: slideData.eventEnabled ? (slideData.eventStartDate || '') : '',
+            eventEndDate: slideData.eventEnabled ? (slideData.eventEndDate || '') : '',
+            eventDates: slideData.eventEnabled ? (slideData.eventDates || []) : [],
             targetDevices,
             renderedTemplateFile: slideData.renderedTemplateFile,
         };

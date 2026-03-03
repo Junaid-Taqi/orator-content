@@ -24,6 +24,12 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         startDate: '',
         archiveDate: '',
         devices: ['all-devices'],
+        publish: true,
+        eventEnabled: false,
+        eventMode: 1, // 1: single, 2: range, 3: multiple
+        eventStartDate: '',
+        eventEndDate: '',
+        eventDates: [''],
     });
     const [devices, setDevices] = useState([{id: 'all-devices', label: 'All Devices'}]);
     const [devicesStatus, setDevicesStatus] = useState('idle');
@@ -110,6 +116,44 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         setFormData((prev) => ({...prev, devices: updated}));
     };
 
+    const handleEventEnabledChange = (checked) => {
+        setValidationError('');
+        setFormData((prev) => ({
+            ...prev,
+            eventEnabled: checked,
+            eventMode: checked ? prev.eventMode : 1,
+        }));
+    };
+
+    const handleEventModeChange = (mode) => {
+        setValidationError('');
+        setFormData((prev) => ({
+            ...prev,
+            eventMode: mode,
+            eventStartDate: mode === 3 ? '' : prev.eventStartDate,
+            eventEndDate: mode === 2 ? prev.eventEndDate : '',
+            eventDates: mode === 3 ? (prev.eventDates.length ? prev.eventDates : ['']) : [''],
+        }));
+    };
+
+    const handleEventDateChange = (index, value) => {
+        setValidationError('');
+        const updatedDates = [...formData.eventDates];
+        updatedDates[index] = value;
+        setFormData((prev) => ({...prev, eventDates: updatedDates}));
+    };
+
+    const handleAddEventDate = () => {
+        setValidationError('');
+        setFormData((prev) => ({...prev, eventDates: [...prev.eventDates, '']}));
+    };
+
+    const handleRemoveEventDate = (index) => {
+        setValidationError('');
+        const updatedDates = formData.eventDates.filter((_, i) => i !== index);
+        setFormData((prev) => ({...prev, eventDates: updatedDates.length ? updatedDates : ['']}));
+    };
+
     const createTemplateImageFile = async () => {
         if (!captureRef.current) {
             throw new Error('Template preview is not ready.');
@@ -151,12 +195,44 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
             setValidationError('Please select at least one target device.');
             return;
         }
+        if (formData.eventEnabled) {
+            if (formData.eventMode === 1 && !formData.eventStartDate) {
+                setValidationError('Event single date is required.');
+                return;
+            }
+            if (formData.eventMode === 2) {
+                if (!formData.eventStartDate || !formData.eventEndDate) {
+                    setValidationError('Event start and end dates are required for date range.');
+                    return;
+                }
+                if (formData.eventEndDate < formData.eventStartDate) {
+                    setValidationError('Event end date must be greater than or equal to event start date.');
+                    return;
+                }
+            }
+            if (formData.eventMode === 3) {
+                const validEventDates = formData.eventDates.map((d) => d.trim()).filter(Boolean);
+                if (!validEventDates.length) {
+                    setValidationError('At least one event date is required for multiple dates mode.');
+                    return;
+                }
+            }
+        }
 
         try {
             setValidationError('');
+            const normalizedEventDates = formData.eventDates.map((d) => d.trim()).filter(Boolean);
             const renderedTemplateFile = await createTemplateImageFile();
             onSubmit({
                 ...formData,
+                title: formData.title.trim(),
+                subtitle: formData.subtitle.trim(),
+                webDescription: formData.webDescription.trim(),
+                totemDescription: formData.totemDescription.trim(),
+                articleUrl: formData.articleUrl.trim(),
+                linkUrl: formData.linkUrl.trim(),
+                configJSON: formData.configJSON.trim(),
+                eventDates: normalizedEventDates,
                 durationSeconds: durationMap[formData.priority] ?? 30,
                 category,
                 categoryName,
@@ -291,6 +367,115 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                                 onChange={(e) => handleChange('archiveDate', e.target.value)}
                             />
                         </div>
+                    </div>
+
+                    <div className="form-group event-dates-group">
+                        <label className="form-label">Event Date(s) (Optional)</label>
+                        <label className="device-checkbox" style={{marginBottom: '10px'}}>
+                            <input
+                                type="checkbox"
+                                checked={formData.eventEnabled}
+                                onChange={(e) => handleEventEnabledChange(e.target.checked)}
+                            />
+                            <span>Enable Event Dates</span>
+                        </label>
+
+                        {formData.eventEnabled && (
+                            <div className="event-date-block">
+                                <div className="preview-tabs" style={{marginBottom: '12px'}}>
+                                    <button
+                                        type="button"
+                                        className={`preview-tab ${formData.eventMode === 1 ? 'active' : ''}`}
+                                        onClick={() => handleEventModeChange(1)}
+                                    >
+                                        Single Date
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`preview-tab ${formData.eventMode === 2 ? 'active' : ''}`}
+                                        onClick={() => handleEventModeChange(2)}
+                                    >
+                                        Date Range
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`preview-tab ${formData.eventMode === 3 ? 'active' : ''}`}
+                                        onClick={() => handleEventModeChange(3)}
+                                    >
+                                        Multiple Dates
+                                    </button>
+                                </div>
+
+                                {formData.eventMode === 1 && (
+                                    <input
+                                        type="date"
+                                        className="form-input date-input"
+                                        value={formData.eventStartDate}
+                                        onChange={(e) => handleChange('eventStartDate', e.target.value)}
+                                    />
+                                )}
+
+                                {formData.eventMode === 2 && (
+                                    <div className="date-row">
+                                        <div className="form-group">
+                                            <label className="form-label">Event Start Date</label>
+                                            <input
+                                                type="date"
+                                                className="form-input date-input"
+                                                value={formData.eventStartDate}
+                                                onChange={(e) => handleChange('eventStartDate', e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="form-label">Event End Date</label>
+                                            <input
+                                                type="date"
+                                                className="form-input date-input"
+                                                value={formData.eventEndDate}
+                                                onChange={(e) => handleChange('eventEndDate', e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {formData.eventMode === 3 && (
+                                    <div className="multi-event-dates">
+                                        {formData.eventDates.map((date, index) => (
+                                            <div key={`template-event-date-${index}`} className="multi-event-row">
+                                                <input
+                                                    type="date"
+                                                    className="form-input date-input"
+                                                    value={date}
+                                                    onChange={(e) => handleEventDateChange(index, e.target.value)}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn-cancel"
+                                                    onClick={() => handleRemoveEventDate(index)}
+                                                    disabled={formData.eventDates.length === 1}
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button type="button" className="btn-submit" onClick={handleAddEventDate}>
+                                            Add Date
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="form-group">
+                        <label className="device-checkbox">
+                            <input
+                                type="checkbox"
+                                checked={formData.publish}
+                                onChange={(e) => handleChange('publish', e.target.checked)}
+                            />
+                            <span>Publish</span>
+                        </label>
                     </div>
 
                     <div className="form-group">
