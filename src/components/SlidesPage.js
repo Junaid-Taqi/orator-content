@@ -384,7 +384,7 @@ const SlidesPage = ({ user }) => {
                                 <div className="footer-icons">
                                     <button className="icon-btn-small"><FontAwesomeIcon icon={faCog} /></button>
                                     <button className="icon-btn-small" onClick={() => handleArchiveClick(slide)}><FontAwesomeIcon icon={faBoxArchive} /></button>
-                                    <button className="icon-btn-small delete" onClick={() => handleDeleteClick(slide)}><FontAwesomeIcon icon={faTrashAlt} /></button>
+                                    {/* <button className="icon-btn-small delete" onClick={() => handleDeleteClick(slide)}><FontAwesomeIcon icon={faTrashAlt} /></button> */}
                                 </div>
                             </div>
                         </div>
