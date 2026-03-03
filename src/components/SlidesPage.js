@@ -381,7 +381,7 @@ const SlidesPage = ({ user }) => {
             {visibleCount < filteredSlides.length && (
                 <div style={{ textAlign: 'center' }}>
                     <button
-                        className="btn btn-outline-primary px-4 py-2 my-5"
+                        className="btn btn-outline-primary px-4 py-2 my-5 text-white"
                         onClick={() => setVisibleCount(prev => prev + 12)}
                         style={{ fontWeight: 500, borderRadius: '50rem', border: '1px solid' }}
                     >
