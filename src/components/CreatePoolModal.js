@@ -127,14 +127,14 @@ const CreatePoolModal = ({isOpen, onClose, user, poolToEdit = null}) => {
                         <label>Pool Name (This is also the category name)</label>
                         <input
                             type="text"
-                            placeholder="e.g., Holiday Specials, Promotions"
+                            placeholder="e.g., 🤹 Holiday Specials, 📢 Promotions, etc."
                             className="modal-input"
                             value={formData.name}
                             onChange={(e) => handleFormChange('name', e.target.value)}
                             maxLength={NAME_MAX_LENGTH}
                             required
                         />
-                        <small className="form-tip">Max {NAME_MAX_LENGTH} characters</small>
+                        <small className="form-tip">Tip: Include an emoji to make your pool easily identifiable</small>
                     </div>
 
                     <div className="form-group">
