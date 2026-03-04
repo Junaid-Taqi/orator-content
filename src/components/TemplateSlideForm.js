@@ -61,6 +61,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
     const [validationError, setValidationError] = useState('');
     const [coverImageError, setCoverImageError] = useState('');
     const [viewMode, setViewMode] = useState('web');
+    const [coverPreviewUrl, setCoverPreviewUrl] = useState('');
 
     const captureRef = useRef(null);
     const coverImageInputRef = useRef(null);
@@ -71,6 +72,20 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         {id: 'medium', label: 'Medium', duration: '30s'},
         {id: 'high', label: 'High', duration: '45s'},
     ];
+
+    useEffect(() => {
+        if (!formData.coverImageFile) {
+            setCoverPreviewUrl('');
+            return;
+        }
+
+        const nextUrl = URL.createObjectURL(formData.coverImageFile);
+        setCoverPreviewUrl(nextUrl);
+
+        return () => {
+            URL.revokeObjectURL(nextUrl);
+        };
+    }, [formData.coverImageFile]);
 
     useEffect(() => {
         const fetchDevices = async () => {
@@ -334,6 +349,12 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
     };
 
     const activeDescription = viewMode === 'web' ? formData.webDescription : formData.totemDescription;
+    const formatPreviewDate = (value) => {
+        if (!value) return '-';
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return value;
+        return parsed.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+    };
 
     return (
         <div className="fullscreen-slide-form template-slide-form">
@@ -677,21 +698,60 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                             </button>
                         </div>
 
-                        <div className={`preview-container portrait ${viewMode}`}>
-                            <div className="template-preview-viewport">
-                                <div className="template-preview-scale">
-                                <TemplateDocumentView
-                                    title={formData.title}
-                                    subtitle={formData.subtitle}
-                                    description={activeDescription}
-                                    startDate={formData.startDate}
-                                    archiveDate={formData.archiveDate}
-                                    linkUrl={formData.linkUrl}
-                                    viewMode={viewMode}
-                                />
+                        {viewMode === 'web' ? (
+                            <div className="template-web-preview-shell">
+                                <div className="template-web-preview-main">
+                                    <div className="template-web-preview-image-wrap">
+                                        {coverPreviewUrl ? (
+                                            <img src={coverPreviewUrl} alt="Cover preview" className="template-web-preview-image" />
+                                        ) : (
+                                            <div className="template-web-preview-placeholder">
+                                                {(categoryName || 'N').slice(0, 1).toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="template-web-preview-content">
+                                        <div className="template-web-preview-meta">
+                                            <span className="badge category-badge">{categoryName || 'Updates'}</span>
+                                            <span className="template-web-preview-meta-item">{'\uD83D\uDCC5'} {formatPreviewDate(new Date())}</span>
+                                        </div>
+
+                                        <h3 className="template-web-preview-title">{formData.title || 'Untitled'}</h3>
+                                        {!!formData.subtitle && <p className="template-web-preview-subtitle">{formData.subtitle}</p>}
+
+                                        {!!formData.tags.length && (
+                                            <div className="template-web-preview-tags-row">
+                                                <span className="template-web-preview-tag-icon">{'\uD83C\uDFF7'}</span>
+                                                <div className="template-web-preview-tags">
+                                                    {formData.tags.map((tag) => (
+                                                        <span key={tag} className="template-web-preview-tag-chip">{tag}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <p className="template-web-preview-description">{formData.webDescription || '-'}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className={`preview-container portrait ${viewMode}`}>
+                                <div className="template-preview-viewport">
+                                    <div className="template-preview-scale">
+                                        <TemplateDocumentView
+                                            title={formData.title}
+                                            subtitle={formData.subtitle}
+                                            description={activeDescription}
+                                            startDate={formData.startDate}
+                                            archiveDate={formData.archiveDate}
+                                            linkUrl={formData.linkUrl}
+                                            viewMode={viewMode}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="note-section">
                             <span>Note: Slide will be added to </span>
