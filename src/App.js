@@ -8,6 +8,7 @@ import './styles/Header.css';
 import Navigation from './components/Navigation';
 import SlidesPage from './components/SlidesPage';
 import PoolsPage from './components/PoolPage';
+import TimelinePage from './components/TimelinePage';
 import DisplayNav from "./components/DisplayNav";
 
 function AppContent() {
@@ -75,8 +76,7 @@ function AppContent() {
         )}
         {activeTab === 'timeline' && (
           <div className="content-placeholder">
-            <h2>Timeline</h2>
-            <p>Coming soon...</p>
+            <TimelinePage user={user} />
           </div>
         )}
       </main>
