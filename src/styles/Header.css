@@ -106,3 +106,10 @@
     justify-content: space-between;
   }
 }
+
+.text-purple {
+  color: #d8b4fe !important;
+}
+.text-orange {
+  color: orange !important;
+}

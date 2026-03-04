@@ -14,8 +14,7 @@
 
 .timeline-header h1 {
   margin: 0;
-  font-size: 34px;
-  font-weight: 700;
+  font-size: 20px;
   color: #fff;
 }
 
@@ -175,8 +174,8 @@
 }
 
 .timeline-stat-card strong {
-  font-size: 34px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: normal !important;
   color: #e6f5ff;
   line-height: 1;
 }
@@ -202,7 +201,7 @@
 
 .timeline-panel-head h2 {
   margin: 0;
-  font-size: 31px;
+  font-size: 20px;
   color: #fff;
 }
 
@@ -214,7 +213,6 @@
   padding: 8px 12px;
   height: auto;
   font-size: 12px;
-  font-weight: 600;
 }
 
 .timeline-help {
@@ -294,10 +292,10 @@
   margin-bottom: 5px;
 }
 
-.cycle-summary-row strong,
-.daily-summary-grid strong {
-  font-size: 35px;
-  color: #fff;
+.cycle-summary-row strong, .daily-summary-grid strong {
+    font-size: 20px;
+    color: #fff;
+    font-weight: normal;
 }
 
 .timeline-panel-head.daily p {

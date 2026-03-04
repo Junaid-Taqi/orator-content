@@ -223,19 +223,19 @@ const TimelinePage = ({ user }) => {
         </div>
         <div className="timeline-stat-card">
           <label>Timeline Blocks</label>
-          <strong className="green">{counters?.timelineBlocks ?? 0}</strong>
+          <strong className='green'>{counters?.timelineBlocks ?? 0}</strong>
         </div>
         <div className="timeline-stat-card">
           <label>Full Cycles</label>
-          <strong className="purple">{counters?.fullCycles ?? 0}</strong>
+          <strong className='text-purple'>{counters?.fullCycles ?? 0}</strong>
         </div>
         <div className="timeline-stat-card">
           <label>Work Duration</label>
-          <strong className="orange">{counters?.workDurationText || '0s'}</strong>
+          <strong className='text-orange'>{counters?.workDurationText || '0s'}</strong>
         </div>
         <div className="timeline-stat-card">
           <label>Current Time</label>
-          <strong>{formatClock(clockNow)}</strong>
+          <strong className='text-primary'>{formatClock(clockNow)}</strong>
         </div>
       </div>
 
@@ -318,7 +318,7 @@ const TimelinePage = ({ user }) => {
         </div>
 
         <div className="sequence-line">
-          <span>{timelineData?.timelinePattern || 'Start -> Loop'}</span>
+          <span>{timelineData?.timelinePattern || 'Start --> Loop'}</span>
           {counters?.fullCycles ? <strong>Loop {counters.fullCycles}x</strong> : null}
         </div>
 
