@@ -198,30 +198,6 @@ const TimelinePage = ({ user }) => {
           </select>
           <small>{display?.orientation || '-'}</small>
         </div>
-
-        <div className="timeline-field">
-          <label>Date</label>
-          <div className="date-control">
-            <button type="button" onClick={() => shiftDateByDays(-1)}>{'<'}</button>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-            <button type="button" onClick={() => shiftDateByDays(1)}>{'>'}</button>
-          </div>
-        </div>
-
-        <div className="timeline-field actions">
-          <label>Actions</label>
-          <button
-            type="button"
-            onClick={() => fetchTimeline(selectedDisplayId)}
-            disabled={!selectedDisplayId || loadingTimeline}
-          >
-            {loadingTimeline ? 'Loading...' : 'Regenerate'}
-          </button>
-        </div>
       </div>
 
       {!!error && <div className="timeline-error">{error}</div>}
