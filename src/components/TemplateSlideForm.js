@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+﻿import React, {useEffect, useRef, useState} from 'react';
 import axios from 'axios';
 import {toBlob} from 'html-to-image';
 import '../styles/FullscreenSlideForm.css';
@@ -7,24 +7,24 @@ import {serverUrl} from '../Services/Constants/Constants';
 import TemplateDocumentView from './TemplateDocumentView';
 
 const TAG_OPTIONS = [
-    '🏥 Health',
-    '⚽ Sport',
-    '⚽ Football',
-    '🏀 Basketball',
-    '🎾 Tennis',
-    '🏊 Swimming',
-    '🚗 Traffic',
-    '🏗️ Infrastructure',
-    '🏘️ Communal',
-    '🌳 Environment',
-    '👶 Child Care',
-    '👥 Social',
-    '🌍 International',
-    '🎓 Education',
-    '🎭 Culture',
-    '🚨 Safety',
-    '🏠 Housing',
-    '💼 Economy',
+    '\uD83C\uDFE5 Health',
+    '\u26BD Sport',
+    '\u26BD Football',
+    '\uD83C\uDFC0 Basketball',
+    '\uD83C\uDFBE Tennis',
+    '\uD83C\uDFCA Swimming',
+    '\uD83D\uDE97 Traffic',
+    '\uD83C\uDFD7\uFE0F Infrastructure',
+    '\uD83C\uDFD8\uFE0F Communal',
+    '\uD83C\uDF33 Environment',
+    '\uD83D\uDC76 Child Care',
+    '\uD83D\uDC65 Social',
+    '\uD83C\uDF0D International',
+    '\uD83C\uDF93 Education',
+    '\uD83C\uDFAD Culture',
+    '\uD83D\uDEA8 Safety',
+    '\uD83C\uDFE0 Housing',
+    '\uD83D\uDCBC Economy',
 ];
 
 const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = false, submitError = ''}) => {
@@ -52,14 +52,18 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         eventEndDate: '',
         eventDates: [''],
         tags: [],
+        coverImageMode: 'category-default',
+        coverImageFile: null,
     });
     const [devices, setDevices] = useState([{id: 'all-devices', label: 'All Devices'}]);
     const [devicesStatus, setDevicesStatus] = useState('idle');
     const [devicesError, setDevicesError] = useState('');
     const [validationError, setValidationError] = useState('');
+    const [coverImageError, setCoverImageError] = useState('');
     const [viewMode, setViewMode] = useState('web');
 
     const captureRef = useRef(null);
+    const coverImageInputRef = useRef(null);
     const categoryName = category?.title || category?.name;
 
     const priorities = [
@@ -128,6 +132,42 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
             tags: prev.tags.includes(tag)
                 ? prev.tags.filter((t) => t !== tag)
                 : [...prev.tags, tag],
+        }));
+    };
+
+    const handleCoverImageModeChange = (mode) => {
+        setValidationError('');
+        setCoverImageError('');
+        setFormData((prev) => ({
+            ...prev,
+            coverImageMode: mode,
+            coverImageFile: mode === 'custom-upload' ? prev.coverImageFile : null,
+        }));
+    };
+
+    const handleCoverImageFileChange = (file) => {
+        if (!file) {
+            return;
+        }
+
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        const maxBytes = 5 * 1024 * 1024;
+
+        if (!allowedTypes.includes(file.type)) {
+            setCoverImageError('Only JPG and PNG files are allowed.');
+            return;
+        }
+        if (file.size > maxBytes) {
+            setCoverImageError('Cover image must be 5MB or smaller.');
+            return;
+        }
+
+        setCoverImageError('');
+        setValidationError('');
+        setFormData((prev) => ({
+            ...prev,
+            coverImageMode: 'custom-upload',
+            coverImageFile: file,
         }));
     };
 
@@ -265,6 +305,10 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
             const configJSON = JSON.stringify({
                 ...(parsedConfig && typeof parsedConfig === 'object' && !Array.isArray(parsedConfig) ? parsedConfig : {}),
                 tags: formData.tags,
+                coverImage: {
+                    mode: formData.coverImageMode,
+                    fileName: formData.coverImageFile?.name || '',
+                },
             });
             onSubmit({
                 ...formData,
@@ -281,6 +325,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                 categoryName,
                 contentPoolId: category?.id,
                 renderedTemplateFile,
+                coverImageFile: formData.coverImageMode === 'custom-upload' ? formData.coverImageFile : null,
                 availableDevices: devices.filter((d) => d.id !== 'all-devices'),
             });
         } catch (error) {
@@ -374,6 +419,59 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                             onChange={(e) => handleChange('configJSON', e.target.value)}
                         />
                     </div> */}
+
+                    <div className="form-group template-cover-group">
+                        <label className="form-label">Cover Image for Web Portal</label>
+                        <small className="template-tags-tip">Used as thumbnail in citizen web portal news feed</small>
+
+                        <div
+                            className="template-cover-upload"
+                            onClick={() => coverImageInputRef.current?.click()}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    coverImageInputRef.current?.click();
+                                }
+                            }}
+                        >
+                            <div className="template-cover-upload-icon">{'\uD83D\uDDBC\uFE0F'}</div>
+                            <p>Upload Custom Image</p>
+                            <small>JPG, PNG (max 5MB) - Recommended: 1200x630px</small>
+                            {!!formData.coverImageFile && <small className="template-cover-file">{formData.coverImageFile.name}</small>}
+                        </div>
+
+                        <input
+                            ref={coverImageInputRef}
+                            type="file"
+                            accept="image/png,image/jpeg"
+                            style={{display: 'none'}}
+                            onChange={(e) => handleCoverImageFileChange(e.target.files?.[0])}
+                        />
+
+                        <div className="template-cover-options">
+                            <label className={`template-cover-option ${formData.coverImageMode === 'category-default' ? 'active' : ''}`}>
+                                <input
+                                    type="radio"
+                                    name="templateCoverMode"
+                                    checked={formData.coverImageMode === 'category-default'}
+                                    onChange={() => handleCoverImageModeChange('category-default')}
+                                />
+                                <span>Category Default</span>
+                            </label>
+                            <label className={`template-cover-option ${formData.coverImageMode === 'municipality-logo' ? 'active' : ''}`}>
+                                <input
+                                    type="radio"
+                                    name="templateCoverMode"
+                                    checked={formData.coverImageMode === 'municipality-logo'}
+                                    onChange={() => handleCoverImageModeChange('municipality-logo')}
+                                />
+                                <span>Municipality Logo</span>
+                            </label>
+                        </div>
+                        {!!coverImageError && <p className="upload-text template-error">{coverImageError}</p>}
+                    </div>
 
                     <div className="form-group">
                         <label className="form-label">Tags (Multi-Select)</label>
@@ -629,3 +727,5 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
 };
 
 export default TemplateSlideForm;
+
+

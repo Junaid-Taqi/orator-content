@@ -49,6 +49,9 @@ export const addNewTemplateSlide = createAsyncThunk(
             if (payload.renderedTemplateFile) {
                 formData.append('renderedTemplateFile', payload.renderedTemplateFile);
             }
+            if (payload.coverImageFile) {
+                formData.append('coverImageFile', payload.coverImageFile);
+            }
 
             const config = {
                 headers: {

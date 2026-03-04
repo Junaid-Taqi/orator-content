@@ -496,6 +496,7 @@ const SlidesPage = ({ user }) => {
             eventDates: slideData.eventEnabled ? (slideData.eventDates || []) : [],
             targetDevices,
             renderedTemplateFile: slideData.renderedTemplateFile,
+            coverImageFile: slideData.coverImageFile || null,
         };
 
         const result = await dispatch(addNewTemplateSlide(payload));
