@@ -109,6 +109,7 @@ const SlidesPage = ({ user }) => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [slideToEdit, setSlideToEdit] = useState(null);
     const [editValidationError, setEditValidationError] = useState('');
+    const [previewMode, setPreviewMode] = useState('web');
     const [editForm, setEditForm] = useState({
         title: '',
         subtitle: '',
@@ -137,6 +138,7 @@ const SlidesPage = ({ user }) => {
     const { status: editTemplateStatus, error: editTemplateError } = useSelector((state) => state.EditTemplateSlide);
 
     const groupId = user?.groups?.[0]?.id;
+
 
     useEffect(() => {
         if (groupId) {
@@ -211,8 +213,11 @@ const SlidesPage = ({ user }) => {
         setSlideToArchive(null);
     };
 
+
+
     const handlePreviewClick = (slide) => {
         setSelectedSlide(slide);
+        setPreviewMode('web'); // default web view
         setIsPreviewModalOpen(true);
     };
 
@@ -655,12 +660,23 @@ const SlidesPage = ({ user }) => {
 
                         {/* Tabs */}
                         <div className="preview-tabs">
-                            <button className="tab inactive">Totem View</button>
-                            <button className="tab active">Web Portal View</button>
+                            <button
+                                className={`tab ${previewMode === 'totem' ? 'active' : 'inactive'}`}
+                                onClick={() => setPreviewMode('totem')}
+                            >
+                                Totem View
+                            </button>
+
+                            <button
+                                className={`tab ${previewMode === 'web' ? 'active' : 'inactive'}`}
+                                onClick={() => setPreviewMode('web')}
+                            >
+                                Web Portal View
+                            </button>
                         </div>
 
                         {/* Big Preview Box */}
-                        <div className="preview-main-box">
+                        <div className={`preview-main-box ${previewMode === 'totem' ? 'totem-mode' : ''}`}>
                             {selectedSlide.url ? (
                                 isVideoUrl(selectedSlide.url) ? (
                                     <video
@@ -679,7 +695,7 @@ const SlidesPage = ({ user }) => {
                                 )
                             ) : (
                                 <div className="preview-placeholder">
-                                    Web Portal Preview
+                                    No Preview Available
                                 </div>
                             )}
                         </div>
@@ -832,7 +848,7 @@ const SlidesPage = ({ user }) => {
                             </div>
 
                             <div className="form-group edit-span-2">
-                                <label className="device-checkbox" style={{marginBottom: '10px'}}>
+                                <label className="device-checkbox" style={{ marginBottom: '10px' }}>
                                     <input
                                         type="checkbox"
                                         checked={editForm.eventEnabled}
@@ -843,7 +859,7 @@ const SlidesPage = ({ user }) => {
 
                                 {editForm.eventEnabled && (
                                     <div className="event-date-block">
-                                        <div className="preview-tabs" style={{marginBottom: '12px'}}>
+                                        <div className="preview-tabs" style={{ marginBottom: '12px' }}>
                                             <button type="button" className={`preview-tab ${editForm.eventMode === 1 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(1)}>Single Date</button>
                                             <button type="button" className={`preview-tab ${editForm.eventMode === 2 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(2)}>Date Range</button>
                                             <button type="button" className={`preview-tab ${editForm.eventMode === 3 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(3)}>Multiple Dates</button>
