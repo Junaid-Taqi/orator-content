@@ -244,9 +244,9 @@ const TimelinePage = ({ user }) => {
           <h2>Cycle Configurator</h2>
           <button type="button" onClick={() => fetchTimeline(selectedDisplayId)} disabled={loadingTimeline || !selectedDisplayId}>Reset to Default</button>
         </div>
-        <p className="timeline-help">{timelineData?.timelinePattern || 'Start -> Loop'}</p>
+        <p className="timeline-help text-primary">{timelineData?.timelinePattern || 'Start -> Loop'}</p>
 
-        <div className="cycle-cards-row">
+        <div className="cycle-cards-row mt-4">
           {legend.map((pool) => {
             const pct = cycleDurationSeconds > 0 ? Math.round((pool.durationSeconds / cycleDurationSeconds) * 100) : 0;
             return (
@@ -296,7 +296,7 @@ const TimelinePage = ({ user }) => {
         <div className="timeline-panel-head daily">
           <div>
             <h2>Daily Timeline Visualization</h2>
-            <p>
+            <p className="text-primary">
               Single cycle pattern repeating {counters?.fullCycles ?? 0} times
               from {display?.wakeTime || '--:--'} to {display?.sleepTime || '--:--'}
             </p>
@@ -328,7 +328,7 @@ const TimelinePage = ({ user }) => {
         </div>
 
         <div className="sequence-line">
-          <span>{timelineData?.timelinePattern || 'Start --> Loop'}</span>
+          <span className="text-primary">{timelineData?.timelinePattern || 'Start --> Loop'}</span>
           {counters?.fullCycles ? <strong>Loop {counters.fullCycles}x</strong> : null}
         </div>
 

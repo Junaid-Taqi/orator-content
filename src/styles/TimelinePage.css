@@ -31,7 +31,6 @@
   border-radius: 999px;
   padding: 8px 14px;
   font-size: 13px;
-  font-weight: 600;
 }
 
 .timeline-live-pill.active {
@@ -146,6 +145,7 @@
 .now-playing-box strong {
   font-size: 18px;
   color: #fff;
+  font-weight: normal !important;
 }
 
 .now-playing-box small {
