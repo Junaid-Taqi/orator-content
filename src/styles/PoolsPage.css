@@ -190,6 +190,9 @@ body,
 .text-green {
     color: var(--green);
 }
+.text-primary {
+    color: var(--cyan) !important;
+}
 
 .text-orange {
     color: #fab1a0;

@@ -256,9 +256,19 @@ const TimelinePage = ({ user }) => {
                 style={{ borderColor: pool.color }}
               >
                 <h4>{pool.name}</h4>
-                <p>Duration: {pool.durationSeconds}s</p>
-                <p>Slides: {pool.slides}</p>
-                <p>% of Cycle: {pct}%</p>
+                <div className='d-flex justify-content-between mt-3'>
+                  <p className='text-primary'>Slides:</p>
+                  <p>{pool.slides}</p>
+                </div>
+                <div className='d-flex justify-content-between'>
+                  <p className='text-primary'>Duration:</p>
+                  <p>{pool.durationSeconds}s</p>
+                </div>
+                <div className='d-flex justify-content-between'>
+                  <p className='text-primary'>% of Cycle:</p>
+                  <p>{pct}%</p>
+                </div>
+
                 {pool.isAlwaysOn && <span className="always-on-badge">Always On</span>}
               </div>
             );
