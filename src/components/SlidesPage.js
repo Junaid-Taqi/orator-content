@@ -92,6 +92,17 @@ const parseEventDates = (value) => {
     return [''];
 };
 
+const parseConfigJson = (value) => {
+    if (!value) return {};
+    if (typeof value === 'object') return value;
+    try {
+        const parsed = JSON.parse(value);
+        return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (e) {
+        return {};
+    }
+};
+
 const SlidesPage = ({ user }) => {
     const dispatch = useDispatch();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -540,7 +551,9 @@ const SlidesPage = ({ user }) => {
                 eventDatesJson: slide.eventDatesJson || '',
                 startDateRaw: slide.startDate,
                 archiveDateRaw: slide.archiveDate,
+                publishDate: formatDateOnly(slide.publishDate),
                 url: slide.url,
+                fileURLCover: slide.fileURLCover || '',
                 devicesText: displayNames.length ? displayNames.join(', ') : '-',
             };
         }),
@@ -550,6 +563,13 @@ const SlidesPage = ({ user }) => {
     const filteredSlides = normalizedSlides.filter((slide) =>
         activeFilter === 'all' ? true : slide.status === activeFilter
     );
+    const selectedSlideConfig = useMemo(
+        () => parseConfigJson(selectedSlide?.configJSON),
+        [selectedSlide?.configJSON]
+    );
+    const selectedSlideTags = Array.isArray(selectedSlideConfig?.tags)
+        ? selectedSlideConfig.tags.filter((tag) => typeof tag === 'string' && tag.trim())
+        : [];
 
     return (
         <div className="slides-page">
@@ -645,21 +665,6 @@ const SlidesPage = ({ user }) => {
             >
                 {selectedSlide && (
                     <div className="preview-dialog">
-                        <div className="preview-top">
-                            <h2 className="preview-title text-capitalize">{selectedSlide.title}</h2>
-
-                            <div className="preview-tags">
-                                <span className="tag-cat">{selectedSlide.category}</span>
-                                <span className={`tag-priority ${selectedSlide.priority.split(' ')[0].toLowerCase()}`}>
-                                    {selectedSlide.priority}
-                                </span>
-                                <span className={`tag-status ${selectedSlide.status}`}>
-                                    {selectedSlide.status}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Tabs */}
                         <div className="preview-tabs">
                             <button
                                 className={`tab ${previewMode === 'totem' ? 'active' : 'inactive'}`}
@@ -676,48 +681,105 @@ const SlidesPage = ({ user }) => {
                             </button>
                         </div>
 
-                        {/* Big Preview Box */}
-                        <div className={`preview-main-box ${previewMode === 'totem' ? 'totem-mode' : ''}`}>
-                            {selectedSlide.url ? (
-                                isVideoUrl(selectedSlide.url) ? (
-                                    <video
-                                        src={selectedSlide.url}
-                                        autoPlay
-                                        muted
-                                        loop
-                                        className="preview-media"
-                                    />
-                                ) : (
-                                    <img
-                                        src={selectedSlide.url}
-                                        alt={selectedSlide.title}
-                                        className="preview-media"
-                                    />
-                                )
-                            ) : (
-                                <div className="preview-placeholder">
-                                    No Preview Available
+                        {previewMode === 'web' ? (
+                            <div className="preview-web-shell">
+                                <div className="preview-web-main">
+                                    <div className="preview-web-image-wrap">
+                                        {selectedSlide.fileURLCover ? (
+                                            <img
+                                                src={selectedSlide.fileURLCover}
+                                                alt={selectedSlide.title}
+                                                className="preview-web-image"
+                                            />
+                                        ) : (
+                                            <div className="preview-web-image-placeholder">
+                                                {(selectedSlide.category || 'N').slice(0, 1).toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="preview-web-content">
+                                        <div className="preview-web-meta">
+                                            <span className="tag-cat">{selectedSlide.category}</span>
+                                            <span className="preview-web-meta-item">{'\uD83D\uDCC5'} {selectedSlide.publishDate || selectedSlide.start}</span>
+                                        </div>
+
+                                        <h2 className="preview-web-title text-capitalize">{selectedSlide.title}</h2>
+                                        {!!selectedSlide.subtitle && <p className="preview-web-subtitle">{selectedSlide.subtitle}</p>}
+
+                                        {!!selectedSlideTags.length && (
+                                            <div className="preview-web-tags-row">
+                                                <span className="preview-web-tag-icon">{'\uD83C\uDFF7'}</span>
+                                                <div className="preview-web-tags">
+                                                    {selectedSlideTags.map((tag) => (
+                                                        <span key={tag} className="preview-web-tag-chip">{tag}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <p className="preview-web-description">{selectedSlide.webDescription || selectedSlide.subtitle || '-'}</p>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-
-                        {/* Info Section */}
-                        <div className="preview-info-grid">
-                            <div className="info-box">
-                                <label>Start Date</label>
-                                <div>{selectedSlide.start}</div>
                             </div>
+                        ) : (
+                            <>
+                                <div className="preview-top">
+                                    <h2 className="preview-title text-capitalize">{selectedSlide.title}</h2>
 
-                            <div className="info-box">
-                                <label>Archive Date</label>
-                                <div>{selectedSlide.archive}</div>
-                            </div>
+                                    <div className="preview-tags">
+                                        <span className="tag-cat">{selectedSlide.category}</span>
+                                        <span className={`tag-priority ${selectedSlide.priority.split(' ')[0].toLowerCase()}`}>
+                                            {selectedSlide.priority}
+                                        </span>
+                                        <span className={`tag-status ${selectedSlide.status}`}>
+                                            {selectedSlide.status}
+                                        </span>
+                                    </div>
+                                </div>
 
-                            <div className="info-box full">
-                                <label>Devices</label>
-                                <div className='text-capitalize'>{selectedSlide.devicesText}</div>
-                            </div>
-                        </div>
+                                <div className="preview-main-box totem-mode">
+                                    {selectedSlide.url ? (
+                                        isVideoUrl(selectedSlide.url) ? (
+                                            <video
+                                                src={selectedSlide.url}
+                                                autoPlay
+                                                muted
+                                                loop
+                                                className="preview-media"
+                                            />
+                                        ) : (
+                                            <img
+                                                src={selectedSlide.url}
+                                                alt={selectedSlide.title}
+                                                className="preview-media"
+                                            />
+                                        )
+                                    ) : (
+                                        <div className="preview-placeholder">
+                                            No Preview Available
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="preview-info-grid">
+                                    <div className="info-box">
+                                        <label>Start Date</label>
+                                        <div>{selectedSlide.start}</div>
+                                    </div>
+
+                                    <div className="info-box">
+                                        <label>Archive Date</label>
+                                        <div>{selectedSlide.archive}</div>
+                                    </div>
+
+                                    <div className="info-box full">
+                                        <label>Devices</label>
+                                        <div className='text-capitalize'>{selectedSlide.devicesText}</div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
 
                         <button className="preview-close-btn" onClick={handleClosePreview}>
                             Close Preview
