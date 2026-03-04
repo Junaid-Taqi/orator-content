@@ -6,6 +6,27 @@ import '../styles/TemplateSlideForm.css';
 import {serverUrl} from '../Services/Constants/Constants';
 import TemplateDocumentView from './TemplateDocumentView';
 
+const TAG_OPTIONS = [
+    '🏥 Health',
+    '⚽ Sport',
+    '⚽ Football',
+    '🏀 Basketball',
+    '🎾 Tennis',
+    '🏊 Swimming',
+    '🚗 Traffic',
+    '🏗️ Infrastructure',
+    '🏘️ Communal',
+    '🌳 Environment',
+    '👶 Child Care',
+    '👥 Social',
+    '🌍 International',
+    '🎓 Education',
+    '🎭 Culture',
+    '🚨 Safety',
+    '🏠 Housing',
+    '💼 Economy',
+];
+
 const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = false, submitError = ''}) => {
     const durationMap = {
         low: 15,
@@ -30,6 +51,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         eventStartDate: '',
         eventEndDate: '',
         eventDates: [''],
+        tags: [],
     });
     const [devices, setDevices] = useState([{id: 'all-devices', label: 'All Devices'}]);
     const [devicesStatus, setDevicesStatus] = useState('idle');
@@ -97,6 +119,16 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
     const handleChange = (field, value) => {
         setValidationError('');
         setFormData((prev) => ({...prev, [field]: value}));
+    };
+
+    const handleTagToggle = (tag) => {
+        setValidationError('');
+        setFormData((prev) => ({
+            ...prev,
+            tags: prev.tags.includes(tag)
+                ? prev.tags.filter((t) => t !== tag)
+                : [...prev.tags, tag],
+        }));
     };
 
     const handleDeviceToggle = (deviceId) => {
@@ -223,6 +255,17 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
             setValidationError('');
             const normalizedEventDates = formData.eventDates.map((d) => d.trim()).filter(Boolean);
             const renderedTemplateFile = await createTemplateImageFile();
+            const parsedConfig = (() => {
+                try {
+                    return formData.configJSON.trim() ? JSON.parse(formData.configJSON.trim()) : {};
+                } catch (e) {
+                    return {};
+                }
+            })();
+            const configJSON = JSON.stringify({
+                ...(parsedConfig && typeof parsedConfig === 'object' && !Array.isArray(parsedConfig) ? parsedConfig : {}),
+                tags: formData.tags,
+            });
             onSubmit({
                 ...formData,
                 title: formData.title.trim(),
@@ -231,7 +274,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                 totemDescription: formData.totemDescription.trim(),
                 articleUrl: formData.articleUrl.trim(),
                 linkUrl: formData.linkUrl.trim(),
-                configJSON: formData.configJSON.trim(),
+                configJSON,
                 eventDates: normalizedEventDates,
                 durationSeconds: durationMap[formData.priority] ?? 30,
                 category,
@@ -331,6 +374,23 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                             onChange={(e) => handleChange('configJSON', e.target.value)}
                         />
                     </div> */}
+
+                    <div className="form-group">
+                        <label className="form-label">Tags (Multi-Select)</label>
+                        <div className="template-tags-list">
+                            {TAG_OPTIONS.map((tag) => (
+                                <label key={tag} className="template-tag-item">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.tags.includes(tag)}
+                                        onChange={() => handleTagToggle(tag)}
+                                    />
+                                    <span>{tag}</span>
+                                </label>
+                            ))}
+                        </div>
+                        <small className="template-tags-tip">Select all relevant categories for better organization</small>
+                    </div>
 
                     <div className="form-group">
                         <label className="form-label">Priority</label>
