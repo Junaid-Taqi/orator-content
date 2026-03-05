@@ -28,6 +28,8 @@ const TAG_OPTIONS = [
 ];
 
 const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = false, submitError = ''}) => {
+    const VARCHAR_300_MAX = 300;
+    const TEXT_MAX = 65535;
     const durationMap = {
         low: 15,
         medium: 30,
@@ -380,6 +382,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                         <label className="form-label">Slide Title *</label>
                         <input
                             type="text"
+                            maxLength={VARCHAR_300_MAX}
                             className="form-input"
                             placeholder="Enter slide title"
                             value={formData.title}
@@ -391,6 +394,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                         <label className="form-label">Sub Title</label>
                         <input
                             type="text"
+                            maxLength={VARCHAR_300_MAX}
                             className="form-input"
                             placeholder="Enter sub title"
                             value={formData.subtitle}
@@ -402,6 +406,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                         <label className="form-label">Web Description</label>
                         <textarea
                             className="form-input template-textarea"
+                            maxLength={TEXT_MAX}
                             placeholder="Enter web description"
                             value={formData.webDescription}
                             onChange={(e) => handleChange('webDescription', e.target.value)}
@@ -412,6 +417,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                         <label className="form-label">Totem Description</label>
                         <textarea
                             className="form-input template-textarea"
+                            maxLength={TEXT_MAX}
                             placeholder="Enter totem description"
                             value={formData.totemDescription}
                             onChange={(e) => handleChange('totemDescription', e.target.value)}
@@ -423,6 +429,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                             <label className="form-label">Article URL</label>
                             <input
                                 type="text"
+                                maxLength={VARCHAR_300_MAX}
                                 className="form-input"
                                 placeholder="https://example.com/article"
                                 value={formData.articleUrl}
@@ -433,6 +440,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                             <label className="form-label">Link URL / Footer Text</label>
                             <input
                                 type="text"
+                                maxLength={VARCHAR_300_MAX}
                                 className="form-input"
                                 placeholder="SCAN FOR MORE INFORMATION"
                                 value={formData.linkUrl}

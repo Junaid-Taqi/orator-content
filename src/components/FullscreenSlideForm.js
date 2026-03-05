@@ -4,6 +4,8 @@ import '../styles/FullscreenSlideForm.css';
 import {serverUrl} from '../Services/Constants/Constants';
 
 const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = false, submitError = ''}) => {
+    const VARCHAR_300_MAX = 300;
+    const TEXT_MAX = 65535;
     const durationMap = {
         low: 15,
         medium: 30,
@@ -267,13 +269,14 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                 <div className="form-left">
                     <div className="form-group">
                         <label className="form-label">Slide Title *</label>
-                        <input type="text" className="form-input" placeholder="Enter slide title" value={formData.title} onChange={handleTitleChange}/>
+                        <input type="text" maxLength={VARCHAR_300_MAX} className="form-input" placeholder="Enter slide title" value={formData.title} onChange={handleTitleChange}/>
                     </div>
 
                     <div className="form-group">
                         <label className="form-label">Sub Title</label>
                         <input
                             type="text"
+                            maxLength={VARCHAR_300_MAX}
                             className="form-input"
                             placeholder="Enter subtitle"
                             value={formData.subtitle}
@@ -285,6 +288,7 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                         <label className="form-label">Web Description</label>
                         <textarea
                             className="form-input"
+                            maxLength={TEXT_MAX}
                             placeholder="Enter web description"
                             value={formData.webDescription}
                             onChange={(e) => handleFieldChange('webDescription', e.target.value)}
