@@ -1059,7 +1059,7 @@ const SlidesPage = ({ user }) => {
                 </div>
             </Modal>
 
-            <Modal isOpen={isModalOpen} onClose={handleCancelModal}>
+            <Modal isOpen={isModalOpen} onClose={handleCancelModal} closeOnOverlayClick={modalContent !== 'form'}>
                 {modalContent === 'type' ? (
                     <SlideTypeSelector onSelectType={handleSelectType} onCancel={handleCancelModal} />
                 ) : modalContent === 'category' ? (

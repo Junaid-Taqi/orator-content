@@ -72,6 +72,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         {id: 'medium', label: 'Medium', duration: '30s'},
         {id: 'high', label: 'High', duration: '45s'},
     ];
+    const safeTrim = (value) => String(value ?? '').trim();
 
     useEffect(() => {
         if (!formData.coverImageFile) {
@@ -256,8 +257,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
             throw new Error('Unable to generate template image.');
         }
 
-        const safeName = (formData.title || 'template-slide')
-            .trim()
+        const safeName = safeTrim(formData.title || 'template-slide')
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-+|-+$/g, '') || 'template-slide';
@@ -266,7 +266,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
     };
 
     const handleSubmit = async () => {
-        if (!formData.title.trim()) {
+        if (!safeTrim(formData.title)) {
             setValidationError('Slide title is required.');
             return;
         }
@@ -298,7 +298,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                 }
             }
             if (formData.eventMode === 3) {
-                const validEventDates = formData.eventDates.map((d) => d.trim()).filter(Boolean);
+                const validEventDates = formData.eventDates.map((d) => safeTrim(d)).filter(Boolean);
                 if (!validEventDates.length) {
                     setValidationError('At least one event date is required for multiple dates mode.');
                     return;
@@ -308,11 +308,11 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
 
         try {
             setValidationError('');
-            const normalizedEventDates = formData.eventDates.map((d) => d.trim()).filter(Boolean);
+            const normalizedEventDates = formData.eventDates.map((d) => safeTrim(d)).filter(Boolean);
             const renderedTemplateFile = await createTemplateImageFile();
             const parsedConfig = (() => {
                 try {
-                    return formData.configJSON.trim() ? JSON.parse(formData.configJSON.trim()) : {};
+                    return safeTrim(formData.configJSON) ? JSON.parse(safeTrim(formData.configJSON)) : {};
                 } catch (e) {
                     return {};
                 }
@@ -327,12 +327,12 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
             });
             onSubmit({
                 ...formData,
-                title: formData.title.trim(),
-                subtitle: formData.subtitle.trim(),
-                webDescription: formData.webDescription.trim(),
-                totemDescription: formData.totemDescription.trim(),
-                articleUrl: formData.articleUrl.trim(),
-                linkUrl: formData.linkUrl.trim(),
+                title: safeTrim(formData.title),
+                subtitle: safeTrim(formData.subtitle),
+                webDescription: safeTrim(formData.webDescription),
+                totemDescription: safeTrim(formData.totemDescription),
+                articleUrl: safeTrim(formData.articleUrl),
+                linkUrl: safeTrim(formData.linkUrl),
                 configJSON,
                 eventDates: normalizedEventDates,
                 durationSeconds: durationMap[formData.priority] ?? 30,
@@ -787,5 +787,4 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
 };
 
 export default TemplateSlideForm;
-
 
