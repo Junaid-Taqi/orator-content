@@ -238,6 +238,13 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
         });
     };
 
+    const formatPreviewDate = (value) => {
+        if (!value) return '-';
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return value;
+        return parsed.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+    };
+
     return (
         <div className="fullscreen-slide-form">
             <h2 className="form-title">Create Fullscreen Slide</h2>
@@ -440,27 +447,58 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                             <button className={`view-mode-btn ${viewMode === 'totem' ? 'active' : ''}`} onClick={() => setViewMode('totem')}>Totem View</button>
                         </div>
 
-                        <div className="preview-tabs">
-                            <button className={`preview-tab ${orientation === 'landscape' ? 'active' : ''}`} onClick={() => setOrientation('landscape')}>Landscape</button>
-                            <button className={`preview-tab ${orientation === 'portrait' ? 'active' : ''}`} onClick={() => setOrientation('portrait')}>Portrait</button>
-                        </div>
-
-                        <div className={`preview-container ${orientation} ${viewMode}`}>
-                            {preview ? (
-                                <div className="preview-media-wrapper">
-                                    {preview.startsWith('data:video') ? (
-                                        <video src={preview} className="preview-fit-media" controls/>
+                        {viewMode === 'web' ? (
+                            <div className="fullscreen-web-preview-shell">
+                                <div className="fullscreen-web-preview-image-wrap">
+                                    {preview ? (
+                                        preview.startsWith('data:video') ? (
+                                            <video src={preview} className="fullscreen-web-preview-image" controls muted/>
+                                        ) : (
+                                            <img src={preview} alt="Preview" className="fullscreen-web-preview-image"/>
+                                        )
                                     ) : (
-                                        <img src={preview} alt="Preview" className="preview-fit-media"/>
+                                        <div className="fullscreen-web-preview-placeholder">
+                                            {(categoryName || 'N').slice(0, 1).toUpperCase()}
+                                        </div>
                                     )}
                                 </div>
-                            ) : (
-                                <div className="preview-placeholder">
-                                    <p>{viewMode === 'web' ? 'Web View' : 'Totem View'}</p>
-                                    <p className="placeholder-text">{orientation.toUpperCase()}</p>
+
+                                <div className="fullscreen-web-preview-content">
+                                    <div className="fullscreen-web-preview-meta">
+                                        <span className="badge category-badge">{categoryName || 'Updates'}</span>
+                                        <span className="fullscreen-web-preview-meta-item">{'\uD83D\uDCC5'} {formatPreviewDate(new Date())}</span>
+                                    </div>
+
+                                    <h3 className="fullscreen-web-preview-title">{formData.title || 'Untitled'}</h3>
+                                    {!!formData.subtitle && <p className="fullscreen-web-preview-subtitle">{formData.subtitle}</p>}
+                                    <p className="fullscreen-web-preview-description">{formData.webDescription || '-'}</p>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="preview-tabs">
+                                    <button className={`preview-tab ${orientation === 'landscape' ? 'active' : ''}`} onClick={() => setOrientation('landscape')}>Landscape</button>
+                                    <button className={`preview-tab ${orientation === 'portrait' ? 'active' : ''}`} onClick={() => setOrientation('portrait')}>Portrait</button>
+                                </div>
+
+                                <div className={`preview-container ${orientation} ${viewMode}`}>
+                                    {preview ? (
+                                        <div className="preview-media-wrapper">
+                                            {preview.startsWith('data:video') ? (
+                                                <video src={preview} className="preview-fit-media" controls/>
+                                            ) : (
+                                                <img src={preview} alt="Preview" className="preview-fit-media"/>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="preview-placeholder">
+                                            <p>Totem View</p>
+                                            <p className="placeholder-text">{orientation.toUpperCase()}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        )}
 
                         <div className="note-section">
                             <span>Note: Slide will be added to </span>
