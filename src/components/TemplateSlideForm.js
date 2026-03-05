@@ -189,9 +189,13 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
 
     const handleDeviceToggle = (deviceId) => {
         setValidationError('');
+        const selectableDeviceIds = devices.filter((d) => d.id !== 'all-devices').map((d) => d.id);
         let updated = [...formData.devices];
         if (deviceId === 'all-devices') {
             updated = updated.includes('all-devices') ? [] : ['all-devices'];
+        } else if (updated.includes('all-devices')) {
+            // If all devices were selected, unchecking one keeps every other device selected.
+            updated = selectableDeviceIds.filter((id) => id !== deviceId);
         } else if (updated.includes(deviceId)) {
             updated = updated.filter((id) => id !== deviceId);
             if (!updated.length) {
@@ -354,6 +358,12 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         const parsed = new Date(value);
         if (Number.isNaN(parsed.getTime())) return value;
         return parsed.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+    };
+    const isDeviceChecked = (deviceId) => {
+        if (deviceId === 'all-devices') {
+            return formData.devices.includes('all-devices');
+        }
+        return formData.devices.includes('all-devices') || formData.devices.includes(deviceId);
     };
 
     return (
@@ -666,7 +676,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                                 <label key={device.id} className="device-checkbox">
                                     <input
                                         type="checkbox"
-                                        checked={formData.devices.includes(device.id)}
+                                        checked={isDeviceChecked(device.id)}
                                         onChange={() => handleDeviceToggle(device.id)}
                                     />
                                     <span>{device.label}</span>
@@ -787,4 +797,3 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
 };
 
 export default TemplateSlideForm;
-
