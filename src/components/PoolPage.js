@@ -13,6 +13,9 @@ import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 
+const POOL_NAME_MAX_LENGTH = 300;
+const POOL_DESCRIPTION_MAX_LENGTH = 500;
+
 const PoolsPage = ({ user }) => {
     const dispatch = useDispatch();
     const [showModal, setShowModal] = useState(false);
@@ -128,7 +131,11 @@ const PoolsPage = ({ user }) => {
     };
 
     const handleOpenEditModal = (pool) => {
-        setEditingPool(pool);
+        setEditingPool({
+            ...pool,
+            name: String(pool?.name || '').slice(0, POOL_NAME_MAX_LENGTH),
+            description: String(pool?.description || '').slice(0, POOL_DESCRIPTION_MAX_LENGTH),
+        });
         setShowModal(true);
     };
 
@@ -471,6 +478,5 @@ const PoolsPage = ({ user }) => {
 };
 
 export default PoolsPage;
-
 
 

@@ -13,11 +13,12 @@ const initialFormState = {
     priorityMode: 'By Priority',
     isAlwaysOn: false,
 };
-const NAME_MAX_LENGTH = 255;
+const NAME_MAX_LENGTH = 300;
+const DESCRIPTION_MAX_LENGTH = 500;
 
 const mapPoolToFormData = (pool) => ({
-    name: pool?.name || '',
-    description: pool?.description || '',
+    name: String(pool?.name || '').slice(0, NAME_MAX_LENGTH),
+    description: String(pool?.description || '').slice(0, DESCRIPTION_MAX_LENGTH),
     color: pool?.color || 'Blue',
     status: String(!!pool?.status),
     priorityMode: pool?.priorityMode || 'By Priority',
@@ -66,6 +67,11 @@ const CreatePoolModal = ({isOpen, onClose, user, poolToEdit = null}) => {
             setSubmitError(`Pool name must be ${NAME_MAX_LENGTH} characters or fewer.`);
             return;
         }
+        const trimmedDescription = formData.description.trim();
+        if (trimmedDescription.length > DESCRIPTION_MAX_LENGTH) {
+            setSubmitError(`Description must be ${DESCRIPTION_MAX_LENGTH} characters or fewer.`);
+            return;
+        }
 
         const groupId = user?.groups?.[0]?.id;
         const userId = user?.userId;
@@ -78,7 +84,7 @@ const CreatePoolModal = ({isOpen, onClose, user, poolToEdit = null}) => {
             groupId: String(groupId),
             userId: String(userId),
             name: trimmedName,
-            description: formData.description.trim(),
+            description: trimmedDescription,
             color: formData.color,
             status: formData.status,
             priorityMode: formData.priorityMode,
@@ -145,6 +151,7 @@ const CreatePoolModal = ({isOpen, onClose, user, poolToEdit = null}) => {
                             className="modal-input"
                             value={formData.description}
                             onChange={(e) => handleFormChange('description', e.target.value)}
+                            maxLength={DESCRIPTION_MAX_LENGTH}
                         />
                     </div>
 
