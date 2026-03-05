@@ -4,13 +4,13 @@ import '../styles/TemplateDocumentView.css';
 
 const formatDisplayDate = (value) => {
     if (!value) {
-        return '--.--.--';
+        return '--.--';
     }
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) {
         return value;
     }
-    return parsed.toLocaleDateString('en-GB').replace(/\//g, '.');
+    return parsed.toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit'}).replace(/\//g, '.');
 };
 
 const TemplateDocumentView = ({
@@ -19,16 +19,19 @@ const TemplateDocumentView = ({
     description = '',
     startDate = '',
     archiveDate = '',
+    categoryLabel = '',
     viewMode = 'web',
 }) => {
     const SCAN_QR_HARDCODED_URL = 'https://orator.hr/';
     const now = new Date();
     const timeValue = now.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+    const topCurrentDate = formatDisplayDate(now);
     const currentDate = formatDisplayDate(startDate);
     const archiveDateText = formatDisplayDate(archiveDate);
     const mainTitle = (title || 'Title');
     const subTitle = (subtitle || 'Sub Title');
-    const bodyText = description || 'Main text';
+    const bodyText = description || 'Description';
+    const badgeText = (categoryLabel || 'Events').toUpperCase();
 
     return (
         <div className={`template-document ${viewMode}`}>
@@ -37,28 +40,22 @@ const TemplateDocumentView = ({
                     <div className="template-top-label">LOCAL TIME</div>
                     <div className="template-top-value">{timeValue}</div>
                 </div>
-                <div className="template-top-brand">ORATOR</div>
+                <div className="template-badge">{badgeText}</div>
                 <div className="template-top-item align-right">
                     <div className="template-top-label">CURRENT DATE</div>
-                    <div className="template-top-value">{currentDate}</div>
+                    <div className="template-top-value">{topCurrentDate}</div>
                 </div>
             </div>
 
-            <div className="template-badge">EVENTS</div>
+            <div className="template-divider" />
+            <div className="template-logo">LOGO</div>
 
             <div className="template-main">
-                <h1 className="template-title">{mainTitle}</h1>
-                <h2 className="template-subtitle">{subTitle}</h2>
-
-                <div className="template-logo">LOGO</div>
-
-                <p className="template-highlight">
-                    {viewMode === 'totem' ? 'VISIT US TODAY' : 'JOIN US FOR A DAY OF FUN'}
-                </p>
-
-                <div className="template-line" />
-
-                <p className="template-description">{bodyText}</p>
+                <div>
+                    <h1 className="template-title">{mainTitle}</h1>
+                    <h2 className="template-subtitle">{subTitle}</h2>
+                    <p className="template-description">{bodyText}</p>
+                </div>
 
                 <div className="template-dates">
                     <div className="template-date-block">

@@ -28,7 +28,9 @@ const TAG_OPTIONS = [
 ];
 
 const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = false, submitError = ''}) => {
+    const VARCHAR_200_MAX = 200;
     const VARCHAR_300_MAX = 300;
+    const VARCHAR_600_MAX = 600;
     const TEXT_MAX = 65535;
     const durationMap = {
         low: 15,
@@ -382,7 +384,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                         <label className="form-label">Slide Title *</label>
                         <input
                             type="text"
-                            maxLength={VARCHAR_300_MAX}
+                            maxLength={VARCHAR_200_MAX}
                             className="form-input"
                             placeholder="Enter slide title"
                             value={formData.title}
@@ -417,7 +419,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                         <label className="form-label">Totem Description</label>
                         <textarea
                             className="form-input template-textarea"
-                            maxLength={TEXT_MAX}
+                            maxLength={VARCHAR_600_MAX}
                             placeholder="Enter totem description"
                             value={formData.totemDescription}
                             onChange={(e) => handleChange('totemDescription', e.target.value)}
@@ -764,6 +766,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                                             startDate={formData.startDate}
                                             archiveDate={formData.archiveDate}
                                             linkUrl={formData.linkUrl}
+                                            categoryLabel={categoryName}
                                             viewMode={viewMode}
                                         />
                                     </div>
@@ -789,6 +792,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                         startDate={formData.startDate}
                         archiveDate={formData.archiveDate}
                         linkUrl={formData.linkUrl}
+                        categoryLabel={categoryName}
                         viewMode={viewMode}
                     />
                 </div>
