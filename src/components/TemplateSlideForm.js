@@ -263,6 +263,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
     };
 
     const handleSubmit = async () => {
+        console.log("submit", formData);
         if (!safeTrim(formData.title)) {
             setValidationError('Slide title is required.');
             return;
