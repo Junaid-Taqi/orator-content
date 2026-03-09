@@ -642,7 +642,7 @@ const SlidesPage = ({ user }) => {
                                 <button className="btn-preview-outline" onClick={() => handlePreviewClick(slide)}><FontAwesomeIcon icon={faEye} style={{ marginRight: '5px' }} />Preview</button>
                                 <div className="footer-icons">
                                     <button className="icon-btn-small" onClick={() => handleEditClick(slide)}><FontAwesomeIcon icon={faCog} /></button>
-                                    <button className="icon-btn-small" onClick={() => handleArchiveClick(slide)}><FontAwesomeIcon icon={faBoxArchive} /></button>
+                                    {/* <button className="icon-btn-small" onClick={() => handleArchiveClick(slide)}><FontAwesomeIcon icon={faBoxArchive} /></button> */}
                                     <button className="icon-btn-small delete" onClick={() => handleDeleteClick(slide)}><FontAwesomeIcon icon={faTrashAlt} /></button>
                                 </div>
                             </div>
