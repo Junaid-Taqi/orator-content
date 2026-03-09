@@ -814,7 +814,7 @@ const SlidesPage = ({ user }) => {
                                 <label className="form-label">Slide Title *</label>
                                 <input
                                     type="text"
-                                    maxLength={VARCHAR_300_MAX}
+                                    maxLength={75}
                                     className="form-input"
                                     value={editForm.title}
                                     onChange={(e) => handleEditFieldChange('title', e.target.value)}
@@ -825,7 +825,7 @@ const SlidesPage = ({ user }) => {
                                 <label className="form-label">Sub Title</label>
                                 <input
                                     type="text"
-                                    maxLength={VARCHAR_300_MAX}
+                                    maxLength={130}
                                     className="form-input"
                                     value={editForm.subtitle}
                                     onChange={(e) => handleEditFieldChange('subtitle', e.target.value)}

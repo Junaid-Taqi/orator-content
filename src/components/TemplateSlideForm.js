@@ -369,7 +369,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                         <label className="form-label">Slide Title *</label>
                         <input
                             type="text"
-                            maxLength={VARCHAR_300_MAX}
+                            maxLength={75}
                             className="form-input"
                             placeholder="Enter slide title"
                             value={formData.title}
@@ -381,7 +381,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                         <label className="form-label">Sub Title</label>
                         <input
                             type="text"
-                            maxLength={VARCHAR_300_MAX}
+                            maxLength={130}
                             className="form-input"
                             placeholder="Enter sub title"
                             value={formData.subtitle}

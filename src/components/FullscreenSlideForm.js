@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../styles/FullscreenSlideForm.css';
-import {serverUrl} from '../Services/Constants/Constants';
+import { serverUrl } from '../Services/Constants/Constants';
 
-const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = false, submitError = ''}) => {
+const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = false, submitError = '' }) => {
     const VARCHAR_300_MAX = 300;
     const TEXT_MAX = 65535;
     const durationMap = {
@@ -26,7 +26,7 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
         eventEndDate: '',
         eventDates: [''],
     });
-    const [devices, setDevices] = useState([{id: 'all-devices', label: 'All Devices'}]);
+    const [devices, setDevices] = useState([{ id: 'all-devices', label: 'All Devices' }]);
     const [devicesStatus, setDevicesStatus] = useState('idle');
     const [devicesError, setDevicesError] = useState('');
 
@@ -39,9 +39,9 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
     const categoryName = category?.title || category?.name;
 
     const priorities = [
-        {id: 'low', label: 'Low', duration: '15s'},
-        {id: 'medium', label: 'Medium', duration: '30s'},
-        {id: 'high', label: 'High', duration: '45s'},
+        { id: 'low', label: 'Low', duration: '15s' },
+        { id: 'medium', label: 'Medium', duration: '30s' },
+        { id: 'high', label: 'High', duration: '45s' },
     ];
 
     useEffect(() => {
@@ -61,7 +61,7 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                     },
                 };
-                const payload = {groupId: String(groupId)};
+                const payload = { groupId: String(groupId) };
                 const response = await axios.post(
                     `${serverUrl}/o/displayManagementApplication/getAllDisplays`,
                     payload,
@@ -81,7 +81,7 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                     sleepTime: display.sleepTime,
                 }));
 
-                setDevices([{id: 'all-devices', label: 'All Devices'}, ...mappedDevices]);
+                setDevices([{ id: 'all-devices', label: 'All Devices' }, ...mappedDevices]);
                 setDevicesStatus('succeeded');
             } catch (error) {
                 setDevicesStatus('failed');
@@ -94,19 +94,19 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
 
     const handleTitleChange = (e) => {
         setValidationError('');
-        setFormData({...formData, title: e.target.value});
+        setFormData({ ...formData, title: e.target.value });
     };
     const handleFieldChange = (field, value) => {
         setValidationError('');
-        setFormData({...formData, [field]: value});
+        setFormData({ ...formData, [field]: value });
     };
     const handlePriorityChange = (priority) => {
         setValidationError('');
-        setFormData({...formData, priority});
+        setFormData({ ...formData, priority });
     };
     const handleDateChange = (field, value) => {
         setValidationError('');
-        setFormData({...formData, [field]: value});
+        setFormData({ ...formData, [field]: value });
     };
 
     const handleDeviceToggle = (deviceId) => {
@@ -127,7 +127,7 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
             updated = updated.filter((id) => id !== 'all-devices');
             updated.push(deviceId);
         }
-        setFormData({...formData, devices: updated});
+        setFormData({ ...formData, devices: updated });
     };
 
     const handleFileUpload = (e) => {
@@ -165,18 +165,18 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
         setValidationError('');
         const updatedDates = [...formData.eventDates];
         updatedDates[index] = value;
-        setFormData({...formData, eventDates: updatedDates});
+        setFormData({ ...formData, eventDates: updatedDates });
     };
 
     const handleAddEventDate = () => {
         setValidationError('');
-        setFormData({...formData, eventDates: [...formData.eventDates, '']});
+        setFormData({ ...formData, eventDates: [...formData.eventDates, ''] });
     };
 
     const handleRemoveEventDate = (index) => {
         setValidationError('');
         const updatedDates = formData.eventDates.filter((_, i) => i !== index);
-        setFormData({...formData, eventDates: updatedDates.length ? updatedDates : ['']});
+        setFormData({ ...formData, eventDates: updatedDates.length ? updatedDates : [''] });
     };
 
     const handleSubmit = () => {
@@ -248,7 +248,7 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
         if (!value) return '-';
         const parsed = new Date(value);
         if (Number.isNaN(parsed.getTime())) return value;
-        return parsed.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+        return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     };
     const isDeviceChecked = (deviceId) => {
         if (deviceId === 'all-devices') {
@@ -269,14 +269,14 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                 <div className="form-left">
                     <div className="form-group">
                         <label className="form-label">Slide Title *</label>
-                        <input type="text" maxLength={VARCHAR_300_MAX} className="form-input" placeholder="Enter slide title" value={formData.title} onChange={handleTitleChange}/>
+                        <input type="text" maxLength={75} className="form-input" placeholder="Enter slide title" value={formData.title} onChange={handleTitleChange} />
                     </div>
 
                     <div className="form-group">
                         <label className="form-label">Sub Title</label>
                         <input
                             type="text"
-                            maxLength={VARCHAR_300_MAX}
+                            maxLength={130}
                             className="form-input"
                             placeholder="Enter subtitle"
                             value={formData.subtitle}
@@ -302,7 +302,7 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                             <div className="upload-icon">UP</div>
                             <p className="upload-text">Click to upload or drag & drop</p>
                         </div>
-                        <input id="media-input" type="file" accept="image/*,video/*" style={{display: 'none'}} onChange={handleFileUpload}/>
+                        <input id="media-input" type="file" accept="image/*,video/*" style={{ display: 'none' }} onChange={handleFileUpload} />
                     </div>
 
                     <div className="form-group">
@@ -319,17 +319,17 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                     <div className="date-row">
                         <div className="form-group">
                             <label className="form-label">Start Date</label>
-                            <input type="date" className="form-input date-input" value={formData.startDate} onChange={(e) => handleDateChange('startDate', e.target.value)}/>
+                            <input type="date" className="form-input date-input" value={formData.startDate} onChange={(e) => handleDateChange('startDate', e.target.value)} />
                         </div>
                         <div className="form-group">
                             <label className="form-label">Archive Date</label>
-                            <input type="date" className="form-input date-input" value={formData.archiveDate} onChange={(e) => handleDateChange('archiveDate', e.target.value)}/>
+                            <input type="date" className="form-input date-input" value={formData.archiveDate} onChange={(e) => handleDateChange('archiveDate', e.target.value)} />
                         </div>
                     </div>
 
                     <div className="form-group event-dates-group">
                         <label className="form-label">Event Date(s) (Optional)</label>
-                        <label className="device-checkbox" style={{marginBottom: '10px'}}>
+                        <label className="device-checkbox" style={{ marginBottom: '10px' }}>
                             <input
                                 type="checkbox"
                                 checked={formData.eventEnabled}
@@ -340,7 +340,7 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
 
                         {formData.eventEnabled && (
                             <div className="event-date-block">
-                                <div className="preview-tabs" style={{marginBottom: '12px'}}>
+                                <div className="preview-tabs" style={{ marginBottom: '12px' }}>
                                     <button
                                         type="button"
                                         className={`preview-tab ${formData.eventMode === 1 ? 'active' : ''}`}
@@ -443,15 +443,15 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                         <div className="device-list">
                             {devices.map((device) => (
                                 <label key={device.id} className="device-checkbox">
-                                    <input type="checkbox" checked={isDeviceChecked(device.id)} onChange={() => handleDeviceToggle(device.id)}/>
+                                    <input type="checkbox" checked={isDeviceChecked(device.id)} onChange={() => handleDeviceToggle(device.id)} />
                                     <span>{device.label}</span>
                                 </label>
                             ))}
                         </div>
                     </div>
 
-                    {!!validationError && <p className="upload-text" style={{color: '#ff9aa2'}}>{validationError}</p>}
-                    {!validationError && !!submitError && <p className="upload-text" style={{color: '#ff9aa2'}}>{submitError}</p>}
+                    {!!validationError && <p className="upload-text" style={{ color: '#ff9aa2' }}>{validationError}</p>}
+                    {!validationError && !!submitError && <p className="upload-text" style={{ color: '#ff9aa2' }}>{submitError}</p>}
                 </div>
 
                 <div className="form-right">
@@ -466,9 +466,9 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                                 <div className="fullscreen-web-preview-image-wrap">
                                     {preview ? (
                                         preview.startsWith('data:video') ? (
-                                            <video src={preview} className="fullscreen-web-preview-image" controls muted/>
+                                            <video src={preview} className="fullscreen-web-preview-image" controls muted />
                                         ) : (
-                                            <img src={preview} alt="Preview" className="fullscreen-web-preview-image"/>
+                                            <img src={preview} alt="Preview" className="fullscreen-web-preview-image" />
                                         )
                                     ) : (
                                         <div className="fullscreen-web-preview-placeholder">
@@ -499,9 +499,9 @@ const FullscreenSlideForm = ({category, user, onCancel, onSubmit, submitting = f
                                     {preview ? (
                                         <div className="preview-media-wrapper">
                                             {preview.startsWith('data:video') ? (
-                                                <video src={preview} className="preview-fit-media" controls/>
+                                                <video src={preview} className="preview-fit-media" controls />
                                             ) : (
-                                                <img src={preview} alt="Preview" className="preview-fit-media"/>
+                                                <img src={preview} alt="Preview" className="preview-fit-media" />
                                             )}
                                         </div>
                                     ) : (
