@@ -56,7 +56,6 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         eventEndDate: '',
         eventDates: [''],
         tags: [],
-        coverImageMode: 'category-default',
         coverImageFile: null,
     });
     const [devices, setDevices] = useState([{id: 'all-devices', label: 'All Devices'}]);
@@ -155,16 +154,6 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         }));
     };
 
-    const handleCoverImageModeChange = (mode) => {
-        setValidationError('');
-        setCoverImageError('');
-        setFormData((prev) => ({
-            ...prev,
-            coverImageMode: mode,
-            coverImageFile: mode === 'custom-upload' ? prev.coverImageFile : null,
-        }));
-    };
-
     const handleCoverImageFileChange = (file) => {
         if (!file) {
             return;
@@ -186,7 +175,6 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         setValidationError('');
         setFormData((prev) => ({
             ...prev,
-            coverImageMode: 'custom-upload',
             coverImageFile: file,
         }));
     };
@@ -328,10 +316,6 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
             const configJSON = JSON.stringify({
                 ...(parsedConfig && typeof parsedConfig === 'object' && !Array.isArray(parsedConfig) ? parsedConfig : {}),
                 tags: formData.tags,
-                coverImage: {
-                    mode: formData.coverImageMode,
-                    fileName: formData.coverImageFile?.name || '',
-                },
             });
             onSubmit({
                 ...formData,
@@ -348,7 +332,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                 categoryName,
                 contentPoolId: category?.id,
                 renderedTemplateFile,
-                coverImageFile: formData.coverImageMode === 'custom-upload' ? formData.coverImageFile : null,
+                coverImageFile: formData.coverImageFile,
                 availableDevices: devices.filter((d) => d.id !== 'all-devices'),
             });
         } catch (error) {
@@ -378,8 +362,8 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                 Category: <span className="badge-value">{categoryName}</span>
             </div>
 
-            <div className="form-container">
-                <div className="form-left">
+            <div className="row m-0">
+                <div className="col-md-6 col-12 mb-3">
                     <div className="form-group">
                         <label className="form-label">Slide Title *</label>
                         <input
@@ -491,26 +475,6 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                             onChange={(e) => handleCoverImageFileChange(e.target.files?.[0])}
                         />
 
-                        <div className="template-cover-options">
-                            <label className={`template-cover-option ${formData.coverImageMode === 'category-default' ? 'active' : ''}`}>
-                                <input
-                                    type="radio"
-                                    name="templateCoverMode"
-                                    checked={formData.coverImageMode === 'category-default'}
-                                    onChange={() => handleCoverImageModeChange('category-default')}
-                                />
-                                <span>Category Default</span>
-                            </label>
-                            <label className={`template-cover-option ${formData.coverImageMode === 'municipality-logo' ? 'active' : ''}`}>
-                                <input
-                                    type="radio"
-                                    name="templateCoverMode"
-                                    checked={formData.coverImageMode === 'municipality-logo'}
-                                    onChange={() => handleCoverImageModeChange('municipality-logo')}
-                                />
-                                <span>Municipality Logo</span>
-                            </label>
-                        </div>
                         {!!coverImageError && <p className="upload-text template-error">{coverImageError}</p>}
                     </div>
 
@@ -699,7 +663,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                     {!validationError && !!submitError && <p className="upload-text template-error">{submitError}</p>}
                 </div>
 
-                <div className="form-right">
+                <div className="col-md-6 col-12 mb-3">
                     <div className="preview-section">
                         <div className="view-mode-toggles">
                             <button

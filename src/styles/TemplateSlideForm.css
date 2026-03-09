@@ -193,6 +193,7 @@
 
 .template-slide-form .template-web-preview-content {
   padding: 16px 18px 20px;
+  word-break: break-all;
 }
 
 .template-slide-form .template-web-preview-meta {
