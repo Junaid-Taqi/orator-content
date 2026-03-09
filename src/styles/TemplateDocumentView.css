@@ -14,6 +14,41 @@
   text-transform: capitalize;
 }
 
+.template-document.bg-header-green {
+  background: linear-gradient(180deg,
+      #008000 0 14%,
+      #1789c7 1% 86%,
+      #008000 85% 100%);
+}
+
+.template-document.bg-header-blue {
+  background: linear-gradient(180deg,
+      #0000FF 0 14%,
+      #1789c7 1% 86%,
+      #0000FF 85% 100%);
+}
+
+.template-document.bg-header-orange {
+  background: linear-gradient(180deg,
+      #FFA500 0 14%,
+      #1789c7 1% 86%,
+      #FFA500 85% 100%);
+}
+
+.template-document.bg-header-red {
+  background: linear-gradient(180deg,
+      #FF0000 0 14%,
+      #1789c7 1% 86%,
+      #FF0000 85% 100%);
+}
+
+.template-document.bg-header-purple {
+  background: linear-gradient(180deg,
+      #800080 0 14%,
+      #1789c7 1% 86%,
+      #800080 85% 100%);
+}
+
 .template-top-strip {
   display: flex;
   justify-content: space-between;

@@ -20,6 +20,7 @@ const TemplateDocumentView = ({
     startDate = '',
     archiveDate = '',
     categoryLabel = '',
+    categoryColor = '',
     viewMode = 'web',
 }) => {
     const SCAN_QR_HARDCODED_URL = 'https://orator.hr/';
@@ -32,9 +33,10 @@ const TemplateDocumentView = ({
     const subTitle = (subtitle || 'Sub Title');
     const bodyText = description || 'Description';
     const badgeText = (categoryLabel || 'Events').toUpperCase();
+    const catehgoryStyle = categoryColor.toLowerCase();
 
     return (
-        <div className={`template-document ${viewMode}`}>
+        <div className={`template-document ${viewMode} bg-header-${catehgoryStyle}`}>
             <div className="template-top-strip">
                 <div className="template-top-item">
                     <div className="template-top-label">LOCAL TIME</div>

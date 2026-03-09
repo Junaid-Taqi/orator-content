@@ -69,6 +69,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
     const captureRef = useRef(null);
     const coverImageInputRef = useRef(null);
     const categoryName = category?.title || category?.name;
+    const categoryColor = category?.color;
 
     const priorities = [
         {id: 'low', label: 'Low', duration: '15s'},
@@ -731,6 +732,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                                             archiveDate={formData.archiveDate}
                                             linkUrl={formData.linkUrl}
                                             categoryLabel={categoryName}
+                                            categoryColor={categoryColor}
                                             viewMode={viewMode}
                                         />
                                     </div>
@@ -757,6 +759,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                         archiveDate={formData.archiveDate}
                         linkUrl={formData.linkUrl}
                         categoryLabel={categoryName}
+                        categoryColor={categoryColor}
                         viewMode={viewMode}
                     />
                 </div>
