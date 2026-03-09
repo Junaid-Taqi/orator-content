@@ -342,7 +342,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
         }
     };
 
-    const activeDescription = viewMode === 'web' ? formData.webDescription : formData.totemDescription;
+    const activeDescription = formData.totemDescription;
     const formatPreviewDate = (value) => {
         if (!value) return '-';
         const parsed = new Date(value);
