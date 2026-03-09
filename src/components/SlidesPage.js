@@ -103,6 +103,11 @@ const parseConfigJson = (value) => {
     }
 };
 
+const VARCHAR_200_MAX = 200;
+const VARCHAR_300_MAX = 300;
+const VARCHAR_600_MAX = 600;
+const TEXT_MAX = 65535;
+
 const SlidesPage = ({ user }) => {
     const dispatch = useDispatch();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -809,6 +814,7 @@ const SlidesPage = ({ user }) => {
                                 <label className="form-label">Slide Title *</label>
                                 <input
                                     type="text"
+                                    maxLength={VARCHAR_300_MAX}
                                     className="form-input"
                                     value={editForm.title}
                                     onChange={(e) => handleEditFieldChange('title', e.target.value)}
@@ -819,6 +825,7 @@ const SlidesPage = ({ user }) => {
                                 <label className="form-label">Sub Title</label>
                                 <input
                                     type="text"
+                                    maxLength={VARCHAR_300_MAX}
                                     className="form-input"
                                     value={editForm.subtitle}
                                     onChange={(e) => handleEditFieldChange('subtitle', e.target.value)}
@@ -829,6 +836,7 @@ const SlidesPage = ({ user }) => {
                                 <label className="form-label">Web Description</label>
                                 <textarea
                                     className="form-input"
+                                    maxLength={TEXT_MAX}
                                     rows={3}
                                     value={editForm.webDescription}
                                     onChange={(e) => handleEditFieldChange('webDescription', e.target.value)}
@@ -841,6 +849,7 @@ const SlidesPage = ({ user }) => {
                                         <label className="form-label">Totem Description</label>
                                         <textarea
                                             className="form-input"
+                                            maxLength={VARCHAR_600_MAX}
                                             rows={2}
                                             value={editForm.totemDescription}
                                             onChange={(e) => handleEditFieldChange('totemDescription', e.target.value)}
@@ -850,6 +859,7 @@ const SlidesPage = ({ user }) => {
                                         <label className="form-label">Article URL</label>
                                         <input
                                             type="text"
+                                            maxLength={VARCHAR_300_MAX}
                                             className="form-input"
                                             value={editForm.articleUrl}
                                             onChange={(e) => handleEditFieldChange('articleUrl', e.target.value)}
@@ -859,6 +869,7 @@ const SlidesPage = ({ user }) => {
                                         <label className="form-label">Link URL</label>
                                         <input
                                             type="text"
+                                            maxLength={VARCHAR_300_MAX}
                                             className="form-input"
                                             value={editForm.linkUrl}
                                             onChange={(e) => handleEditFieldChange('linkUrl', e.target.value)}
@@ -889,25 +900,6 @@ const SlidesPage = ({ user }) => {
                                     />
                                     <span>Publish</span>
                                 </label>
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Start Date</label>
-                                <input
-                                    type="date"
-                                    className="form-input"
-                                    value={editForm.startDate}
-                                    onChange={(e) => handleEditFieldChange('startDate', e.target.value)}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Archive Date</label>
-                                <input
-                                    type="date"
-                                    className="form-input"
-                                    value={editForm.archiveDate}
-                                    onChange={(e) => handleEditFieldChange('archiveDate', e.target.value)}
-                                />
                             </div>
 
                             <div className="form-group edit-span-2">

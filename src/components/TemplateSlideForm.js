@@ -1,9 +1,9 @@
-﻿import React, {useEffect, useRef, useState} from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import {toBlob} from 'html-to-image';
+import { toBlob } from 'html-to-image';
 import '../styles/FullscreenSlideForm.css';
 import '../styles/TemplateSlideForm.css';
-import {serverUrl} from '../Services/Constants/Constants';
+import { serverUrl } from '../Services/Constants/Constants';
 import TemplateDocumentView from './TemplateDocumentView';
 
 const TAG_OPTIONS = [
@@ -27,7 +27,7 @@ const TAG_OPTIONS = [
     '\uD83D\uDCBC Economy',
 ];
 
-const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = false, submitError = ''}) => {
+const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = false, submitError = '' }) => {
     const VARCHAR_200_MAX = 200;
     const VARCHAR_300_MAX = 300;
     const VARCHAR_600_MAX = 600;
@@ -58,7 +58,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         tags: [],
         coverImageFile: null,
     });
-    const [devices, setDevices] = useState([{id: 'all-devices', label: 'All Devices'}]);
+    const [devices, setDevices] = useState([{ id: 'all-devices', label: 'All Devices' }]);
     const [devicesStatus, setDevicesStatus] = useState('idle');
     const [devicesError, setDevicesError] = useState('');
     const [validationError, setValidationError] = useState('');
@@ -72,9 +72,9 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
     const categoryColor = category?.color;
 
     const priorities = [
-        {id: 'low', label: 'Low', duration: '15s'},
-        {id: 'medium', label: 'Medium', duration: '30s'},
-        {id: 'high', label: 'High', duration: '45s'},
+        { id: 'low', label: 'Low', duration: '15s' },
+        { id: 'medium', label: 'Medium', duration: '30s' },
+        { id: 'high', label: 'High', duration: '45s' },
     ];
     const safeTrim = (value) => String(value ?? '').trim();
 
@@ -109,7 +109,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                     },
                 };
-                const payload = {groupId: String(groupId)};
+                const payload = { groupId: String(groupId) };
                 const response = await axios.post(
                     `${serverUrl}/o/displayManagementApplication/getAllDisplays`,
                     payload,
@@ -129,7 +129,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                     sleepTime: display.sleepTime,
                 }));
 
-                setDevices([{id: 'all-devices', label: 'All Devices'}, ...mappedDevices]);
+                setDevices([{ id: 'all-devices', label: 'All Devices' }, ...mappedDevices]);
                 setDevicesStatus('succeeded');
             } catch (error) {
                 setDevicesStatus('failed');
@@ -142,7 +142,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
 
     const handleChange = (field, value) => {
         setValidationError('');
-        setFormData((prev) => ({...prev, [field]: value}));
+        setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleTagToggle = (tag) => {
@@ -198,7 +198,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
             updated = updated.filter((id) => id !== 'all-devices');
             updated.push(deviceId);
         }
-        setFormData((prev) => ({...prev, devices: updated}));
+        setFormData((prev) => ({ ...prev, devices: updated }));
     };
 
     const handleEventEnabledChange = (checked) => {
@@ -225,18 +225,18 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         setValidationError('');
         const updatedDates = [...formData.eventDates];
         updatedDates[index] = value;
-        setFormData((prev) => ({...prev, eventDates: updatedDates}));
+        setFormData((prev) => ({ ...prev, eventDates: updatedDates }));
     };
 
     const handleAddEventDate = () => {
         setValidationError('');
-        setFormData((prev) => ({...prev, eventDates: [...prev.eventDates, '']}));
+        setFormData((prev) => ({ ...prev, eventDates: [...prev.eventDates, ''] }));
     };
 
     const handleRemoveEventDate = (index) => {
         setValidationError('');
         const updatedDates = formData.eventDates.filter((_, i) => i !== index);
-        setFormData((prev) => ({...prev, eventDates: updatedDates.length ? updatedDates : ['']}));
+        setFormData((prev) => ({ ...prev, eventDates: updatedDates.length ? updatedDates : [''] }));
     };
 
     const createTemplateImageFile = async () => {
@@ -259,7 +259,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-+|-+$/g, '') || 'template-slide';
 
-        return new File([blob], `${safeName}.png`, {type: 'image/png'});
+        return new File([blob], `${safeName}.png`, { type: 'image/png' });
     };
 
     const handleSubmit = async () => {
@@ -346,7 +346,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
         if (!value) return '-';
         const parsed = new Date(value);
         if (Number.isNaN(parsed.getTime())) return value;
-        return parsed.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+        return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     };
     const isDeviceChecked = (deviceId) => {
         if (deviceId === 'all-devices') {
@@ -369,7 +369,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                         <label className="form-label">Slide Title *</label>
                         <input
                             type="text"
-                            maxLength={VARCHAR_200_MAX}
+                            maxLength={VARCHAR_300_MAX}
                             className="form-input"
                             placeholder="Enter slide title"
                             value={formData.title}
@@ -472,7 +472,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
                             ref={coverImageInputRef}
                             type="file"
                             accept="image/png,image/jpeg"
-                            style={{display: 'none'}}
+                            style={{ display: 'none' }}
                             onChange={(e) => handleCoverImageFileChange(e.target.files?.[0])}
                         />
 
@@ -535,7 +535,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
 
                     <div className="form-group event-dates-group">
                         <label className="form-label">Event Date(s) (Optional)</label>
-                        <label className="device-checkbox" style={{marginBottom: '10px'}}>
+                        <label className="device-checkbox" style={{ marginBottom: '10px' }}>
                             <input
                                 type="checkbox"
                                 checked={formData.eventEnabled}
@@ -546,7 +546,7 @@ const TemplateSlideForm = ({category, user, onCancel, onSubmit, submitting = fal
 
                         {formData.eventEnabled && (
                             <div className="event-date-block">
-                                <div className="preview-tabs" style={{marginBottom: '12px'}}>
+                                <div className="preview-tabs" style={{ marginBottom: '12px' }}>
                                     <button
                                         type="button"
                                         className={`preview-tab ${formData.eventMode === 1 ? 'active' : ''}`}
