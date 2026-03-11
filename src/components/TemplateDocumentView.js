@@ -21,6 +21,8 @@ const TemplateDocumentView = ({
     archiveDate = '',
     categoryLabel = '',
     categoryColor = '',
+    linkUrl = '',
+    qrValue = '',
     viewMode = 'web',
 }) => {
     const SCAN_QR_HARDCODED_URL = 'https://orator.hr/';
@@ -34,6 +36,8 @@ const TemplateDocumentView = ({
     const bodyText = description || 'Description';
     const badgeText = (categoryLabel || 'Events').toUpperCase();
     const catehgoryStyle = categoryColor.toLowerCase();
+    const qrCodeValue = qrValue || SCAN_QR_HARDCODED_URL;
+    const footerText = linkUrl || 'SCAN FOR MORE INFORMATION';
 
     return (
         <div className={`template-document ${viewMode} bg-header-${catehgoryStyle}`}>
@@ -74,7 +78,7 @@ const TemplateDocumentView = ({
             <div className="template-footer">
                 <div className="template-qr">
                     <QRCodeSVG
-                        value={SCAN_QR_HARDCODED_URL}
+                        value={qrCodeValue}
                         size={122}
                         bgColor="#ffffff"
                         fgColor="#111111"
@@ -83,7 +87,7 @@ const TemplateDocumentView = ({
                     />
                 </div>
                 <div className="template-footer-text">
-                    "SCAN FOR MORE INFORMATION"
+                    {footerText}
                 </div>
             </div>
         </div>

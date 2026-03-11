@@ -65,6 +65,12 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
     const [coverImageError, setCoverImageError] = useState('');
     const [viewMode, setViewMode] = useState('web');
     const [coverPreviewUrl, setCoverPreviewUrl] = useState('');
+    const [clientRefId] = useState(() => {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    });
 
     const captureRef = useRef(null);
     const coverImageInputRef = useRef(null);
@@ -318,6 +324,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
             const configJSON = JSON.stringify({
                 ...(parsedConfig && typeof parsedConfig === 'object' && !Array.isArray(parsedConfig) ? parsedConfig : {}),
                 tags: formData.tags,
+                clientRefId,
             });
             onSubmit({
                 ...formData,
@@ -355,6 +362,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
         }
         return formData.devices.includes('all-devices') || formData.devices.includes(deviceId);
     };
+    const qrValue = `${serverUrl}/#/news/${clientRefId}`;
 
     return (
         <div className="fullscreen-slide-form template-slide-form">
@@ -425,7 +433,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                             />
                         </div>
                         <div>
-                            <label className="form-label">Link URL / Footer Text</label>
+                            <label className="form-label">Footer Text</label>
                             <input
                                 type="text"
                                 maxLength={VARCHAR_300_MAX}
@@ -732,6 +740,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                             startDate={formData.startDate}
                                             archiveDate={formData.archiveDate}
                                             linkUrl={formData.linkUrl}
+                                            qrValue={qrValue}
                                             categoryLabel={categoryName}
                                             categoryColor={categoryColor}
                                             viewMode={viewMode}
@@ -759,6 +768,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                         startDate={formData.startDate}
                         archiveDate={formData.archiveDate}
                         linkUrl={formData.linkUrl}
+                        qrValue={qrValue}
                         categoryLabel={categoryName}
                         categoryColor={categoryColor}
                         viewMode={viewMode}
