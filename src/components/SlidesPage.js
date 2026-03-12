@@ -557,6 +557,7 @@ const SlidesPage = ({ user }) => {
                 eventStartDate: slide.eventStartDate || '',
                 eventEndDate: slide.eventEndDate || '',
                 eventDatesJson: slide.eventDatesJson || '',
+                eventDates: parseEventDates(slide.eventDatesJson),
                 startDateRaw: slide.startDate,
                 archiveDateRaw: slide.archiveDate,
                 publishDate: formatDateOnly(slide.publishDate),
@@ -759,6 +760,11 @@ const SlidesPage = ({ user }) => {
                                                     description={selectedSlide.totemDescription}
                                                     startDate={selectedSlide.startDateRaw}
                                                     archiveDate={selectedSlide.archiveDateRaw}
+                                                    eventEnabled={selectedSlide.eventEnabled}
+                                                    eventMode={selectedSlide.eventMode}
+                                                    eventStartDate={selectedSlide.eventStartDate}
+                                                    eventEndDate={selectedSlide.eventEndDate}
+                                                    eventDates={selectedSlide.eventDates}
                                                     linkUrl={selectedSlide.linkUrl}
                                                     qrValue={qrValue}
                                                     categoryLabel={selectedSlide.category}

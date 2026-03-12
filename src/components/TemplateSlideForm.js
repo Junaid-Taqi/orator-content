@@ -714,6 +714,11 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                             description={activeDescription}
                                             startDate={formData.startDate}
                                             archiveDate={formData.archiveDate}
+                                            eventEnabled={formData.eventEnabled}
+                                            eventMode={formData.eventMode}
+                                            eventStartDate={formData.eventStartDate}
+                                            eventEndDate={formData.eventEndDate}
+                                            eventDates={formData.eventDates}
                                             linkUrl={formData.linkUrl}
                                             qrValue={qrValue}
                                             categoryLabel={categoryName}

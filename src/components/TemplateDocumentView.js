@@ -15,6 +15,26 @@ const formatDisplayDate = (value) => {
     return parsed.toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit'}).replace(/\//g, '.');
 };
 
+const parseDateValue = (value) => {
+    if (!value) return null;
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+    return null;
+};
+
+const getNextEventDates = (dates, maxCount = 2) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const parsed = (dates || [])
+        .map((d) => parseDateValue(d))
+        .filter(Boolean)
+        .sort((a, b) => a.getTime() - b.getTime());
+    if (!parsed.length) return [];
+    const upcoming = parsed.filter((d) => d.getTime() >= today.getTime());
+    const pool = upcoming.length ? upcoming : parsed;
+    return pool.slice(0, maxCount);
+};
+
 let cachedLogoUrl = '';
 let cachedLogoGroupId = '';
 let logoFetchPromise = null;
@@ -69,6 +89,11 @@ const TemplateDocumentView = ({
     groupId = '',
     bgImageEnabled = false,
     bgImageUrl = '',
+    eventEnabled = false,
+    eventMode = 1,
+    eventStartDate = '',
+    eventEndDate = '',
+    eventDates = [],
     viewMode = 'web',
 }) => {
     const SCAN_QR_HARDCODED_URL = 'https://orator.hr/';
@@ -85,6 +110,45 @@ const TemplateDocumentView = ({
     const qrCodeValue = qrValue || SCAN_QR_HARDCODED_URL;
     const footerText = linkUrl || 'SCAN FOR MORE INFORMATION';
     const [resolvedLogoUrl, setResolvedLogoUrl] = useState(logoUrl || cachedLogoUrl);
+    const normalizedEventMode = Number(eventMode || 1);
+    const normalizedEventDates = Array.isArray(eventDates) ? eventDates : [];
+
+    const eventDisplay = (() => {
+        if (!eventEnabled) {
+            return {
+                leftLabel: viewMode === 'totem' ? '' : 'START DATE',
+                leftValue: viewMode === 'totem' ? '' : currentDate,
+                rightLabel: viewMode === 'totem' ? '' : 'ARCHIVE DATE',
+                rightValue: viewMode === 'totem' ? '' : archiveDateText,
+            };
+        }
+
+        if (normalizedEventMode === 2) {
+            return {
+                leftLabel: 'EVENT START',
+                leftValue: formatDisplayDate(eventStartDate),
+                rightLabel: 'EVENT END',
+                rightValue: formatDisplayDate(eventEndDate),
+            };
+        }
+
+        if (normalizedEventMode === 3) {
+            const nextDates = getNextEventDates(normalizedEventDates, 2);
+            return {
+                leftLabel: 'EVENT DATE 1',
+                leftValue: nextDates[0] ? formatDisplayDate(nextDates[0]) : '--.--',
+                rightLabel: 'EVENT DATE 2',
+                rightValue: nextDates[1] ? formatDisplayDate(nextDates[1]) : '--.--',
+            };
+        }
+
+        return {
+            leftLabel: 'EVENT DATE',
+            leftValue: formatDisplayDate(eventStartDate),
+            rightLabel: '',
+            rightValue: '',
+        };
+    })();
 
     useEffect(() => {
         let isMounted = true;
@@ -146,13 +210,15 @@ const TemplateDocumentView = ({
 
                 <div className="template-dates">
                     <div className="template-date-block">
-                        <span>START DATE</span>
-                        <strong>{currentDate}</strong>
+                        <span>{eventDisplay.leftLabel}</span>
+                        <strong>{eventDisplay.leftValue}</strong>
                     </div>
-                    <div className="template-date-block">
-                        <span>ARCHIVE DATE</span>
-                        <strong>{archiveDateText}</strong>
-                    </div>
+                    {eventDisplay.rightLabel ? (
+                        <div className="template-date-block">
+                            <span>{eventDisplay.rightLabel}</span>
+                            <strong>{eventDisplay.rightValue}</strong>
+                        </div>
+                    ) : null}
                 </div>
             </div>
 
