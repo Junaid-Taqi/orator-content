@@ -881,8 +881,8 @@ const SlidesPage = ({ user }) => {
                                         <label className="form-label">Totem Description</label>
                                         <textarea
                                             className="form-input"
-                                            maxLength={VARCHAR_600_MAX}
-                                            rows={2}
+                                            maxLength={460}
+                                            rows={3}
                                             value={editForm.totemDescription}
                                             onChange={(e) => handleEditFieldChange('totemDescription', e.target.value)}
                                         />

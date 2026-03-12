@@ -388,7 +388,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                         <label className="form-label">Totem Description</label>
                         <textarea
                             className="form-input template-textarea"
-                            maxLength={VARCHAR_600_MAX}
+                            maxLength={460}
                             placeholder="Enter totem description"
                             value={formData.totemDescription}
                             onChange={(e) => handleChange('totemDescription', e.target.value)}
