@@ -14,6 +14,27 @@
   text-transform: capitalize;
 }
 
+.template-bg-image {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 14%;
+  height: 72%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.35;
+  z-index: 0;
+}
+
+.template-top-strip,
+.template-divider,
+.template-logo,
+.template-main,
+.template-footer {
+  position: relative;
+  z-index: 1;
+}
+
 .template-document.bg-header-green {
   background: linear-gradient(180deg,
       #008000 0 14%,

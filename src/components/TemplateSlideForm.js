@@ -719,6 +719,8 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                             categoryLabel={categoryName}
                                             categoryColor={categoryColor}
                                             groupId={groupId}
+                                            bgImageEnabled={Boolean(coverPreviewUrl)}
+                                            bgImageUrl={coverPreviewUrl}
                                             viewMode={viewMode}
                                         />
                                     </div>

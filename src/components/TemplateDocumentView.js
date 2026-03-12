@@ -67,6 +67,8 @@ const TemplateDocumentView = ({
     qrValue = '',
     logoUrl = '',
     groupId = '',
+    bgImageEnabled = false,
+    bgImageUrl = '',
     viewMode = 'web',
 }) => {
     const SCAN_QR_HARDCODED_URL = 'https://orator.hr/';
@@ -107,6 +109,13 @@ const TemplateDocumentView = ({
 
     return (
         <div className={`template-document ${viewMode} bg-header-${catehgoryStyle}`}>
+            {bgImageEnabled && bgImageUrl ? (
+                <div
+                    className="template-bg-image"
+                    style={{ backgroundImage: `url(${bgImageUrl})` }}
+                    aria-hidden="true"
+                />
+            ) : null}
             <div className="template-top-strip">
                 <div className="template-top-item">
                     <div className="template-top-label">LOCAL TIME</div>

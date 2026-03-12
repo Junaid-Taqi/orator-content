@@ -562,6 +562,7 @@ const SlidesPage = ({ user }) => {
                 publishDate: formatDateOnly(slide.publishDate),
                 url: slide.url,
                 fileURLCover: slide.fileURLCover || '',
+                bgImage: Boolean(slide.bgImage),
                 devicesText: displayNames.length ? displayNames.join(', ') : '-',
             };
         }),
@@ -759,10 +760,12 @@ const SlidesPage = ({ user }) => {
                                                     startDate={selectedSlide.startDateRaw}
                                                     archiveDate={selectedSlide.archiveDateRaw}
                                                     linkUrl={selectedSlide.linkUrl}
-                                                    qrValue={selectedSlideQrValue}
+                                                    qrValue={qrValue}
                                                     categoryLabel={selectedSlide.category}
                                                     categoryColor={selectedSlide.categoryColor}
                                                     groupId={groupId}
+                                                    bgImageEnabled={Boolean(selectedSlide.bgImage)}
+                                                    bgImageUrl={selectedSlide.fileURLCover}
                                                     viewMode="totem"
                                                 />
                                             </div>
