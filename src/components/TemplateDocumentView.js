@@ -35,6 +35,8 @@ const getNextEventDates = (dates, maxCount = 2) => {
     return pool.slice(0, maxCount);
 };
 
+const MAX_MULTIPLE_EVENT_DATES = 8;
+
 let cachedLogoUrl = '';
 let cachedLogoGroupId = '';
 let logoFetchPromise = null;
@@ -112,6 +114,10 @@ const TemplateDocumentView = ({
     const [resolvedLogoUrl, setResolvedLogoUrl] = useState(logoUrl || cachedLogoUrl);
     const normalizedEventMode = Number(eventMode || 1);
     const normalizedEventDates = Array.isArray(eventDates) ? eventDates : [];
+    const multipleEventDates = normalizedEventMode === 3
+        ? getNextEventDates(normalizedEventDates, MAX_MULTIPLE_EVENT_DATES)
+        : [];
+    const isMultipleEventMode = eventEnabled && normalizedEventMode === 3;
 
     const eventDisplay = (() => {
         if (!eventEnabled) {
@@ -133,12 +139,11 @@ const TemplateDocumentView = ({
         }
 
         if (normalizedEventMode === 3) {
-            const nextDates = getNextEventDates(normalizedEventDates, 2);
             return {
-                leftLabel: 'EVENT DATE 1',
-                leftValue: nextDates[0] ? formatDisplayDate(nextDates[0]) : '--.--',
-                rightLabel: 'EVENT DATE 2',
-                rightValue: nextDates[1] ? formatDisplayDate(nextDates[1]) : '--.--',
+                leftLabel: 'EVENT DATE',
+                leftValue: multipleEventDates[0] ? formatDisplayDate(multipleEventDates[0]) : '--.--',
+                rightLabel: '',
+                rightValue: '',
             };
         }
 
@@ -208,17 +213,28 @@ const TemplateDocumentView = ({
                     <p className="template-description">{bodyText}</p>
                 </div>
 
-                <div className="template-dates">
-                    <div className="template-date-block">
-                        <span>{eventDisplay.leftLabel}</span>
-                        <strong>{eventDisplay.leftValue}</strong>
-                    </div>
-                    {eventDisplay.rightLabel ? (
-                        <div className="template-date-block">
-                            <span>{eventDisplay.rightLabel}</span>
-                            <strong>{eventDisplay.rightValue}</strong>
-                        </div>
-                    ) : null}
+                <div className={`template-dates ${isMultipleEventMode ? 'multiple' : ''}`}>
+                    {isMultipleEventMode ? (
+                        (multipleEventDates.length ? multipleEventDates : [null]).map((dateValue, index) => (
+                            <div key={`event-date-${index}`} className="template-date-block">
+                                <span>{`EVENT DATE ${index + 1}`}</span>
+                                <strong>{dateValue ? formatDisplayDate(dateValue) : '--.--'}</strong>
+                            </div>
+                        ))
+                    ) : (
+                        <>
+                            <div className="template-date-block">
+                                <span>{eventDisplay.leftLabel}</span>
+                                <strong>{eventDisplay.leftValue}</strong>
+                            </div>
+                            {eventDisplay.rightLabel ? (
+                                <div className="template-date-block">
+                                    <span>{eventDisplay.rightLabel}</span>
+                                    <strong>{eventDisplay.rightValue}</strong>
+                                </div>
+                            ) : null}
+                        </>
+                    )}
                 </div>
             </div>
 
