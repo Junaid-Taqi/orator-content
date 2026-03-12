@@ -7,6 +7,7 @@ import SlideTypeSelector from './SlideTypeSelector';
 import CategorySelector from './CategorySelector';
 import FullscreenSlideForm from './FullscreenSlideForm';
 import TemplateSlideForm from './TemplateSlideForm';
+import TemplateDocumentView from './TemplateDocumentView';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter } from '@fortawesome/free-solid-svg-icons/faFilter';
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus';
@@ -20,6 +21,7 @@ import { editTemplateSlide } from '../Services/Slices/EditTemplateSlideSlice';
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import { faBoxArchive, faEye } from "@fortawesome/free-solid-svg-icons";
+import { serverUrl } from '../Services/Constants/Constants';
 
 const priorityMap = {
     high: 1,
@@ -472,7 +474,7 @@ const SlidesPage = ({ user }) => {
         const userId = user?.userId;
         const contentPoolId = slideData?.contentPoolId;
 
-        if (!currentGroupId || !userId || !contentPoolId || !slideData?.renderedTemplateFile) {
+        if (!currentGroupId || !userId || !contentPoolId) {
             return;
         }
 
@@ -511,7 +513,7 @@ const SlidesPage = ({ user }) => {
             eventEndDate: slideData.eventEnabled ? (slideData.eventEndDate || '') : '',
             eventDates: slideData.eventEnabled ? (slideData.eventDates || []) : [],
             targetDevices,
-            renderedTemplateFile: slideData.renderedTemplateFile,
+            renderedTemplateFile: slideData.renderedTemplateFile || null,
             coverImageFile: slideData.coverImageFile || null,
         };
 
@@ -536,6 +538,7 @@ const SlidesPage = ({ user }) => {
                 id: slide.slideId,
                 title: slide.title,
                 category: slide.contentPoolName,
+                categoryColor: slide.color || '',
                 priority: priorityLabel,
                 priorityRaw: slide.priority,
                 status: statusLabel,
@@ -575,6 +578,7 @@ const SlidesPage = ({ user }) => {
     const selectedSlideTags = Array.isArray(selectedSlideConfig?.tags)
         ? selectedSlideConfig.tags.filter((tag) => typeof tag === 'string' && tag.trim())
         : [];
+    const selectedSlideQrValue = selectedSlideConfig?.clientRefId;
 
     return (
         <div className="slides-page">
@@ -617,14 +621,14 @@ const SlidesPage = ({ user }) => {
                 {filteredSlides.slice(0, visibleCount).map((slide) => (
                     <div key={slide.id} className="slide-card-item">
                         <div className="slide-card-visual">
-                            {slide.url ? (
-                                isVideoUrl(slide.url) ? (
-                                    <video src={slide.url} className="visual-emoji" muted playsInline preload="metadata" />
+                            {slide.fileURLCover ? (
+                                isVideoUrl(slide.fileURLCover) ? (
+                                    <video src={slide.fileURLCover} className="visual-emoji" muted playsInline preload="metadata" />
                                 ) : (
-                                    <img src={slide.url} alt={slide.title} className="visual-emoji" />
+                                    <img src={slide.fileURLCover} alt={slide.title} className="visual-emoji" />
                                 )
                             ) : (
-                                <span className="visual-emoji">SL</span>
+                                    <span className="visual-emoji">{(slide.title || "N").slice(0, 1).toUpperCase()}</span>
                             )}
                         </div>
                         <div className="slide-card-body">
@@ -743,8 +747,25 @@ const SlidesPage = ({ user }) => {
                                     </div>
                                 </div>
 
-                                <div className="preview-main-box totem-mode">
-                                    {selectedSlide.url ? (
+                                <div className={`preview-main-box totem-mode ${selectedSlide.slideType === 2 ? 'template-totem-preview' : ''}`}>
+                                    {selectedSlide.slideType === 2 ? (
+                                        <div className="template-preview-viewport">
+                                            <div className="template-preview-scale">
+                                                <TemplateDocumentView
+                                                    title={selectedSlide.title}
+                                                    subtitle={selectedSlide.subtitle}
+                                                    description={selectedSlide.totemDescription}
+                                                    startDate={selectedSlide.startDateRaw}
+                                                    archiveDate={selectedSlide.archiveDateRaw}
+                                                    linkUrl={selectedSlide.linkUrl}
+                                                    qrValue={selectedSlideQrValue}
+                                                    categoryLabel={selectedSlide.category}
+                                                    categoryColor={selectedSlide.categoryColor}
+                                                    viewMode="totem"
+                                                />
+                                            </div>
+                                        </div>
+                                    ) : selectedSlide.url ? (
                                         isVideoUrl(selectedSlide.url) ? (
                                             <video
                                                 src={selectedSlide.url}
