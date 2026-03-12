@@ -57,6 +57,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
         eventEndDate: '',
         eventDates: [''],
         tags: [],
+        useCoverImageInTotem: false,
         coverImageFile: null,
     });
     const [devices, setDevices] = useState([{ id: 'all-devices', label: 'All Devices' }]);
@@ -337,6 +338,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                 ...(parsedConfig && typeof parsedConfig === 'object' && !Array.isArray(parsedConfig) ? parsedConfig : {}),
                 tags: formData.tags,
                 clientRefId,
+                useCoverImageInTotem: Boolean(formData.useCoverImageInTotem),
             });
             onSubmit({
                 ...formData,
@@ -488,6 +490,16 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                             <small>JPG, PNG (max 5MB) - Recommended: 1200x630px</small>
                             {!!formData.coverImageFile && <small className="template-cover-file">{formData.coverImageFile.name}</small>}
                         </div>
+
+                        <label className="device-checkbox" style={{ marginTop: '12px' }}>
+                            <input
+                                type="checkbox"
+                                checked={formData.useCoverImageInTotem}
+                                onChange={(e) => handleChange('useCoverImageInTotem', e.target.checked)}
+                                disabled={!formData.coverImageFile}
+                            />
+                            <span>Use this image as totem cover</span>
+                        </label>
 
                         <input
                             ref={coverImageInputRef}
@@ -769,7 +781,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                             categoryLabel={categoryName}
                                             categoryColor={categoryColor}
                                             groupId={groupId}
-                                            bgImageEnabled={Boolean(coverPreviewUrl)}
+                                            bgImageEnabled={Boolean(coverPreviewUrl) && formData.useCoverImageInTotem}
                                             bgImageUrl={coverPreviewUrl}
                                             viewMode={viewMode}
                                         />
@@ -805,7 +817,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                         categoryLabel={categoryName}
                         categoryColor={categoryColor}
                         groupId={groupId}
-                        bgImageEnabled={Boolean(coverPreviewUrl)}
+                        bgImageEnabled={Boolean(coverPreviewUrl) && formData.useCoverImageInTotem}
                         bgImageUrl={coverPreviewUrl}
                         viewMode={viewMode}
                     />

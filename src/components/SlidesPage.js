@@ -581,6 +581,7 @@ const SlidesPage = ({ user }) => {
         ? selectedSlideConfig.tags.filter((tag) => typeof tag === 'string' && tag.trim())
         : [];
     const selectedSlideQrValue = selectedSlideConfig?.clientRefId;
+    const selectedSlideUseCoverInTotem = selectedSlideConfig?.useCoverImageInTotem ?? Boolean(selectedSlide?.bgImage);
     const qrValue = `${serverUrl}/#/news/${selectedSlideQrValue}`;
 
     return (
@@ -787,7 +788,7 @@ const SlidesPage = ({ user }) => {
                                                     categoryLabel={selectedSlide.category}
                                                     categoryColor={selectedSlide.categoryColor}
                                                     groupId={groupId}
-                                                    bgImageEnabled={Boolean(selectedSlide.bgImage)}
+                                                    bgImageEnabled={Boolean(selectedSlideUseCoverInTotem)}
                                                     bgImageUrl={selectedSlide.fileURLCover}
                                                     viewMode="totem"
                                                 />
