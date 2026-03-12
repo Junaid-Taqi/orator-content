@@ -67,6 +67,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
     const [coverImageError, setCoverImageError] = useState('');
     const [viewMode, setViewMode] = useState('web');
     const [coverPreviewUrl, setCoverPreviewUrl] = useState('');
+    const [captureHideLogo, setCaptureHideLogo] = useState(false);
     const [clientRefId] = useState(() => {
         if (typeof crypto !== 'undefined' && crypto.randomUUID) {
             return crypto.randomUUID();
@@ -75,6 +76,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
     });
 
     const captureRef = useRef(null);
+    const previewCaptureRef = useRef(null);
     const coverImageInputRef = useRef(null);
     const categoryName = category?.title || category?.name;
     const categoryColor = category?.color;
@@ -87,19 +89,12 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
     ];
     const safeTrim = (value) => String(value ?? '').trim();
 
-    useEffect(() => {
-        if (!formData.coverImageFile) {
-            setCoverPreviewUrl('');
-            return;
-        }
-
-        const nextUrl = URL.createObjectURL(formData.coverImageFile);
-        setCoverPreviewUrl(nextUrl);
-
-        return () => {
-            URL.revokeObjectURL(nextUrl);
-        };
-    }, [formData.coverImageFile]);
+    const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+    });
 
     useEffect(() => {
         const fetchDevices = async () => {
@@ -183,10 +178,20 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
 
         setCoverImageError('');
         setValidationError('');
+        setCoverPreviewUrl('');
         setFormData((prev) => ({
             ...prev,
             coverImageFile: file,
         }));
+        readFileAsDataUrl(file)
+            .then((result) => {
+                if (typeof result === 'string') {
+                    setCoverPreviewUrl(result);
+                }
+            })
+            .catch(() => {
+                setCoverPreviewUrl('');
+            });
     };
 
     const handleDeviceToggle = (deviceId) => {
@@ -254,18 +259,65 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
         setFormData((prev) => ({ ...prev, eventDates: updatedDates.length ? updatedDates : [''] }));
     };
 
+    const waitForImageLoad = (src) => new Promise((resolve) => {
+        if (!src) {
+            resolve();
+            return;
+        }
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        img.src = src;
+        if (img.complete) {
+            resolve();
+        }
+    });
+
     const createTemplateImageFile = async () => {
         if (!captureRef.current) {
             throw new Error('Template preview is not ready.');
         }
 
-        const blob = await toBlob(captureRef.current, {
+        if (formData.useCoverImageInTotem && coverPreviewUrl) {
+            await waitForImageLoad(coverPreviewUrl);
+        }
+
+        const captureOptions = {
             cacheBust: true,
             pixelRatio: 2,
             backgroundColor: '#0f57a8',
-        });
+            useCORS: true,
+        };
+
+        let blob = null;
+        let lastError = null;
+        try {
+            blob = await toBlob(captureRef.current, captureOptions);
+        } catch (error) {
+            lastError = error;
+            setCaptureHideLogo(true);
+            await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+            try {
+                blob = await toBlob(captureRef.current, captureOptions);
+            } catch (retryError) {
+                lastError = retryError;
+                blob = null;
+            }
+        }
+
+        if (!blob && previewCaptureRef.current) {
+            try {
+                blob = await toBlob(previewCaptureRef.current, captureOptions);
+            } catch (fallbackError) {
+                lastError = fallbackError;
+                blob = null;
+            }
+        }
 
         if (!blob) {
+            if (lastError) {
+                console.error('Template image capture failed:', lastError);
+            }
             throw new Error('Unable to generate template image.');
         }
 
@@ -763,7 +815,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                             </div>
                         ) : (
                             <div className={`preview-container portrait ${viewMode}`}>
-                                <div className="template-preview-viewport">
+                                <div className="template-preview-viewport" ref={previewCaptureRef}>
                                     <div className="template-preview-scale">
                                         <TemplateDocumentView
                                             title={formData.title}
@@ -820,6 +872,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                         bgImageEnabled={Boolean(coverPreviewUrl) && formData.useCoverImageInTotem}
                         bgImageUrl={coverPreviewUrl}
                         viewMode={viewMode}
+                        hideLogo={captureHideLogo}
                     />
                 </div>
             </div>

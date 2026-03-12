@@ -91,6 +91,7 @@ const TemplateDocumentView = ({
     groupId = '',
     bgImageEnabled = false,
     bgImageUrl = '',
+    hideLogo = false,
     eventEnabled = false,
     eventMode = 1,
     eventStartDate = '',
@@ -179,9 +180,10 @@ const TemplateDocumentView = ({
     return (
         <div className={`template-document ${viewMode} bg-header-${catehgoryStyle}`}>
             {bgImageEnabled && bgImageUrl ? (
-                <div
+                <img
                     className="template-bg-image"
-                    style={{ backgroundImage: `url(${bgImageUrl})` }}
+                    src={bgImageUrl}
+                    alt=""
                     aria-hidden="true"
                 />
             ) : null}
@@ -199,7 +201,7 @@ const TemplateDocumentView = ({
 
             <div className="template-divider" />
             <div className="template-logo">
-                {resolvedLogoUrl ? (
+                {!hideLogo && resolvedLogoUrl ? (
                     <img src={resolvedLogoUrl} alt="Municipality logo" className="template-logo-image" />
                 ) : (
                     'LOGO'

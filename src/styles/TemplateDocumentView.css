@@ -18,9 +18,9 @@
   left: 0;
   right: 0;
   top: 14%;
+  width: 100%;
   height: 72%;
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
   opacity: 0.35;
   z-index: 0;
 }
