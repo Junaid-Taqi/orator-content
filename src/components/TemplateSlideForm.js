@@ -32,6 +32,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
     const VARCHAR_300_MAX = 300;
     const VARCHAR_600_MAX = 600;
     const TEXT_MAX = 65535;
+    const MAX_MULTIPLE_EVENT_DATES = 8;
     const durationMap = {
         low: 15,
         medium: 30,
@@ -237,7 +238,13 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
 
     const handleAddEventDate = () => {
         setValidationError('');
-        setFormData((prev) => ({ ...prev, eventDates: [...prev.eventDates, ''] }));
+        setFormData((prev) => {
+            if (prev.eventDates.length >= MAX_MULTIPLE_EVENT_DATES) {
+                setValidationError(`You can select up to ${MAX_MULTIPLE_EVENT_DATES} dates.`);
+                return prev;
+            }
+            return { ...prev, eventDates: [...prev.eventDates, ''] };
+        });
     };
 
     const handleRemoveEventDate = (index) => {
@@ -306,6 +313,10 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                 const validEventDates = formData.eventDates.map((d) => safeTrim(d)).filter(Boolean);
                 if (!validEventDates.length) {
                     setValidationError('At least one event date is required for multiple dates mode.');
+                    return;
+                }
+                if (validEventDates.length > MAX_MULTIPLE_EVENT_DATES) {
+                    setValidationError(`You can select up to ${MAX_MULTIPLE_EVENT_DATES} dates.`);
                     return;
                 }
             }
@@ -632,9 +643,17 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                                 </button>
                                             </div>
                                         ))}
-                                        <button type="button" className="btn-submit" onClick={handleAddEventDate}>
+                                        <button
+                                            type="button"
+                                            className="btn-submit"
+                                            onClick={handleAddEventDate}
+                                            disabled={formData.eventDates.length >= MAX_MULTIPLE_EVENT_DATES}
+                                        >
                                             Add Date
                                         </button>
+                                        <small className="template-tags-tip">
+                                            Maximum {MAX_MULTIPLE_EVENT_DATES} dates allowed.
+                                        </small>
                                     </div>
                                 )}
                             </div>

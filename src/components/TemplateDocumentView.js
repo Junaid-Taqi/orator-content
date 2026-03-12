@@ -181,15 +181,15 @@ const TemplateDocumentView = ({
                 />
             ) : null}
             <div className="template-top-strip">
-                <div className="template-top-item">
+                {/* <div className="template-top-item">
                     <div className="template-top-label">LOCAL TIME</div>
                     <div className="template-top-value">{timeValue}</div>
-                </div>
+                </div> */}
                 <div className="template-badge">{badgeText}</div>
-                <div className="template-top-item align-right">
+                {/* <div className="template-top-item align-right">
                     <div className="template-top-label">CURRENT DATE</div>
                     <div className="template-top-value">{topCurrentDate}</div>
-                </div>
+                </div> */}
             </div>
 
             <div className="template-divider" />
