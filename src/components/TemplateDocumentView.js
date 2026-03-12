@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {QRCodeSVG} from 'qrcode.react';
 import '../styles/TemplateDocumentView.css';
+import { serverUrl } from '../Services/Constants/Constants';
 
 const formatDisplayDate = (value) => {
     if (!value) {
@@ -13,6 +15,46 @@ const formatDisplayDate = (value) => {
     return parsed.toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit'}).replace(/\//g, '.');
 };
 
+let cachedLogoUrl = '';
+let cachedLogoGroupId = '';
+let logoFetchPromise = null;
+
+const fetchMunicipalityLogoUrl = async (groupId) => {
+    if (cachedLogoUrl && cachedLogoGroupId === String(groupId || '')) {
+        return cachedLogoUrl;
+    }
+    if (logoFetchPromise) {
+        return logoFetchPromise;
+    }
+    logoFetchPromise = (async () => {
+        try {
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+                },
+            };
+            const payload = { groupId: String(groupId) };
+            const response = await axios.post(
+                `${serverUrl}/o/settingsManagement/getMunicipalityDetails`,
+                payload,
+                config
+            );
+            const nextUrl = response?.data?.data?.logoUrl || '';
+            if (nextUrl) {
+                cachedLogoUrl = nextUrl;
+                cachedLogoGroupId = String(groupId || '');
+            }
+            return cachedLogoUrl;
+        } catch (error) {
+            return '';
+        } finally {
+            logoFetchPromise = null;
+        }
+    })();
+    return logoFetchPromise;
+};
+
 const TemplateDocumentView = ({
     title = '',
     subtitle = '',
@@ -23,6 +65,8 @@ const TemplateDocumentView = ({
     categoryColor = '',
     linkUrl = '',
     qrValue = '',
+    logoUrl = '',
+    groupId = '',
     viewMode = 'web',
 }) => {
     const SCAN_QR_HARDCODED_URL = 'https://orator.hr/';
@@ -38,6 +82,28 @@ const TemplateDocumentView = ({
     const catehgoryStyle = categoryColor.toLowerCase();
     const qrCodeValue = qrValue || SCAN_QR_HARDCODED_URL;
     const footerText = linkUrl || 'SCAN FOR MORE INFORMATION';
+    const [resolvedLogoUrl, setResolvedLogoUrl] = useState(logoUrl || cachedLogoUrl);
+
+    useEffect(() => {
+        let isMounted = true;
+        if (logoUrl) {
+            setResolvedLogoUrl(logoUrl);
+            return () => { isMounted = false; };
+        }
+        if (cachedLogoUrl && cachedLogoGroupId === String(groupId || '')) {
+            setResolvedLogoUrl(cachedLogoUrl);
+            return () => { isMounted = false; };
+        }
+        if (!groupId) {
+            return () => { isMounted = false; };
+        }
+        fetchMunicipalityLogoUrl(groupId).then((url) => {
+            if (isMounted) {
+                setResolvedLogoUrl(url || '');
+            }
+        });
+        return () => { isMounted = false; };
+    }, [logoUrl, groupId]);
 
     return (
         <div className={`template-document ${viewMode} bg-header-${catehgoryStyle}`}>
@@ -54,7 +120,13 @@ const TemplateDocumentView = ({
             </div>
 
             <div className="template-divider" />
-            <div className="template-logo">LOGO</div>
+            <div className="template-logo">
+                {resolvedLogoUrl ? (
+                    <img src={resolvedLogoUrl} alt="Municipality logo" className="template-logo-image" />
+                ) : (
+                    'LOGO'
+                )}
+            </div>
 
             <div className="template-main">
                 <div>

@@ -759,9 +759,10 @@ const SlidesPage = ({ user }) => {
                                                     startDate={selectedSlide.startDateRaw}
                                                     archiveDate={selectedSlide.archiveDateRaw}
                                                     linkUrl={selectedSlide.linkUrl}
-                                                    qrValue={qrValue}
+                                                    qrValue={selectedSlideQrValue}
                                                     categoryLabel={selectedSlide.category}
                                                     categoryColor={selectedSlide.categoryColor}
+                                                    groupId={groupId}
                                                     viewMode="totem"
                                                 />
                                             </div>

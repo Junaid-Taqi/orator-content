@@ -74,6 +74,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
     const coverImageInputRef = useRef(null);
     const categoryName = category?.title || category?.name;
     const categoryColor = category?.color;
+    const groupId = user?.groups?.[0]?.id;
 
     const priorities = [
         { id: 'low', label: 'Low', duration: '15s' },
@@ -717,6 +718,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                             qrValue={qrValue}
                                             categoryLabel={categoryName}
                                             categoryColor={categoryColor}
+                                            groupId={groupId}
                                             viewMode={viewMode}
                                         />
                                     </div>
