@@ -474,7 +474,7 @@ const SlidesPage = ({ user }) => {
         const userId = user?.userId;
         const contentPoolId = slideData?.contentPoolId;
 
-        if (!currentGroupId || !userId || !contentPoolId) {
+        if (!currentGroupId || !userId || !contentPoolId || !slideData?.renderedTemplateFile) {
             return;
         }
 
@@ -513,7 +513,7 @@ const SlidesPage = ({ user }) => {
             eventEndDate: slideData.eventEnabled ? (slideData.eventEndDate || '') : '',
             eventDates: slideData.eventEnabled ? (slideData.eventDates || []) : [],
             targetDevices,
-            renderedTemplateFile: slideData.renderedTemplateFile || null,
+            renderedTemplateFile: slideData.renderedTemplateFile,
             coverImageFile: slideData.coverImageFile || null,
         };
 
@@ -623,17 +623,34 @@ const SlidesPage = ({ user }) => {
                 {slidesStatus === 'succeeded' && filteredSlides.length === 0 && <p>No slides found.</p>}
                 {filteredSlides.slice(0, visibleCount).map((slide) => (
                     <div key={slide.id} className="slide-card-item">
-                        <div className="slide-card-visual">
-                            {slide.fileURLCover ? (
-                                isVideoUrl(slide.fileURLCover) ? (
-                                    <video src={slide.fileURLCover} className="visual-emoji" muted playsInline preload="metadata" />
-                                ) : (
-                                    <img src={slide.fileURLCover} alt={slide.title} className="visual-emoji" />
-                                )
-                            ) : (
-                                    <span className="visual-emoji">{(slide.title || "N").slice(0, 1).toUpperCase()}</span>
-                            )}
-                        </div>
+                        {(() => {
+                            const mediaUrl = slide.url || slide.fileURLCover;
+                            return (
+                                <div className="slide-card-visual">
+                                    {mediaUrl ? (
+                                        isVideoUrl(mediaUrl) ? (
+                                            <video
+                                                src={mediaUrl}
+                                                className="visual-emoji"
+                                                muted
+                                                playsInline
+                                                preload="metadata"
+                                            />
+                                        ) : (
+                                            <img
+                                                src={mediaUrl}
+                                                alt={slide.title}
+                                                className="visual-emoji"
+                                            />
+                                        )
+                                    ) : (
+                                        <span className="visual-emoji">
+                                            {(slide.title || "N").slice(0, 1).toUpperCase()}
+                                        </span>
+                                    )}
+                                </div>
+                            );
+                        })()}
                         <div className="slide-card-body">
                             <h3 className="slide-card-name">{slide.title}</h3>
                             <div className="slide-card-tags">

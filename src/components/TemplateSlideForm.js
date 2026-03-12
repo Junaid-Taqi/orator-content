@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import { toBlob } from 'html-to-image';
 import '../styles/FullscreenSlideForm.css';
 import '../styles/TemplateSlideForm.css';
 import { serverUrl } from '../Services/Constants/Constants';
@@ -71,6 +72,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
         return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
     });
 
+    const captureRef = useRef(null);
     const coverImageInputRef = useRef(null);
     const categoryName = category?.title || category?.name;
     const categoryColor = category?.color;
@@ -244,6 +246,29 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
         setFormData((prev) => ({ ...prev, eventDates: updatedDates.length ? updatedDates : [''] }));
     };
 
+    const createTemplateImageFile = async () => {
+        if (!captureRef.current) {
+            throw new Error('Template preview is not ready.');
+        }
+
+        const blob = await toBlob(captureRef.current, {
+            cacheBust: true,
+            pixelRatio: 2,
+            backgroundColor: '#0f57a8',
+        });
+
+        if (!blob) {
+            throw new Error('Unable to generate template image.');
+        }
+
+        const safeName = safeTrim(formData.title || 'template-slide')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '') || 'template-slide';
+
+        return new File([blob], `${safeName}.png`, { type: 'image/png' });
+    };
+
     const handleSubmit = async () => {
         console.log("submit", formData);
         if (!safeTrim(formData.title)) {
@@ -289,6 +314,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
         try {
             setValidationError('');
             const normalizedEventDates = formData.eventDates.map((d) => safeTrim(d)).filter(Boolean);
+            const renderedTemplateFile = await createTemplateImageFile();
             const parsedConfig = (() => {
                 try {
                     return safeTrim(formData.configJSON) ? JSON.parse(safeTrim(formData.configJSON)) : {};
@@ -315,12 +341,12 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                 category,
                 categoryName,
                 contentPoolId: category?.id,
-                renderedTemplateFile: '',
+                renderedTemplateFile,
                 coverImageFile: formData.coverImageFile,
                 availableDevices: devices.filter((d) => d.id !== 'all-devices'),
             });
         } catch (error) {
-            setValidationError(error.message || 'Unable to submit slide.');
+            setValidationError(error.message || 'Unable to generate template image.');
         }
     };
 
@@ -739,6 +765,31 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                             <span> pool as a rendered template image.</span>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div className="template-render-host" aria-hidden="true">
+                <div ref={captureRef}>
+                    <TemplateDocumentView
+                        title={formData.title}
+                        subtitle={formData.subtitle}
+                        description={activeDescription}
+                        startDate={formData.startDate}
+                        archiveDate={formData.archiveDate}
+                        eventEnabled={formData.eventEnabled}
+                        eventMode={formData.eventMode}
+                        eventStartDate={formData.eventStartDate}
+                        eventEndDate={formData.eventEndDate}
+                        eventDates={formData.eventDates}
+                        linkUrl={formData.linkUrl}
+                        qrValue={qrValue}
+                        categoryLabel={categoryName}
+                        categoryColor={categoryColor}
+                        groupId={groupId}
+                        bgImageEnabled={Boolean(coverPreviewUrl)}
+                        bgImageUrl={coverPreviewUrl}
+                        viewMode={viewMode}
+                    />
                 </div>
             </div>
 
