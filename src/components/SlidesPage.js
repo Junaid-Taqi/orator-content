@@ -579,6 +579,7 @@ const SlidesPage = ({ user }) => {
         ? selectedSlideConfig.tags.filter((tag) => typeof tag === 'string' && tag.trim())
         : [];
     const selectedSlideQrValue = selectedSlideConfig?.clientRefId;
+    const qrValue = `${serverUrl}/#/news/${selectedSlideQrValue}`;
 
     return (
         <div className="slides-page">
@@ -758,7 +759,7 @@ const SlidesPage = ({ user }) => {
                                                     startDate={selectedSlide.startDateRaw}
                                                     archiveDate={selectedSlide.archiveDateRaw}
                                                     linkUrl={selectedSlide.linkUrl}
-                                                    qrValue={selectedSlideQrValue}
+                                                    qrValue={qrValue}
                                                     categoryLabel={selectedSlide.category}
                                                     categoryColor={selectedSlide.categoryColor}
                                                     viewMode="totem"
