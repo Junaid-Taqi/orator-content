@@ -69,10 +69,12 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
     const [coverPreviewUrl, setCoverPreviewUrl] = useState('');
     const [captureHideLogo, setCaptureHideLogo] = useState(false);
     const [clientRefId] = useState(() => {
-        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-            return crypto.randomUUID();
-        }
-        return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+        const uuid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+
+        // Prefix with "qr-code-scan-" for your QR code purpose
+        return `qr-code-scan-${uuid}`;
     });
 
     const captureRef = useRef(null);
