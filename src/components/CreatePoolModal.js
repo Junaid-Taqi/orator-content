@@ -4,6 +4,7 @@ import '../styles/CreatePoolModal.css';
 import {addContentPool} from '../Services/Slices/AddContentPoolSlice';
 import {getAllContentPool} from '../Services/Slices/GetContentPoolSlice';
 import {updateContentPool} from '../Services/Slices/UpdateContentPoolSlice';
+import { useTranslation } from '../Services/Localization/Localization';
 
 const initialFormState = {
     name: '',
@@ -26,6 +27,7 @@ const mapPoolToFormData = (pool) => ({
 });
 
 const CreatePoolModal = ({isOpen, onClose, user, poolToEdit = null}) => {
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const {status: addStatus} = useSelector((state) => state.AddContentPool);
     const {status: updateStatus} = useSelector((state) => state.UpdateContentPool);
@@ -116,38 +118,42 @@ const CreatePoolModal = ({isOpen, onClose, user, poolToEdit = null}) => {
         <div className="modal-overlay" onClick={handleClose}>
             <div className="modal-card" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2>{isEditMode ? 'Update Content Pool' : 'Create New Content Pool'}</h2>
+                    <h2>{isEditMode ? t("updateContentPoolTitle") : t("createNewContentPoolTitle")}</h2>
                     <button className="close-btn" onClick={handleClose}>&times;</button>
                 </div>
 
                 <form className="modal-body" onSubmit={handleSubmit}>
                     <div className="info-alert blue-tint">
                         <p>
-                            <strong>{isEditMode ? 'Update this pool:' : 'Create a new pool:'}</strong>
+                            <strong>
+                                {isEditMode ? t("updateThisPoolLabel") : t("createNewPoolLabel")}
+                            </strong>
                             {' '}
-                            Each pool name is unique and represents a category.
+                            {t("eachPoolNameUniqueCategoryText")}
                         </p>
                     </div>
 
                     <div className="form-group">
-                        <label>Pool Name (This is also the category name)</label>
+                        <label>{t("poolNameCategoryLabel")}</label>
                         <input
                             type="text"
-                            placeholder="e.g., 🤹 Holiday Specials, 📢 Promotions, etc."
+                            placeholder={t("poolNamePlaceholderExample")}
                             className="modal-input"
                             value={formData.name}
                             onChange={(e) => handleFormChange('name', e.target.value)}
                             maxLength={NAME_MAX_LENGTH}
                             required
                         />
-                        <small className="form-tip">Tip: Include an emoji to make your pool easily identifiable</small>
+                        <small className="form-tip">
+                            {t("poolNameEmojiTip")}
+                        </small>
                     </div>
 
                     <div className="form-group">
-                        <label>Description</label>
+                        <label>{t("poolDescriptionLabel")}</label>
                         <input
                             type="text"
-                            placeholder="Short description for this pool"
+                            placeholder={t("poolDescriptionPlaceholder")}
                             className="modal-input"
                             value={formData.description}
                             onChange={(e) => handleFormChange('description', e.target.value)}
@@ -156,43 +162,43 @@ const CreatePoolModal = ({isOpen, onClose, user, poolToEdit = null}) => {
                     </div>
 
                     <div className="config-section">
-                        <h3>Pool Configuration</h3>
+                        <h3>{t("poolConfigurationHeading")}</h3>
 
                         <div className="form-group">
-                            <label>Pool Color</label>
+                            <label>{t("poolColorLabel")}</label>
                             <select
                                 className="modal-select"
                                 value={formData.color}
                                 onChange={(e) => handleFormChange('color', e.target.value)}
                             >
-                                <option value="Blue">Blue</option>
-                                <option value="Purple">Purple</option>
-                                <option value="Orange">Orange</option>
-                                <option value="Green">Green</option>
-                                <option value="Red">Red</option>
+                                <option value="Blue">{t("colorBlue")}</option>
+                                <option value="Purple">{t("colorPurple")}</option>
+                                <option value="Orange">{t("colorOrange")}</option>
+                                <option value="Green">{t("colorGreen")}</option>
+                                <option value="Red">{t("colorRed")}</option>
                             </select>
                         </div>
 
                         <div className="form-group">
-                            <label>Initial Status</label>
+                            <label>{t("initialPoolStatusLabel")}</label>
                             <select
                                 className="modal-select"
                                 value={formData.status}
                                 onChange={(e) => handleFormChange('status', e.target.value)}
                             >
-                                <option value="true">Enabled (Active in rotation)</option>
-                                <option value="false">Disabled</option>
+                                <option value="true">{t("enabledActiveRotationStatus")}</option>
+                                <option value="false">{t("disabledStatus")}</option>
                             </select>
                         </div>
 
                         <div className="form-group">
-                            <label>Priority Mode</label>
+                            <label>{t("priorityModeLabel")}</label>
                             <select
                                 className="modal-select"
                                 value={formData.priorityMode}
                                 onChange={(e) => handleFormChange('priorityMode', e.target.value)}
                             >
-                                <option value="By Priority">By Priority (High to Medium to Low)</option>
+                                <option value="By Priority">{t("priorityModeHighMediumLow")}</option>
                             </select>
                         </div>
 
@@ -204,22 +210,46 @@ const CreatePoolModal = ({isOpen, onClose, user, poolToEdit = null}) => {
                                     checked={formData.isAlwaysOn}
                                     onChange={(e) => handleFormChange('isAlwaysOn', e.target.checked)}
                                 />
-                                <label htmlFor="alwaysOn">Create this as the Always On pool</label>
+                                <label htmlFor="alwaysOn">
+                                    {t("createAsAlwaysOnPoolLabel")}
+                                </label>
                             </div>
-                            <p className="checkbox-hint">Only one Always On pool can exist per group. Enable this only when creating that dedicated pool.</p>
+                            <p className="checkbox-hint">
+                                {t("alwaysOnPoolRestrictionHint")}
+                            </p>
                         </div>
                     </div>
 
                     <div className="info-alert green-tint">
-                        <p><strong>Next steps:</strong> After creating the pool, you can add slides from the Slides tab or import content from the Connector.</p>
+                        <p>
+                            <strong>{t("nextStepsLabel")}</strong> {t("afterCreatingPoolNextStepsText")}
+                        </p>
                     </div>
 
-                    {submitError && <p className="form-tip" style={{color: '#d93025'}}>{submitError}</p>}
+                    {submitError && (
+                        <p className="form-tip" style={{ color: '#d93025' }}>
+                            {submitError}
+                        </p>
+                    )}
 
                     <div className="modal-footer">
-                        <button type="button" className="footer-btn btn-cancel" onClick={handleClose}>Cancel</button>
-                        <button type="submit" className="footer-btn btn-submit" disabled={isSubmitting}>
-                            {isSubmitting ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Pool' : 'Create Pool')}
+                        <button
+                            type="button"
+                            className="footer-btn btn-cancel"
+                            onClick={handleClose}
+                        >
+                            {t("cancelButtonText")}
+                        </button>
+
+                        <button
+                            type="submit"
+                            className="footer-btn btn-submit"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting
+                                ? (isEditMode ? t("updatingButtonText") : t("creatingButtonText"))
+                                : (isEditMode ? t("updatePoolButtonText") : t("createPoolButtonText"))
+                            }
                         </button>
                     </div>
                 </form>

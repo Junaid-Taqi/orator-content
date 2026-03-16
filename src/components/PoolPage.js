@@ -178,7 +178,7 @@ const PoolsPage = ({ user }) => {
         }
 
         if (!contentPoolList?.length) {
-            return <div className="pool-accordion"><p>No content pools found.</p></div>;
+            return <div className="pool-accordion"><p>{t('NoContentPool')}</p></div>;
         }
 
         return contentPoolList.slice(0, visibleCount).map((pool) => {
