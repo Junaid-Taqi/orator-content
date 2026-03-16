@@ -1,11 +1,13 @@
 import React from 'react';
 import '../styles/Navigation.css';
+import { useTranslation } from '../Services/Localization/Localization';
 
 const Navigation = ({activeTab, setActiveTab}) => {
+    const { t } = useTranslation();
     const tabs = [
-        {id: 'slides', label: 'Slides', icon: '📊'},
-        {id: 'pools', label: 'Content Pools', icon: '🎯'},
-        {id: 'timeline', label: 'Timeline', icon: '⏱️'},
+        {id: 'slides', label: t('slides'), icon: '📊'},
+        {id: 'pools', label: t('contentPools'), icon: '🎯'},
+        {id: 'timeline', label: t('timeline'), icon: '⏱️'},
     ];
 
     return (
@@ -24,7 +26,7 @@ const Navigation = ({activeTab, setActiveTab}) => {
             </div>
             <button className="connector-btn">
                 <span className="connector-icon">🔗</span>
-                <span>Connector</span>
+                <span>{t('Connectors')}</span>
             </button>
         </nav>
     );

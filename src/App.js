@@ -10,8 +10,10 @@ import SlidesPage from './components/SlidesPage';
 import PoolsPage from './components/PoolPage';
 import TimelinePage from './components/TimelinePage';
 import DisplayNav from "./components/DisplayNav";
+import { useTranslation, LanguageProvider } from './Services/Localization/Localization';
 
 function AppContent() {
+  const t = useTranslation();
   const dispatch = useDispatch();
   const { token, expiresIn, status, error } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('slides');
@@ -88,9 +90,11 @@ function AppContent() {
 function App() {
   return (
     <div className="App">
+      <LanguageProvider>
       <Provider store={store}>
         <AppContent />
       </Provider>
+      </LanguageProvider>
     </div>
   );
 }

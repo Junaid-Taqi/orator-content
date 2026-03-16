@@ -12,11 +12,13 @@ import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons/faAngleDown";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { useTranslation } from '../Services/Localization/Localization';
 
 const POOL_NAME_MAX_LENGTH = 300;
 const POOL_DESCRIPTION_MAX_LENGTH = 500;
 
 const PoolsPage = ({ user }) => {
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const [showModal, setShowModal] = useState(false);
     const [editingPool, setEditingPool] = useState(null);
@@ -205,7 +207,7 @@ const PoolsPage = ({ user }) => {
                 return (
                     <div className="manage-slides-section">
                         <div className="manage-slides-header">
-                            <h4>Manage Slides</h4>
+                            <h4>{t('ManageSlides')}</h4>
                             <div className="manage-slides-tabs">
                                 {[
                                     { id: 'active', label: 'Active', count: pool?.slidesActive?.length || 0 },
@@ -226,7 +228,7 @@ const PoolsPage = ({ user }) => {
 
                         <div className="slides-list-vertical">
                             {!currentSlides.length ? (
-                                <p className="slides-empty">No slides in this section</p>
+                                <p className="slides-empty">{t('NoSlides')}</p>
                             ) : (
                                 currentSlides.map((slide) => {
                                     const priorityLabel = slide?.priority === 1 ? 'High' : slide?.priority === 2 ? 'Medium' : slide?.priority === 3 ? 'Low' : '';
@@ -263,7 +265,7 @@ const PoolsPage = ({ user }) => {
                         <div className="accordion-title">
                             <h3 className='text-capitalize'>{title}</h3>
                             <span className={badgeClass}>{badgeText}</span>
-                            {isAlwaysOn && <span className="badge-enabled">Always On</span>}
+                            {isAlwaysOn && <span className="badge-enabled">{t('AlwaysOn')}</span>}
                         </div>
                         <button
                             type="button"
@@ -274,23 +276,23 @@ const PoolsPage = ({ user }) => {
                         </button>
                     </div>
 
-                    <p className="category-label text-capitalize">Category: {title}</p>
+                    <p className="category-label text-capitalize">{t('Category')}: {title}</p>
 
                     <div className="accordion-body">
                         <div className="sub-stat">
-                            <label>Active</label>
+                            <label>{t('active')}</label>
                             <span className="sub-val text-green">{pool?.activeCount ?? 0}</span>
                         </div>
                         <div className="sub-stat">
-                            <label>Scheduled</label>
+                            <label>{t('scheduled')}</label>
                             <span className="sub-val text-orange">{pool?.scheduledCount ?? 0}</span>
                         </div>
                         <div className="sub-stat">
-                            <label>Archived</label>
+                            <label>{t('archived')}</label>
                             <span className="sub-val text-muted">{pool?.archivedCount ?? 0}</span>
                         </div>
                         <div className="sub-stat">
-                            <label>Pool Status</label>
+                            <label>{t('PoolStatus')}</label>
                             <div className="toggle-switch">
                                 <input
                                     type="checkbox"
@@ -302,14 +304,14 @@ const PoolsPage = ({ user }) => {
                             </div>
                         </div>
                         <div className="sub-stat">
-                            <label>Order</label>
+                            <label>{t('Order')}</label>
                             <span className="sub-val">#{sortOrder}</span>
                         </div>
                     </div>
 
                     <div className="accordion-footer">
                         <div className="priority-mode">
-                            <span>Slide Priority Mode:</span>
+                            <span>{t('SlidePriorityMode')}:</span>
                             <p>{priorityMode}</p>
                         </div>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -321,7 +323,7 @@ const PoolsPage = ({ user }) => {
                                 className="btn btn-create"
                                 onClick={() => handleOpenEditModal(pool)}
                             >
-                                Edit
+                                {t('Edit')}
                             </button>
                         </div>
                     </div>
@@ -341,31 +343,31 @@ const PoolsPage = ({ user }) => {
             {/* 1. Header Section */}
             <div className="pools-header">
                 <div className="header-text">
-                    <h1>Content Pools</h1>
-                    <p>Category-based pools in fixed rotation with Always On insertion</p>
+                    <h1>{t('ContentPools')}</h1>
+                    <p>{t('Categorybased')}</p>
                 </div>
                 <div className="header-btns">
-                    <button className="btn btn-create" onClick={handleOpenCreateModal}><FontAwesomeIcon icon={faPlus} style={{ marginRight: '5px' }} /> Create Pool</button>
+                    <button className="btn btn-create" onClick={handleOpenCreateModal}><FontAwesomeIcon icon={faPlus} style={{ marginRight: '5px' }} /> {t('createPool')}</button>
                     <button
                         className="btn btn-always"
                         onClick={() => setShowAlwaysOnSettings((prev) => !prev)}
                     >
-                        <FontAwesomeIcon icon={faCog} style={{ marginRight: '5px' }} /> Always On Settings
+                        <FontAwesomeIcon icon={faCog} style={{ marginRight: '5px' }} /> {t('AlwaysOn')} {t('Settings')}
                     </button>
-                    <button className="btn btn-emergency"><FontAwesomeIcon icon={faCircleExclamation} style={{ marginRight: '5px' }} /> Emergency Settings</button>
+                    <button className="btn btn-emergency"><FontAwesomeIcon icon={faCircleExclamation} style={{ marginRight: '5px' }} /> {t('EmergencySettings')}</button>
                 </div>
             </div>
 
             {showAlwaysOnSettings && (
                 <div className="always-on-settings-panel">
                     <div className="always-on-settings-header">
-                        <h3>Always On Insertion Settings</h3>
-                        <p>Control where Always On slides appear in the playback loop.</p>
+                        <h3>{t('InsertionSettings')}</h3>
+                        <p>{t('AlwaysOnSlides')}</p>
                     </div>
 
                     {!alwaysOnPool ? (
                         <div className="always-on-empty">
-                            No Always On pool found. Create one first to configure insertion mode.
+                            <p>{t('NoAlwaysOnPool')}</p>
                         </div>
                     ) : (
                         <div className="always-on-options">
@@ -378,7 +380,7 @@ const PoolsPage = ({ user }) => {
                                     onChange={() => handleAlwaysOnModeChange(1)}
                                     disabled={alwaysOnUpdateStatus === 'loading'}
                                 />
-                                <span>Show only at start of loop</span>
+                                <span>{t('ShowStartLoop')}</span>
                             </label>
 
                             <label className={`always-on-option ${selectedAlwaysOnMode === 2 ? 'selected' : ''}`}>
@@ -390,7 +392,7 @@ const PoolsPage = ({ user }) => {
                                     onChange={() => handleAlwaysOnModeChange(2)}
                                     disabled={alwaysOnUpdateStatus === 'loading'}
                                 />
-                                <span>Show between every pool</span>
+                                <span>{t('ShowEndLoop')}</span>
                             </label>
                         </div>
                     )}
@@ -407,7 +409,7 @@ const PoolsPage = ({ user }) => {
                     <span className="icon-box">📚</span>
                 </div>
                 <div className="rotation-details">
-                    <strong>Fixed Playback Rotation</strong>
+                    <strong>{t('FixedPlaybackRotation')}</strong>
                     <p>{fixedPlaybackPreview || 'No rotation preview available.'}</p>
                 </div>
             </div>
@@ -415,23 +417,23 @@ const PoolsPage = ({ user }) => {
             {/* 3. Stats Grid */}
             <div className="stats-grid">
                 <div className="stat-card">
-                    <label>Active Slides</label>
+                    <label>{t('ActiveSlides')}</label>
                     <span className="value text-green">{summary?.activeSlides ?? 0}</span>
                 </div>
                 <div className="stat-card">
-                    <label>Scheduled</label>
+                    <label>{t('scheduled')}</label>
                     <span className="value text-orange">{summary?.scheduled ?? 0}</span>
                 </div>
                 <div className="stat-card">
-                    <label>Archived</label>
+                    <label>{t('archived')}</label>
                     <span className="value">{summary?.archived ?? 0}</span>
                 </div>
                 <div className="stat-card">
-                    <label>Enabled Pools</label>
+                    <label>{t('EnabledPools')}</label>
                     <span className="value text-purple">{enabledPools}</span>
                 </div>
                 <div className="stat-card">
-                    <label>Emergency Ready</label>
+                    <label>{t('EmergencyReady')}</label>
                     <span className="value text-red">{summary?.emergencyReady ?? 0}</span>
                 </div>
             </div>
@@ -439,8 +441,8 @@ const PoolsPage = ({ user }) => {
             {/* 4. Device Filter Bar */}
             <div className="device-filter">
                 <div className="filter-info">
-                    <span>🖥️ Device-Specific Content</span>
-                    <p>View and manage pool content for specific displays</p>
+                    <span>🖥️ {t('DeviceSpecificContent')}</span>
+                    <p>{t('DeviceSpecificContentDescription')}</p>
                 </div>
                 <select
                     className="device-dropdown"
@@ -462,7 +464,7 @@ const PoolsPage = ({ user }) => {
                         onClick={() => setVisibleCount(prev => prev + 5)}
                         style={{ fontWeight: 500, borderRadius: '50rem', border: '1px solid' }}
                     >
-                        Load More Pools
+                        {t('loadMorePools')}
                     </button>
                 </div>
             )}

@@ -2,10 +2,16 @@ import React, {useEffect, useRef, useState} from 'react';
 import '../styles/DisplaysDashboard.css'; // Path check kar lein apne structure ke hisaab se
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faChevronDown, faChevronUp, faSignOutAlt, faUser} from "@fortawesome/free-solid-svg-icons";
+import { useTranslation} from '../Services/Localization/Localization';
 
 const DisplayNav = ({user}) => {
+    const { t, lang, setLanguage } = useTranslation();
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const userMenuRef = useRef(null);
+
+    const handleLangChange = (e) => {
+        setLanguage(e.target.value);
+    };
 
     // Click outside to close menu logic
     useEffect(() => {
@@ -29,10 +35,22 @@ const DisplayNav = ({user}) => {
         <nav className="displays-dashboard__nav">
             <div className="header-left">
                 <h1 className="header-title">{user?.groups?.[0]?.name || "Municipality"}</h1>
-                <p className="header-subtitle">Monitor your digital signage network</p>
+                <p className="header-subtitle">{t('monitorNetwork')}</p>
             </div>
 
-            <div className="displays-dashboard__nav-user-wrap" ref={userMenuRef}>
+            <div className="displays-dashboard__nav-user-wrap d-flex gap-5" ref={userMenuRef}>
+                {/* Language Selector */}
+                <div className="header-lang">
+                    <select
+                        id="lang-select"
+                        value={lang}
+                        onChange={handleLangChange}
+                        className="form-select form-select-sm"
+                    >
+                        <option value="hr">Croatian</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
                 <button
                     type="button"
                     className="displays-dashboard__nav-user"

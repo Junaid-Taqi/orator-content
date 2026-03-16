@@ -22,6 +22,8 @@ import { faTrashAlt } from "@fortawesome/free-solid-svg-icons/faTrashAlt";
 import { faCog } from "@fortawesome/free-solid-svg-icons/faCog";
 import { faBoxArchive, faEye } from "@fortawesome/free-solid-svg-icons";
 import { serverUrl } from '../Services/Constants/Constants';
+import { t } from 'i18next';
+import { useTranslation } from '../Services/Localization/Localization';
 
 const priorityMap = {
     high: 1,
@@ -111,6 +113,7 @@ const VARCHAR_600_MAX = 600;
 const TEXT_MAX = 65535;
 
 const SlidesPage = ({ user }) => {
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState('type');
@@ -588,19 +591,19 @@ const SlidesPage = ({ user }) => {
         <div className="slides-page">
             <div className="slides-header">
                 <div className="slides-title-section">
-                    <h2 className="slides-title">Slides</h2>
+                    <h2 className="slides-title">{t('slides')}</h2>
                     <p className="slides-description">
-                        Category-driven templates. Priority determines duration: Low=15s, Medium=30s, High=45s
+                        {t('categoryTemplates')}
                     </p>
                 </div>
-                <button className="btn btn-create" onClick={handleAddSlide}><FontAwesomeIcon icon={faPlus} style={{ marginRight: '5px' }} /> Create Slides</button>
+                <button className="btn btn-create" onClick={handleAddSlide}><FontAwesomeIcon icon={faPlus} style={{ marginRight: '5px' }} /> {t('createSlide')}</button>
             </div>
 
             <div className="stats-grid">
-                <StatsCard title="Total Slides" count={String(counters?.totalSlides || 0)} bgColor="primary" />
-                <StatsCard title="Active" count={String(counters?.active || 0)} bgColor="success" />
-                <StatsCard title="Scheduled" count={String(counters?.scheduled || 0)} bgColor="warning" />
-                <StatsCard title="Archived" count={String(counters?.archived || 0)} bgColor="muted" />
+                <StatsCard title={t('totalSlides')} count={String(counters?.totalSlides || 0)} bgColor="primary" />
+                <StatsCard title={t('active')} count={String(counters?.active || 0)} bgColor="success" />
+                <StatsCard title={t('scheduled')} count={String(counters?.scheduled || 0)} bgColor="warning" />
+                <StatsCard title={t('archived')} count={String(counters?.archived || 0)} bgColor="muted" />
             </div>
 
             <div className="filter-bar">
@@ -613,15 +616,15 @@ const SlidesPage = ({ user }) => {
                         className={`filter-pill ${activeFilter === f ? 'active' : ''}`}
                         onClick={() => setActiveFilter(f)}
                     >
-                        {f.charAt(0).toUpperCase() + f.slice(1)}
+                        {t(`${f}`)}
                     </button>
                 ))}
             </div>
 
             <div className="slides-grid-container">
-                {slidesStatus === 'loading' && <p>Loading slides...</p>}
+                {slidesStatus === 'loading' && <p>{t('loadingSlides')}</p>}
                 {slidesStatus === 'failed' && <p>{slidesError || 'Unable to load slides.'}</p>}
-                {slidesStatus === 'succeeded' && filteredSlides.length === 0 && <p>No slides found.</p>}
+                {slidesStatus === 'succeeded' && filteredSlides.length === 0 && <p className='slides-description'>{t('noSlides')}</p>}
                 {filteredSlides.slice(0, visibleCount).map((slide) => (
                     <div key={slide.id} className="slide-card-item">
                         {(() => {
@@ -660,11 +663,11 @@ const SlidesPage = ({ user }) => {
                                 <span className={`tag-status ${slide.status}`}>{slide.status}</span>
                             </div>
                             <div className="slide-card-info">
-                                <div className="info-row"><span>Start:</span> <span>{slide.start}</span></div>
-                                <div className="info-row"><span>Archive:</span> <span>{slide.archive}</span></div>
+                                <div className="info-row"><span>{t('start')}:</span> <span>{slide.start}</span></div>
+                                <div className="info-row"><span>{t('archive')}:</span> <span>{slide.archive}</span></div>
                             </div>
                             <div className="slide-card-footer">
-                                <button className="btn-preview-outline" onClick={() => handlePreviewClick(slide)}><FontAwesomeIcon icon={faEye} style={{ marginRight: '5px' }} />Preview</button>
+                                <button className="btn-preview-outline" onClick={() => handlePreviewClick(slide)}><FontAwesomeIcon icon={faEye} style={{ marginRight: '5px' }} />{t('preview')}</button>
                                 <div className="footer-icons">
                                     <button className="icon-btn-small" onClick={() => handleEditClick(slide)}><FontAwesomeIcon icon={faCog} /></button>
                                     {/* <button className="icon-btn-small" onClick={() => handleArchiveClick(slide)}><FontAwesomeIcon icon={faBoxArchive} /></button> */}
@@ -700,14 +703,14 @@ const SlidesPage = ({ user }) => {
                                 className={`tab ${previewMode === 'totem' ? 'active' : 'inactive'}`}
                                 onClick={() => setPreviewMode('totem')}
                             >
-                                Totem View
+                                {t('totemView')}
                             </button>
 
                             <button
                                 className={`tab ${previewMode === 'web' ? 'active' : 'inactive'}`}
                                 onClick={() => setPreviewMode('web')}
                             >
-                                Web Portal View
+                                {t('webView')}
                             </button>
                         </div>
 
@@ -812,7 +815,7 @@ const SlidesPage = ({ user }) => {
                                         )
                                     ) : (
                                         <div className="preview-placeholder">
-                                            No Preview Available
+                                            {t('noPreviewAvailable')}
                                         </div>
                                     )}
                                 </div>
@@ -837,7 +840,7 @@ const SlidesPage = ({ user }) => {
                         )}
 
                         <button className="preview-close-btn" onClick={handleClosePreview}>
-                            Close Preview
+                            {t('closePreview')}
                         </button>
                     </div>
                 )}
@@ -850,18 +853,18 @@ const SlidesPage = ({ user }) => {
             >
                 {slideToEdit && (
                     <div className="edit-slide-modal">
-                        <h2 className="edit-modal-title">Edit Slide</h2>
+                        <h2 className="edit-modal-title">{t('editSlide')}</h2>
 
                         <div className="edit-slide-info">
-                            <strong>Editing:</strong> {slideToEdit.title}
+                            <strong>{t('Editing')}:</strong> {slideToEdit.title}
                             <div className="edit-slide-meta">
-                                Category: {slideToEdit.category} | Type: {slideToEdit.slideType === 2 ? 'template' : 'fullscreen'}
+                                {t('Category')}: {slideToEdit.category} | {t('Type')}: {slideToEdit.slideType === 2 ? 'template' : 'fullscreen'}
                             </div>
                         </div>
 
                         <div className="edit-grid">
                             <div className="form-group">
-                                <label className="form-label">Slide Title *</label>
+                                <label className="form-label">{t('SlideTitle')} *</label>
                                 <input
                                     type="text"
                                     maxLength={75}
@@ -872,7 +875,7 @@ const SlidesPage = ({ user }) => {
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Sub Title</label>
+                                <label className="form-label">{t('SubTitle')}</label>
                                 <input
                                     type="text"
                                     maxLength={130}
@@ -883,7 +886,7 @@ const SlidesPage = ({ user }) => {
                             </div>
 
                             <div className="form-group edit-span-2">
-                                <label className="form-label">Web Description</label>
+                                <label className="form-label">{t('WebDescription')}</label>
                                 <textarea
                                     className="form-input"
                                     maxLength={TEXT_MAX}
@@ -896,7 +899,7 @@ const SlidesPage = ({ user }) => {
                             {slideToEdit.slideType === 2 && (
                                 <>
                                     <div className="form-group edit-span-2">
-                                        <label className="form-label">Totem Description</label>
+                                        <label className="form-label">{t('TotemDescription')}</label>
                                         <textarea
                                             className="form-input"
                                             maxLength={460}
@@ -906,7 +909,7 @@ const SlidesPage = ({ user }) => {
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label className="form-label">Article URL</label>
+                                        <label className="form-label">{t('ArticleUrl')}</label>
                                         <input
                                             type="text"
                                             maxLength={VARCHAR_300_MAX}
@@ -916,7 +919,7 @@ const SlidesPage = ({ user }) => {
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label className="form-label">Link URL</label>
+                                        <label className="form-label">{t('LinkUrl')}</label>
                                         <input
                                             type="text"
                                             maxLength={VARCHAR_300_MAX}
@@ -929,15 +932,15 @@ const SlidesPage = ({ user }) => {
                             )}
 
                             <div className="form-group">
-                                <label className="form-label">Priority</label>
+                                <label className="form-label">{t('Priority')}</label>
                                 <select
                                     className="form-input"
                                     value={editForm.priority}
                                     onChange={(e) => handleEditFieldChange('priority', e.target.value)}
                                 >
-                                    <option value="high">High (45s)</option>
-                                    <option value="medium">Medium (30s)</option>
-                                    <option value="low">Low (15s)</option>
+                                    <option value="high">{t('high')} (45s)</option>
+                                    <option value="medium">{t('medium')} (30s)</option>
+                                    <option value="low">{t('low')} (15s)</option>
                                 </select>
                             </div>
 
@@ -948,7 +951,7 @@ const SlidesPage = ({ user }) => {
                                         checked={editForm.publish}
                                         onChange={(e) => handleEditFieldChange('publish', e.target.checked)}
                                     />
-                                    <span>Publish</span>
+                                    <span>{t('Publish')}</span>
                                 </label>
                             </div>
 
@@ -959,15 +962,15 @@ const SlidesPage = ({ user }) => {
                                         checked={editForm.eventEnabled}
                                         onChange={(e) => handleEditFieldChange('eventEnabled', e.target.checked)}
                                     />
-                                    <span>Enable Event Dates</span>
+                                    <span>{t('EnableEventDates')}</span>
                                 </label>
 
                                 {editForm.eventEnabled && (
                                     <div className="event-date-block">
                                         <div className="preview-tabs" style={{ marginBottom: '12px' }}>
-                                            <button type="button" className={`preview-tab ${editForm.eventMode === 1 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(1)}>Single Date</button>
-                                            <button type="button" className={`preview-tab ${editForm.eventMode === 2 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(2)}>Date Range</button>
-                                            <button type="button" className={`preview-tab ${editForm.eventMode === 3 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(3)}>Multiple Dates</button>
+                                            <button type="button" className={`preview-tab ${editForm.eventMode === 1 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(1)}>{t('SingleDate')}</button>
+                                            <button type="button" className={`preview-tab ${editForm.eventMode === 2 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(2)}>{t('DateRange')}</button>
+                                            <button type="button" className={`preview-tab ${editForm.eventMode === 3 ? 'active' : ''}`} onClick={() => handleEditEventModeChange(3)}>{t('MultipleDates')}</button>
                                         </div>
 
                                         {editForm.eventMode === 1 && (
@@ -982,7 +985,7 @@ const SlidesPage = ({ user }) => {
                                         {editForm.eventMode === 2 && (
                                             <div className="date-row">
                                                 <div className="form-group">
-                                                    <label className="form-label">Event Start Date</label>
+                                                    <label className="form-label">{t('StartDate')}</label>
                                                     <input
                                                         type="date"
                                                         className="form-input"
@@ -991,7 +994,7 @@ const SlidesPage = ({ user }) => {
                                                     />
                                                 </div>
                                                 <div className="form-group">
-                                                    <label className="form-label">Event End Date</label>
+                                                    <label className="form-label">{t('EndDate')}</label>
                                                     <input
                                                         type="date"
                                                         className="form-input"
@@ -1018,12 +1021,12 @@ const SlidesPage = ({ user }) => {
                                                             onClick={() => handleRemoveEditEventDate(index)}
                                                             disabled={editForm.eventDates.length === 1}
                                                         >
-                                                            Remove
+                                                            {t('Remove')}
                                                         </button>
                                                     </div>
                                                 ))}
                                                 <button type="button" className="btn-submit" onClick={handleAddEditEventDate}>
-                                                    Add Date
+                                                    {t('AddDate')}
                                                 </button>
                                             </div>
                                         )}
@@ -1038,14 +1041,16 @@ const SlidesPage = ({ user }) => {
                         {!editValidationError && slideToEdit.slideType !== 2 && !!editFullscreenError && <p className="upload-text template-error">{editFullscreenError}</p>}
 
                         <div className="edit-actions">
-                            <button className="btn-cancel" onClick={handleCancelEdit} type="button">Cancel</button>
+                            <button className="btn-cancel" onClick={handleCancelEdit} type="button">
+                                {t('cancel')}
+                            </button>
                             <button
                                 className="btn-submit"
                                 onClick={handleSaveEdit}
                                 type="button"
                                 disabled={editFullscreenStatus === 'loading' || editTemplateStatus === 'loading'}
                             >
-                                {editFullscreenStatus === 'loading' || editTemplateStatus === 'loading' ? 'Saving...' : 'Save Changes'}
+                                {editFullscreenStatus === 'loading' || editTemplateStatus === 'loading' ? 'Saving...' : t('saveChange')}
                             </button>
                         </div>
                     </div>
@@ -1062,18 +1067,18 @@ const SlidesPage = ({ user }) => {
                         <FontAwesomeIcon icon={faBoxArchive} />
                     </div>
 
-                    <h2>Archive Slide?</h2>
+                    <h2>{t('ArchiveSlide')}</h2>
                     <p>
-                        This slide will be moved to archived status and won't be
-                        displayed on any devices.
+                        {t('ArchivedStatus')}
                     </p>
 
                     <div className="delete-modal-actions">
                         <button className="btn-cancel" onClick={handleCancelArchive}>
-                            Cancel
+                            {t('cancel')}
+
                         </button>
                         <button className="btn-delete btn-archive" onClick={handleConfirmArchive} disabled={archiveStatus === 'loading'}>
-                            {archiveStatus === 'loading' ? 'Archiving...' : 'Archive'}
+                            {archiveStatus === 'loading' ? 'Archiving...' : t('Archive')}
                         </button>
                     </div>
                 </div>
@@ -1085,17 +1090,17 @@ const SlidesPage = ({ user }) => {
                         <FontAwesomeIcon icon={faTrashAlt} />
                     </div>
 
-                    <h2>Delete Slide?</h2>
+                    <h2>{t('DeleteSlide')}</h2>
                     <p>
-                        This action cannot be undone. The slide will be permanently deleted from the system.
+                        {t('DeleteStatus')}
                     </p>
 
                     <div className="delete-modal-actions">
                         <button className="btn-cancel" onClick={handleCancelDelete}>
-                            Cancel
+                            {t('cancel')}
                         </button>
                         <button className="btn-delete" onClick={handleConfirmDelete} disabled={deleteStatus === 'loading'}>
-                            {deleteStatus === 'loading' ? 'Deleting...' : 'Delete'}
+                            {deleteStatus === 'loading' ? 'Deleting...' : t('Delete')}
                         </button>
                     </div>
                 </div>

@@ -16,6 +16,18 @@
   gap: 4px;
 }
 
+.header-lang select {
+  background: #0000;
+  border: 1px solid #2f82ab;
+  border-radius: 4px;
+  color: #fff;
+  padding: .45rem .6rem;
+}
+select#lang-select option {
+  background: #21536b;
+  border: 1px solid #255d79;
+  color: #fff !important;
+}
 .header-title {
   margin: 0;
   font-size: 24px;
