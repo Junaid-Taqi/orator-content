@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import '../styles/TimelinePage.css';
 import { serverUrl } from '../Services/Constants/Constants';
+import { useTranslation } from '../Services/Localization/Localization';
 
 const getPoolColor = (pool, fallbackIndex = 0) => {
   const palette = ['#22c55e', '#58a6ff', '#c084fc', '#f59e0b', '#ef4444', '#14b8a6'];
@@ -38,6 +39,7 @@ const formatDateInput = (date) => {
 };
 
 const TimelinePage = ({ user }) => {
+  const { t } = useTranslation();
   const groupId = user?.groups?.[0]?.id;
 
   const [devices, setDevices] = useState([]);
@@ -169,27 +171,29 @@ const TimelinePage = ({ user }) => {
     setSelectedDate(formatDateInput(current));
   };
 
-  const statusText = timelineData?.active ? 'Live & Playing' : 'Inactive';
+  const statusText = timelineData?.active ? 'Live & Playing' : t('inactiveStatus');
 
   return (
     <div className="timeline-page">
       <div className="timeline-header">
         <div>
-          <h1>Timeline</h1>
-          <p>Dynamic device work cycle visualization with pool-based rotation</p>
+          <h1>{t("timelinePageTitle")}</h1>
+          <p>{t("timelinePageSubtitle")}</p>
         </div>
-        <div className={`timeline-live-pill ${timelineData?.active ? 'active' : ''}`}>{statusText}</div>
+        <div className={`timeline-live-pill ${timelineData?.active ? 'active' : ''}`}>
+          {statusText}
+        </div>
       </div>
 
       <div className="timeline-filters">
         <div className="timeline-field">
-          <label>Device</label>
+          <label>{t("deviceLabel")}</label>
           <select
             value={selectedDisplayId}
             onChange={(e) => setSelectedDisplayId(e.target.value)}
             disabled={loadingDevices || !devices.length}
           >
-            {!devices.length && <option value="">No Devices</option>}
+            {!devices.length && <option value="">{t("noDevicesOption")}</option>}
             {devices.map((d) => (
               <option key={d.displayId} value={String(d.displayId)}>
                 {d.name}
@@ -204,51 +208,72 @@ const TimelinePage = ({ user }) => {
 
       <div className="timeline-work-banner">
         <div>
-          <h3>{display?.name || 'No Device Selected'} - Work Schedule</h3>
+          <h3>
+            {display?.name || t("noDeviceSelected")} - {t("workScheduleLabel")}
+          </h3>
           <p>
-            Wake: {display?.wakeTime || '--:--'} | Sleep: {display?.sleepTime || '--:--'} | Total: {counters?.workDurationText || '0s'}
+            {t("wakeLabel")}: {display?.wakeTime || '--:--'} |
+            {t("sleepLabel")}: {display?.sleepTime || '--:--'} |
+            {t("totalLabel")}: {counters?.workDurationText || '0s'}
           </p>
         </div>
+
         <div className="now-playing-box">
-          <span>Now Playing</span>
+          <span>{t("nowPlayingLabel")}</span>
           <strong>{nowPlaying?.poolName || nowPlaying?.slideTitle || '-'}</strong>
-          <small>Cycle #{counters?.fullCycles ?? 0}</small>
+          <small>{t("cycleNumberLabel")} #{counters?.fullCycles ?? 0}</small>
         </div>
       </div>
 
       <div className="timeline-stats">
         <div className="timeline-stat-card">
-          <label>Total Pools</label>
+          <label>{t("totalPoolsLabel")}</label>
           <strong>{counters?.totalPools ?? 0}</strong>
         </div>
+
         <div className="timeline-stat-card">
-          <label>Timeline Blocks</label>
+          <label>{t("timelineBlocksLabel")}</label>
           <strong className='green'>{counters?.timelineBlocks ?? 0}</strong>
         </div>
+
         <div className="timeline-stat-card">
-          <label>Full Cycles</label>
+          <label>{t("fullCyclesLabel")}</label>
           <strong className='text-purple'>{counters?.fullCycles ?? 0}</strong>
         </div>
+
         <div className="timeline-stat-card">
-          <label>Work Duration</label>
+          <label>{t("workDurationLabel")}</label>
           <strong className='text-orange'>{counters?.workDurationText || '0s'}</strong>
         </div>
+
         <div className="timeline-stat-card">
-          <label>Current Time</label>
+          <label>{t("currentTimeLabel")}</label>
           <strong className='text-primary'>{formatClock(clockNow)}</strong>
         </div>
       </div>
 
       <div className="timeline-panel">
         <div className="timeline-panel-head">
-          <h2>Cycle Configurator</h2>
-          <button type="button" onClick={() => fetchTimeline(selectedDisplayId)} disabled={loadingTimeline || !selectedDisplayId}>Reset to Default</button>
+          <h2>{t("cycleConfiguratorTitle")}</h2>
+          <button
+            type="button"
+            onClick={() => fetchTimeline(selectedDisplayId)}
+            disabled={loadingTimeline || !selectedDisplayId}
+          >
+            {t("resetToDefaultButton")}
+          </button>
         </div>
-        <p className="timeline-help text-primary">{timelineData?.timelinePattern || 'Start -> Loop'}</p>
+
+        <p className="timeline-help text-primary">
+          {timelineData?.timelinePattern || t("timelineDefaultPattern")}
+        </p>
 
         <div className="cycle-cards-row mt-4">
           {legend.map((pool) => {
-            const pct = cycleDurationSeconds > 0 ? Math.round((pool.durationSeconds / cycleDurationSeconds) * 100) : 0;
+            const pct = cycleDurationSeconds > 0
+              ? Math.round((pool.durationSeconds / cycleDurationSeconds) * 100)
+              : 0;
+
             return (
               <div
                 key={pool.key}
@@ -256,37 +281,51 @@ const TimelinePage = ({ user }) => {
                 style={{ borderColor: pool.color }}
               >
                 <h4>{pool.name}</h4>
+
                 <div className='d-flex justify-content-between mt-3'>
-                  <p className='text-primary'>Slides:</p>
+                  <p className='text-primary'>{t("slidesLabel")}</p>
                   <p>{pool.slides}</p>
                 </div>
+
                 <div className='d-flex justify-content-between'>
-                  <p className='text-primary'>Duration:</p>
+                  <p className='text-primary'>{t("durationLabel")}</p>
                   <p>{pool.durationSeconds}s</p>
                 </div>
+
                 <div className='d-flex justify-content-between'>
-                  <p className='text-primary'>% of Cycle:</p>
+                  <p className='text-primary'>{t("percentOfCycleLabel")}</p>
                   <p>{pct}%</p>
                 </div>
 
-                {pool.isAlwaysOn && <span className="always-on-badge">Always On</span>}
+                {pool.isAlwaysOn && (
+                  <span className="always-on-badge">
+                    {t("alwaysOnBadgeText")}
+                  </span>
+                )}
               </div>
             );
           })}
-          {!legend.length && <div className="timeline-empty">No pool blocks available for this device.</div>}
+
+          {!legend.length && (
+            <div className="timeline-empty">
+              {t("noPoolBlocksForDevice")}
+            </div>
+          )}
         </div>
 
         <div className="cycle-summary-row">
           <div>
-            <label>Content Pools</label>
+            <label>{t("contentPoolsLabel")}</label>
             <strong>{legend.length}</strong>
           </div>
+
           <div>
-            <label>Estimated Cycle</label>
+            <label>{t("estimatedCycleLabel")}</label>
             <strong>{counters?.cycleDurationText || '0s'}</strong>
           </div>
+
           <div>
-            <label>Total Slides</label>
+            <label>{t("totalSlidesLabel")}</label>
             <strong>{totalSlides}</strong>
           </div>
         </div>
@@ -295,12 +334,14 @@ const TimelinePage = ({ user }) => {
       <div className="timeline-panel">
         <div className="timeline-panel-head daily">
           <div>
-            <h2>Daily Timeline Visualization</h2>
+            <h2>{t("dailyTimelineVisualizationTitle")}</h2>
             <p className="text-primary">
-              Single cycle pattern repeating {counters?.fullCycles ?? 0} times
-              from {display?.wakeTime || '--:--'} to {display?.sleepTime || '--:--'}
+              {t("singleCyclePatternText")} {counters?.fullCycles ?? 0} {t("timesText")}
+              {t("fromText")} {display?.wakeTime || '--:--'}
+              {t("toText")} {display?.sleepTime || '--:--'}
             </p>
           </div>
+
           <div className="legend-row">
             {legend.map((pool) => (
               <div key={`legend-${pool.key}`} className="legend-item">
@@ -313,7 +354,10 @@ const TimelinePage = ({ user }) => {
 
         <div className="pool-rotation-strip">
           {legend.map((pool) => {
-            const widthPercent = cycleDurationSeconds > 0 ? (pool.durationSeconds / cycleDurationSeconds) * 100 : 0;
+            const widthPercent = cycleDurationSeconds > 0
+              ? (pool.durationSeconds / cycleDurationSeconds) * 100
+              : 0;
+
             return (
               <div
                 key={`strip-${pool.key}`}
@@ -328,26 +372,36 @@ const TimelinePage = ({ user }) => {
         </div>
 
         <div className="sequence-line">
-          <span className="text-primary">{timelineData?.timelinePattern || 'Start --> Loop'}</span>
-          {counters?.fullCycles ? <strong>Loop {counters.fullCycles}x</strong> : null}
+          <span className="text-primary">
+            {timelineData?.timelinePattern || t("timelineStartLoopPattern")}
+          </span>
+
+          {counters?.fullCycles
+            ? <strong>{t("loopLabel")} {counters.fullCycles}x</strong>
+            : null}
         </div>
 
         <div className="daily-summary-grid">
           <div>
-            <label>Total Cycles Today</label>
+            <label>{t("totalCyclesTodayLabel")}</label>
             <strong>{counters?.fullCycles ?? 0}</strong>
           </div>
+
           <div>
-            <label>Cycle Duration</label>
+            <label>{t("cycleDurationLabel")}</label>
             <strong>{counters?.cycleDurationText || '0s'}</strong>
           </div>
+
           <div>
-            <label>Total Active Time</label>
+            <label>{t("totalActiveTimeLabel")}</label>
             <strong>{counters?.workDurationText || '0s'}</strong>
           </div>
+
           <div>
-            <label>Status</label>
-            <strong className={timelineData?.active ? 'green' : ''}>{timelineData?.active ? 'Active' : 'Inactive'}</strong>
+            <label>{t("statusLabel")}</label>
+            <strong className={timelineData?.active ? 'green' : ''}>
+              {timelineData?.active ? t("activeStatus") : t("inactiveStatus")}
+            </strong>
           </div>
         </div>
       </div>
