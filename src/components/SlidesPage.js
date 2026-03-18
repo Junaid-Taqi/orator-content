@@ -155,6 +155,7 @@ const SlidesPage = ({ user }) => {
         linkUrl: '',
         configJSON: '',
         priority: 'medium',
+        durationSeconds: 15,
         startDate: '',
         archiveDate: '',
         publish: true,
@@ -275,6 +276,7 @@ const SlidesPage = ({ user }) => {
             linkUrl: slide.linkUrl || '',
             configJSON: slide.configJSON || '',
             priority: normalizedPriority,
+            durationSeconds: slide.durationSeconds || durationMap[normalizedPriority] || 30,
             startDate: toInputDate(slide.startDateRaw),
             archiveDate: toInputDate(slide.archiveDateRaw),
             publish: slide.publish !== false,
@@ -396,7 +398,7 @@ const SlidesPage = ({ user }) => {
         }
 
         const priority = priorityMap[normalizePriorityKey(editForm.priority)] || 2;
-        const durationSeconds = durationMap[normalizePriorityKey(editForm.priority)] || 30;
+        const durationSeconds = Number(editForm.durationSeconds) || durationMap[normalizePriorityKey(editForm.priority)] || 30;
 
         const basePayload = {
             groupId: String(currentGroupId),
@@ -574,7 +576,9 @@ const SlidesPage = ({ user }) => {
     const normalizedSlides = useMemo(
         () => (slides || []).map((slide) => {
             const statusLabel = slide.status === 2 ? 'active' : slide.status === 1 ? 'scheduled' : 'archived';
-            const priorityLabel = slide.priority === 1 ? 'High (45s)' : slide.priority === 3 ? 'Low (15s)' : 'Medium (30s)';
+            const priorityLabel = slide.priority === 1 ? 'High' : slide.priority === 3 ? 'Low' : 'Medium';
+            const durationSeconds = slide.durationSeconds || durationMap[normalizePriorityKey(slide.priorityRaw)] || 30;
+            const priorityDisplay = `${priorityLabel} (${durationSeconds}s)`;
             const displayNames = (slide.displays || [])
                 .map((d) => d?.displayName)
                 .filter(Boolean);
@@ -583,21 +587,23 @@ const SlidesPage = ({ user }) => {
                 title: slide.title,
                 category: slide.contentPoolName,
                 categoryColor: slide.color || '',
-                priority: priorityLabel,
+                priority: priorityDisplay,
+                priorityClass: priorityLabel.toLowerCase(),
                 priorityRaw: slide.priority,
                 status: statusLabel,
                 start: formatDateOnly(slide.startDate),
                 archive: formatDateOnly(slide.archiveDate),
                 slideType: slide.slideType,
-                subtitle: slide.subtitle || '',
-                webDescription: slide.webDescription || '',
-                totemDescription: slide.totemDescription || '',
-                articleUrl: slide.articleUrl || '',
-                linkUrl: slide.linkUrl || '',
-                configJSON: slide.configJSON || '',
-                publish: typeof slide.publish === 'boolean' ? slide.publish : true,
-                eventEnabled: Boolean(slide.eventEnabled),
-                eventMode: Number(slide.eventMode || 1),
+            subtitle: slide.subtitle || '',
+            webDescription: slide.webDescription || '',
+            totemDescription: slide.totemDescription || '',
+            articleUrl: slide.articleUrl || '',
+            linkUrl: slide.linkUrl || '',
+            configJSON: slide.configJSON || '',
+                durationSeconds,
+            publish: typeof slide.publish === 'boolean' ? slide.publish : true,
+            eventEnabled: Boolean(slide.eventEnabled),
+            eventMode: Number(slide.eventMode || 1),
                 eventStartDate: slide.eventStartDate || '',
                 eventEndDate: slide.eventEndDate || '',
                 eventDatesJson: slide.eventDatesJson || '',
@@ -700,7 +706,7 @@ const SlidesPage = ({ user }) => {
                             <h3 className="slide-card-name">{slide.title}</h3>
                             <div className="slide-card-tags">
                                 <span className="tag-cat">{slide.category}</span>
-                                <span className={`tag-priority ${slide.priority.split(' ')[0].toLowerCase()}`}>{slide.priority}</span>
+                                <span className={`tag-priority ${slide.priorityClass || ''}`}>{slide.priority}</span>
                                 <span className={`tag-status ${slide.status}`}>{slide.status}</span>
                             </div>
                             <div className="slide-card-info">
@@ -803,7 +809,7 @@ const SlidesPage = ({ user }) => {
 
                                     <div className="preview-tags">
                                         <span className="tag-cat">{selectedSlide.category}</span>
-                                        <span className={`tag-priority ${selectedSlide.priority.split(' ')[0].toLowerCase()}`}>
+                                        <span className={`tag-priority ${selectedSlide.priorityClass || ''}`}>
                                             {selectedSlide.priority}
                                         </span>
                                         <span className={`tag-status ${selectedSlide.status}`}>

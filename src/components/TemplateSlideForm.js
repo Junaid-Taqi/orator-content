@@ -48,7 +48,8 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
         articleUrl: '',
         linkUrl: '',
         configJSON: '',
-        priority: 'medium',
+        priority: 'low',
+        durationSeconds: 15,
         startDate: '',
         archiveDate: '',
         devices: ['all-devices'],
@@ -88,10 +89,11 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
     const groupId = user?.groups?.[0]?.id;
 
     const priorities = [
-        { id: 'low', label: 'Low', duration: '15s' },
-        { id: 'medium', label: 'Medium', duration: '30s' },
-        { id: 'high', label: 'High', duration: '45s' },
+        { id: 'low', label: 'Low' },
+        { id: 'medium', label: 'Medium' },
+        { id: 'high', label: 'High' },
     ];
+    const durationOptions = [15, 30, 45];
     const safeTrim = (value) => String(value ?? '').trim();
     const createEmptyEventDate = () => ({ date: '', label: '' });
     const normalizeEventDateItems = (dates = []) => dates.map((item) => {
@@ -456,7 +458,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                 linkUrl: safeTrim(formData.linkUrl),
                 configJSON,
                 eventDates: normalizedEventDates,
-                durationSeconds: durationMap[formData.priority] ?? 30,
+                durationSeconds: Number(formData.durationSeconds) || (durationMap[formData.priority] ?? 30),
                 category,
                 categoryName,
                 contentPoolId: category?.id,
@@ -635,10 +637,23 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                     className={`priority-btn priority-${p.id} ${formData.priority === p.id ? 'active' : ''}`}
                                     onClick={() => handleChange('priority', p.id)}
                                 >
-                                    {p.label} <span className="duration">{p.duration}</span>
+                                    {p.label}
                                 </button>
                             ))}
                         </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">{t('duration')}</label>
+                        <select
+                            className="form-input"
+                            value={formData.durationSeconds}
+                            onChange={(e) => handleChange('durationSeconds', Number(e.target.value))}
+                        >
+                            {durationOptions.map((sec) => (
+                                <option key={`duration-${sec}`} value={sec}>{`${sec}s`}</option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="date-row">
