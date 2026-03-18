@@ -4,7 +4,19 @@ import '../styles/FullscreenSlideForm.css';
 import { serverUrl } from '../Services/Constants/Constants';
 import { useTranslation } from "../Services/Localization/Localization";
 
-const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = false, submitError = '' }) => {
+const FullscreenSlideForm = ({
+    category,
+    user,
+    onCancel,
+    onSubmit,
+    submitting = false,
+    submitError = '',
+    initialValues = null,
+    existingMediaUrl = '',
+    requireFile = true,
+    mode = 'create',
+    hideTargets = false,
+}) => {
     const { t } = useTranslation();
     const VARCHAR_300_MAX = 300;
     const TEXT_MAX = 65535;
@@ -115,6 +127,15 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
 
     useEffect(() => {
         setFormData((prev) => {
+            if (initialValues) {
+                const merged = {
+                    ...prev,
+                    ...initialValues,
+                    eventDates: initialValues.eventDates ? normalizeEventDateItems(initialValues.eventDates) : prev.eventDates,
+                    devices: initialValues.devices || prev.devices,
+                };
+                return merged;
+            }
             const today = new Date();
             const startDate = prev.startDate || toInputDate(today);
             const archiveDate = prev.archiveDate || toInputDate(new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000));
@@ -123,7 +144,13 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
             }
             return { ...prev, startDate, archiveDate };
         });
-    }, []);
+    }, [initialValues]);
+
+    useEffect(() => {
+        if (!selectedFile && existingMediaUrl) {
+            setPreview(existingMediaUrl);
+        }
+    }, [existingMediaUrl, selectedFile]);
 
     const handleTitleChange = (e) => {
         setValidationError('');
@@ -238,7 +265,7 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
             setValidationError('Slide title is required.');
             return;
         }
-        if (!selectedFile) {
+        if (requireFile && !selectedFile) {
             setValidationError('Media file is required.');
             return;
         }
@@ -297,11 +324,11 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
             subtitle: formData.subtitle.trim(),
             webDescription: formData.webDescription.trim(),
             durationSeconds: Number(formData.durationSeconds) || (durationMap[formData.priority] ?? 30),
-            file: selectedFile,
+            file: selectedFile || null,
             category,
             categoryName,
             contentPoolId: category?.id,
-            mediaName: selectedFile.name,
+            mediaName: selectedFile?.name || formData.mediaName || formData.title,
             availableDevices: devices.filter((d) => d.id !== 'all-devices'),
             orientation,
             viewMode,
@@ -528,19 +555,21 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                         </label>
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">{t("targetDevices")}</label>
-                        {devicesStatus === 'loading' && <p className="upload-text">{t("loadingDevices")}</p>}
-                        {devicesStatus === 'failed' && <p className="upload-text">{devicesError}</p>}
-                        <div className="device-list">
-                            {devices.map((device) => (
-                                <label key={device.id} className="device-checkbox">
-                                    <input type="checkbox" checked={isDeviceChecked(device.id)} onChange={() => handleDeviceToggle(device.id)} />
-                                    <span>{device.label}</span>
-                                </label>
-                            ))}
+                    {!hideTargets && (
+                        <div className="form-group">
+                            <label className="form-label">{t("targetDevices")}</label>
+                            {devicesStatus === 'loading' && <p className="upload-text">{t("loadingDevices")}</p>}
+                            {devicesStatus === 'failed' && <p className="upload-text">{devicesError}</p>}
+                            <div className="device-list">
+                                {devices.map((device) => (
+                                    <label key={device.id} className="device-checkbox">
+                                        <input type="checkbox" checked={isDeviceChecked(device.id)} onChange={() => handleDeviceToggle(device.id)} />
+                                        <span>{device.label}</span>
+                                    </label>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {!!validationError && <p className="upload-text" style={{ color: '#ff9aa2' }}>{validationError}</p>}
                     {!validationError && !!submitError && <p className="upload-text" style={{ color: '#ff9aa2' }}>{submitError}</p>}

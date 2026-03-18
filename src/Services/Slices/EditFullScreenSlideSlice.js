@@ -26,6 +26,9 @@ export const editFullScreenSlide = createAsyncThunk(
             formData.append('publish', String(payload.publish !== false));
             formData.append('eventEnabled', String(Boolean(payload.eventEnabled)));
             formData.append('eventMode', String(payload.eventEnabled ? Number(payload.eventMode || 1) : 0));
+            formData.append('mediaId', String(payload.mediaId || 0));
+            formData.append('mediaName', payload.mediaName || '');
+            formData.append('targetDevices', JSON.stringify(payload.targetDevices || []));
 
             if (payload.eventEnabled) {
                 const mode = Number(payload.eventMode || 1);
@@ -37,6 +40,10 @@ export const editFullScreenSlide = createAsyncThunk(
                 } else if (mode === 3) {
                     formData.append('eventDates', JSON.stringify(payload.eventDates || []));
                 }
+            }
+
+            if (payload.file) {
+                formData.append('file', payload.file);
             }
 
             const config = {
