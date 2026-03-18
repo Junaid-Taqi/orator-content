@@ -45,6 +45,11 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
         { id: 'medium', label: 'Medium', duration: '30s' },
         { id: 'high', label: 'High', duration: '45s' },
     ];
+    const toInputDate = (date) => {
+        const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+        const local = new Date(date.getTime() - offsetMs);
+        return local.toISOString().split('T')[0];
+    };
 
     useEffect(() => {
         const fetchDevices = async () => {
@@ -93,6 +98,18 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
 
         fetchDevices();
     }, [user]);
+
+    useEffect(() => {
+        setFormData((prev) => {
+            const today = new Date();
+            const startDate = prev.startDate || toInputDate(today);
+            const archiveDate = prev.archiveDate || toInputDate(new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000));
+            if (prev.startDate && prev.archiveDate) {
+                return prev;
+            }
+            return { ...prev, startDate, archiveDate };
+        });
+    }, []);
 
     const handleTitleChange = (e) => {
         setValidationError('');

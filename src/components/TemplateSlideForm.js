@@ -92,6 +92,11 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
         { id: 'high', label: 'High', duration: '45s' },
     ];
     const safeTrim = (value) => String(value ?? '').trim();
+    const toInputDate = (date) => {
+        const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+        const local = new Date(date.getTime() - offsetMs);
+        return local.toISOString().split('T')[0];
+    };
 
     const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -147,6 +152,18 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
 
         fetchDevices();
     }, [user]);
+
+    useEffect(() => {
+        setFormData((prev) => {
+            const today = new Date();
+            const startDate = prev.startDate || toInputDate(today);
+            const archiveDate = prev.archiveDate || toInputDate(new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000));
+            if (prev.startDate && prev.archiveDate) {
+                return prev;
+            }
+            return { ...prev, startDate, archiveDate };
+        });
+    }, []);
 
     const handleChange = (field, value) => {
         setValidationError('');
@@ -514,16 +531,6 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                             />
                         </div>
                     </div>
-
-                    {/* <div className="form-group">
-                        <label className="form-label">Config JSON (optional)</label>
-                        <textarea
-                            className="form-input template-textarea"
-                            placeholder='{"theme":"default"}'
-                            value={formData.configJSON}
-                            onChange={(e) => handleChange('configJSON', e.target.value)}
-                        />
-                    </div> */}
 
                     <div className="form-group template-cover-group">
                         <label className="form-label">{t("coverImageWebPortal")}</label>
