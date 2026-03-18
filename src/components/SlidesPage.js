@@ -314,6 +314,48 @@ const SlidesPage = ({ user }) => {
         }
     };
 
+    const handleSubmitEditTemplate = async (formData) => {
+        if (!slideToEdit) return;
+        const currentGroupId = user?.groups?.[0]?.id;
+        const userId = user?.userId;
+        if (!currentGroupId || !userId) return;
+
+        const payload = {
+            groupId: String(currentGroupId),
+            userId: String(userId),
+            slideId: String(slideToEdit.id),
+            title: formData.title,
+            subtitle: formData.subtitle || '',
+            articleUrl: formData.articleUrl || '',
+            webDescription: formData.webDescription || '',
+            totemDescription: formData.totemDescription || '',
+            linkUrl: formData.linkUrl || '',
+            configJSON: formData.configJSON || '',
+            priority: priorityMap[normalizePriorityKey(formData.priority)] || 2,
+            durationSeconds: Number(formData.durationSeconds) || durationMap[normalizePriorityKey(formData.priority)] || 30,
+            startDate: formData.startDate,
+            archiveDate: formData.archiveDate,
+            publish: formData.publish !== false,
+            eventEnabled: Boolean(formData.eventEnabled),
+            eventMode: formData.eventEnabled ? Number(formData.eventMode || 1) : 0,
+            eventStartDate: formData.eventEnabled ? (formData.eventStartDate || '') : '',
+            eventEndDate: formData.eventEnabled ? (formData.eventEndDate || '') : '',
+            eventDates: formData.eventEnabled ? (formData.eventDates || []) : [],
+            renderedTemplateFile: formData.renderedTemplateFile || null,
+            coverImageFile: formData.coverImageFile || null,
+            targetDevices: [],
+        };
+
+        const result = await dispatch(editTemplateSlide(payload));
+        if (editTemplateSlide.fulfilled.match(result) && result.payload?.success) {
+            setIsEditModalOpen(false);
+            setSlideToEdit(null);
+            dispatch(getAllSlides({ groupId: String(currentGroupId) }));
+        } else if (result.payload?.message) {
+            setEditValidationError(result.payload.message);
+        }
+    };
+
     const handleEditClick = (slide) => {
         setEditValidationError('');
         setSlideToEdit(slide);
@@ -623,6 +665,7 @@ const SlidesPage = ({ user }) => {
                 priorityRaw: slide.priority,
                 mediaId: slide.mediaId,
                 displays: slide.displays || [],
+                contentPoolId: slide.contentPoolId,
                 status: statusLabel,
                 start: formatDateOnly(slide.startDate),
                 archive: formatDateOnly(slide.archiveDate),
@@ -967,8 +1010,9 @@ const SlidesPage = ({ user }) => {
                         category={{ title: slideToEdit.category }}
                         user={user}
                         onCancel={handleCancelEdit}
-                        onSubmit={() => {}}
-                        submitting
+                        onSubmit={handleSubmitEditTemplate}
+                        submitting={editTemplateStatus === 'loading'}
+                        submitError={editTemplateError || editValidationError}
                         hideTargets
                         initialValues={{
                             title: slideToEdit.title || '',

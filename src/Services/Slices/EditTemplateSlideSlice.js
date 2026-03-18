@@ -30,6 +30,7 @@ export const editTemplateSlide = createAsyncThunk(
             formData.append('publish', String(payload.publish !== false));
             formData.append('eventEnabled', String(Boolean(payload.eventEnabled)));
             formData.append('eventMode', String(payload.eventEnabled ? Number(payload.eventMode || 1) : 0));
+            formData.append('targetDevices', JSON.stringify(payload.targetDevices || []));
 
             if (payload.eventEnabled) {
                 const mode = Number(payload.eventMode || 1);
@@ -41,6 +42,13 @@ export const editTemplateSlide = createAsyncThunk(
                 } else if (mode === 3) {
                     formData.append('eventDates', JSON.stringify(payload.eventDates || []));
                 }
+            }
+
+            if (payload.renderedTemplateFile) {
+                formData.append('renderedTemplateFile', payload.renderedTemplateFile);
+            }
+            if (payload.coverImageFile) {
+                formData.append('coverImageFile', payload.coverImageFile);
             }
 
             const config = {
