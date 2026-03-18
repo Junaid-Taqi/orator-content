@@ -5,6 +5,7 @@ import '../styles/FullscreenSlideForm.css';
 import '../styles/TemplateSlideForm.css';
 import { serverUrl } from '../Services/Constants/Constants';
 import TemplateDocumentView from './TemplateDocumentView';
+import { useTranslation } from '../Services/Localization/Localization';
 
 const TAG_OPTIONS = [
     '\uD83C\uDFE5 Health',
@@ -28,6 +29,7 @@ const TAG_OPTIONS = [
 ];
 
 const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = false, submitError = '' }) => {
+    const { t } = useTranslation();
     const VARCHAR_200_MAX = 200;
     const VARCHAR_300_MAX = 300;
     const VARCHAR_600_MAX = 600;
@@ -60,7 +62,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
         useCoverImageInTotem: false,
         coverImageFile: null,
     });
-    const [devices, setDevices] = useState([{ id: 'all-devices', label: 'All Devices' }]);
+    const [devices, setDevices] = useState([{ id: 'all-devices', label: t('allDevices') }]);
     const [devicesStatus, setDevicesStatus] = useState('idle');
     const [devicesError, setDevicesError] = useState('');
     const [validationError, setValidationError] = useState('');
@@ -434,55 +436,55 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
 
     return (
         <div className="fullscreen-slide-form template-slide-form">
-            <h2 className="form-title">Create Template Slide</h2>
+            <h2 className="form-title">{t('createTemplateSlide')}</h2>
 
             <div className="category-badge">
-                Category: <span className="badge-value">{categoryName}</span>
+                {t('category')}: <span className="badge-value">{categoryName}</span>
             </div>
 
             <div className="row m-0">
                 <div className="col-md-6 col-12 mb-3">
                     <div className="form-group">
-                        <label className="form-label">Slide Title *</label>
+                        <label className="form-label">{t('slideTitle')} *</label>
                         <input
                             type="text"
                             maxLength={75}
                             className="form-input"
-                            placeholder="Enter slide title"
+                            placeholder={t('enterSlideTitle')}
                             value={formData.title}
                             onChange={(e) => handleChange('title', e.target.value)}
                         />
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Sub Title</label>
+                        <label className="form-label">{t('subtitle')}</label>
                         <input
                             type="text"
                             maxLength={130}
                             className="form-input"
-                            placeholder="Enter sub title"
+                            placeholder={t('enterSubtitle')}
                             value={formData.subtitle}
                             onChange={(e) => handleChange('subtitle', e.target.value)}
                         />
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Web Description</label>
+                        <label className="form-label">{t('webDescription')}</label>
                         <textarea
                             className="form-input template-textarea"
                             maxLength={TEXT_MAX}
-                            placeholder="Enter web description"
+                            placeholder={t('enterWebDescription')}
                             value={formData.webDescription}
                             onChange={(e) => handleChange('webDescription', e.target.value)}
                         />
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Totem Description</label>
+                        <label className="form-label">{t('totemDescription')}</label>
                         <textarea
                             className="form-input template-textarea"
                             maxLength={460}
-                            placeholder="Enter totem description"
+                            placeholder={t('enterTotemDescription')}
                             value={formData.totemDescription}
                             onChange={(e) => handleChange('totemDescription', e.target.value)}
                         />
@@ -490,18 +492,18 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
 
                     <div className="form-group template-inline-grid">
                         <div>
-                            <label className="form-label">Article URL</label>
+                            <label className="form-label">{t('articleUrl')}</label>
                             <input
                                 type="text"
                                 maxLength={VARCHAR_300_MAX}
                                 className="form-input"
-                                placeholder="https://example.com/article"
+                                placeholder={t('enterArticleUrl')}
                                 value={formData.articleUrl}
                                 onChange={(e) => handleChange('articleUrl', e.target.value)}
                             />
                         </div>
                         <div>
-                            <label className="form-label">Footer Text</label>
+                            <label className="form-label">{t("footerText")}</label>
                             <input
                                 type="text"
                                 maxLength={VARCHAR_300_MAX}
@@ -524,8 +526,8 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                     </div> */}
 
                     <div className="form-group template-cover-group">
-                        <label className="form-label">Cover Image for Web Portal</label>
-                        <small className="template-tags-tip">Used as thumbnail in citizen web portal news feed</small>
+                        <label className="form-label">{t("coverImageWebPortal")}</label>
+                        <small className="template-tags-tip">{t("UsedThumbnail")}</small>
 
                         <div
                             className="template-cover-upload"
@@ -540,8 +542,8 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                             }}
                         >
                             <div className="template-cover-upload-icon">{'\uD83D\uDDBC\uFE0F'}</div>
-                            <p>Upload Custom Image</p>
-                            <small>JPG, PNG (max 5MB) - Recommended: 1200x630px</small>
+                            <p>{t("uploadCustomImage")}</p>
+                            <small>{t("Recommended")}</small>
                             {!!formData.coverImageFile && <small className="template-cover-file">{formData.coverImageFile.name}</small>}
                         </div>
 
@@ -552,7 +554,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                 onChange={(e) => handleChange('useCoverImageInTotem', e.target.checked)}
                                 disabled={!formData.coverImageFile}
                             />
-                            <span>Use this image as totem cover</span>
+                            <span>{t("useAsTotemCover")}</span>
                         </label>
 
                         <input
@@ -567,7 +569,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Tags (Multi-Select)</label>
+                        <label className="form-label">{t("tagsMultiSelect")}</label>
                         <div className="template-tags-list">
                             {TAG_OPTIONS.map((tag) => (
                                 <label key={tag} className="template-tag-item">
@@ -580,11 +582,11 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                 </label>
                             ))}
                         </div>
-                        <small className="template-tags-tip">Select all relevant categories for better organization</small>
+                        <small className="template-tags-tip">{t("selectAllRelevant")}</small>
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Priority</label>
+                        <label className="form-label">{t('priority')}</label>
                         <div className="priority-buttons">
                             {priorities.map((p) => (
                                 <button
@@ -601,7 +603,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
 
                     <div className="date-row">
                         <div className="form-group">
-                            <label className="form-label">Start Date *</label>
+                            <label className="form-label">{t('startDate')} *</label>
                             <input
                                 type="date"
                                 className="form-input date-input"
@@ -610,7 +612,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                             />
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Archive Date *</label>
+                            <label className="form-label">{t('archiveDate')} *</label>
                             <input
                                 type="date"
                                 className="form-input date-input"
@@ -621,14 +623,14 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                     </div>
 
                     <div className="form-group event-dates-group">
-                        <label className="form-label">Event Date(s) (Optional)</label>
+                        <label className="form-label">{t("eventDatesOptional")}</label>
                         <label className="device-checkbox" style={{ marginBottom: '10px' }}>
                             <input
                                 type="checkbox"
                                 checked={formData.eventEnabled}
                                 onChange={(e) => handleEventEnabledChange(e.target.checked)}
                             />
-                            <span>Enable Event Dates</span>
+                            <span>{t("enableEventDates")}</span>
                         </label>
 
                         {formData.eventEnabled && (
@@ -639,21 +641,21 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                         className={`preview-tab ${formData.eventMode === 1 ? 'active' : ''}`}
                                         onClick={() => handleEventModeChange(1)}
                                     >
-                                        Single Date
+                                        {t('singleDate')}
                                     </button>
                                     <button
                                         type="button"
                                         className={`preview-tab ${formData.eventMode === 2 ? 'active' : ''}`}
                                         onClick={() => handleEventModeChange(2)}
                                     >
-                                        Date Range
+                                        {t('dateRange')}
                                     </button>
                                     <button
                                         type="button"
                                         className={`preview-tab ${formData.eventMode === 3 ? 'active' : ''}`}
                                         onClick={() => handleEventModeChange(3)}
                                     >
-                                        Multiple Dates
+                                        {t('multipleDates')}
                                     </button>
                                 </div>
 
@@ -669,7 +671,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                 {formData.eventMode === 2 && (
                                     <div className="date-row">
                                         <div className="form-group">
-                                            <label className="form-label">Event Start Date</label>
+                                            <label className="form-label">{t("EventStartDate")}</label>
                                             <input
                                                 type="date"
                                                 className="form-input date-input"
@@ -678,7 +680,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                             />
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Event End Date</label>
+                                            <label className="form-label">{t("EventEndDate")}</label>
                                             <input
                                                 type="date"
                                                 className="form-input date-input"
@@ -705,7 +707,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                                     onClick={() => handleRemoveEventDate(index)}
                                                     disabled={formData.eventDates.length === 1}
                                                 >
-                                                    Remove
+                                                    {t('remove')}
                                                 </button>
                                             </div>
                                         ))}
@@ -715,7 +717,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                             onClick={handleAddEventDate}
                                             disabled={formData.eventDates.length >= MAX_MULTIPLE_EVENT_DATES}
                                         >
-                                            Add Date
+                                            {t("AddDate")}
                                         </button>
                                         <small className="template-tags-tip">
                                             Maximum {MAX_MULTIPLE_EVENT_DATES} dates allowed.
@@ -733,13 +735,13 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                 checked={formData.publish}
                                 onChange={(e) => handleChange('publish', e.target.checked)}
                             />
-                            <span>Publish</span>
+                            <span>{t("publish")}</span>
                         </label>
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Target Devices</label>
-                        {devicesStatus === 'loading' && <p className="upload-text">Loading devices...</p>}
+                        <label className="form-label">{t("targetDevices")}</label>
+                        {devicesStatus === 'loading' && <p className="upload-text">{t("loadingDevices")}</p>}
                         {devicesStatus === 'failed' && <p className="upload-text">{devicesError}</p>}
                         <div className="device-list">
                             {devices.map((device) => (
@@ -767,14 +769,14 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                 className={`view-mode-btn ${viewMode === 'web' ? 'active' : ''}`}
                                 onClick={() => setViewMode('web')}
                             >
-                                Web View
+                                {t("webView")}
                             </button>
                             <button
                                 type="button"
                                 className={`view-mode-btn ${viewMode === 'totem' ? 'active' : ''}`}
                                 onClick={() => setViewMode('totem')}
                             >
-                                Totem View
+                                {t("totemView")}
                             </button>
                         </div>
 
@@ -845,9 +847,9 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                         )}
 
                         <div className="note-section">
-                            <span>Note: Slide will be added to </span>
+                            <span>{t("NoteSlide")}</span>
                             <span className="note-category">{categoryName}</span>
-                            <span> pool as a rendered template image.</span>
+                            <span> {t("poolAsRenderedImage")}</span>
                         </div>
                     </div>
                 </div>
@@ -880,9 +882,9 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
             </div>
 
             <div className="form-actions">
-                <button className="btn-cancel" onClick={onCancel} type="button">Cancel</button>
+                <button className="btn-cancel" onClick={onCancel} type="button">{t("cancel")}</button>
                 <button className="btn-submit" onClick={handleSubmit} disabled={submitting} type="button">
-                    {submitting ? 'Creating...' : 'Create Slide'}
+                    {submitting ? t('submitting') : t('submit')}
                 </button>
             </div>
         </div>

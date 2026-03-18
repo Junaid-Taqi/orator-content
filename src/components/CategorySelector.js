@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import '../styles/CategorySelector.css';
 import {serverUrl} from '../Services/Constants/Constants';
+import { useTranslation } from "../Services/Localization/Localization";
 
 const colorToHex = {
     blue: '#3b82f6',
@@ -12,6 +13,7 @@ const colorToHex = {
 };
 
 const CategorySelector = ({onSelectCategory, onBack, user}) => {
+    const { t } = useTranslation();
     const [categories, setCategories] = useState([]);
     const [status, setStatus] = useState('idle');
     const [error, setError] = useState('');
@@ -44,7 +46,7 @@ const CategorySelector = ({onSelectCategory, onBack, user}) => {
 
                 if (!response.data?.success) {
                     setStatus('failed');
-                    setError(response.data?.message || 'Unable to load categories.');
+                    setError(response.data?.message || t("errorLoadingCategories"));
                     return;
                 }
 
@@ -59,7 +61,7 @@ const CategorySelector = ({onSelectCategory, onBack, user}) => {
                 setStatus('succeeded');
             } catch (err) {
                 setStatus('failed');
-                setError(err?.response?.data?.message || err.message || 'Unable to load categories.');
+                setError(err?.response?.data?.message || err.message || t("errorLoadingCategories"));
             }
         };
 
@@ -68,7 +70,7 @@ const CategorySelector = ({onSelectCategory, onBack, user}) => {
 
     const renderGridContent = () => {
         if (status === 'loading') {
-            return <div className="category-name">Loading active categories...</div>;
+            return <div className="category-name">{t("loadingCategories")}</div>;
         }
 
         if (status === 'failed') {
@@ -76,7 +78,7 @@ const CategorySelector = ({onSelectCategory, onBack, user}) => {
         }
 
         if (!categories.length) {
-            return <div className="category-name">No active categories found.</div>;
+            return <div className="category-name">{t("noCategories")}</div>;
         }
 
         return categories.map((c) => {
@@ -89,13 +91,16 @@ const CategorySelector = ({onSelectCategory, onBack, user}) => {
             const cleanTitle = titleText
                 .replace(/(\p{Extended_Pictographic}(?:\uFE0F)?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F)?)*)/gu, '')
                 .trim();
+
             return (
                 <div
                     key={c.id}
                     className="category-card"
                     onClick={() => onSelectCategory(c)}
                 >
-                    <div className="category-icon" style={{color: dotColor}}>{leadingEmoji || '•'}</div>
+                    <div className="category-icon" style={{color: dotColor}}>
+                        {leadingEmoji || '•'}
+                    </div>
                     <div className="category-name">{cleanTitle || c.title}</div>
                 </div>
             );
@@ -104,15 +109,20 @@ const CategorySelector = ({onSelectCategory, onBack, user}) => {
 
     return (
         <div className="category-selector">
-            <h2 className="category-title">Select Category</h2>
-            <p className="category-desc">Choose the category for your slide. The template will be based on the category you select.</p>
+            <h2 className="category-title">{t("selectCategory")}</h2>
+
+            <p className="category-desc">
+                {t("categoryDescription")}
+            </p>
 
             <div className="category-grid">
                 {renderGridContent()}
             </div>
 
             <div className="category-actions">
-                <button className="back-btn" onClick={onBack}>Back</button>
+                <button className="back-btn" onClick={onBack}>
+                    {t("back")}
+                </button>
             </div>
         </div>
     );

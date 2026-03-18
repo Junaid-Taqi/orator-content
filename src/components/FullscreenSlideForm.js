@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../styles/FullscreenSlideForm.css';
 import { serverUrl } from '../Services/Constants/Constants';
+import { useTranslation } from "../Services/Localization/Localization";
 
 const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = false, submitError = '' }) => {
+    const { t } = useTranslation();
     const VARCHAR_300_MAX = 300;
     const TEXT_MAX = 65535;
     const durationMap = {
@@ -259,37 +261,37 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
 
     return (
         <div className="fullscreen-slide-form">
-            <h2 className="form-title">Create Fullscreen Slide</h2>
+            <h2 className="form-title">{t("createFullscreenSlide")}</h2>
 
             <div className="category-badge">
-                Category: <span className="badge-value">{categoryName}</span>
+                {t("category")}: <span className="badge-value">{categoryName}</span>
             </div>
 
             <div className="form-container">
                 <div className="form-left">
                     <div className="form-group">
-                        <label className="form-label">Slide Title *</label>
-                        <input type="text" maxLength={75} className="form-input" placeholder="Enter slide title" value={formData.title} onChange={handleTitleChange} />
+                        <label className="form-label">{t("slideTitle")} *</label>
+                        <input type="text" maxLength={75} className="form-input" placeholder={t("enterSlideTitle")} value={formData.title} onChange={handleTitleChange} />
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Sub Title</label>
+                        <label className="form-label">{t("subTitle")}</label>
                         <input
                             type="text"
                             maxLength={130}
                             className="form-input"
-                            placeholder="Enter subtitle"
+                            placeholder={t("enterSubtitle")}
                             value={formData.subtitle}
                             onChange={(e) => handleFieldChange('subtitle', e.target.value)}
                         />
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Web Description</label>
+                        <label className="form-label">{t("webDescription")}</label>
                         <textarea
                             className="form-input"
                             maxLength={TEXT_MAX}
-                            placeholder="Enter web description"
+                            placeholder={t("enterWebDescription")}
                             value={formData.webDescription}
                             onChange={(e) => handleFieldChange('webDescription', e.target.value)}
                             rows={3}
@@ -297,16 +299,16 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Upload Media *</label>
+                        <label className="form-label">{t("uploadMedia")} *</label>
                         <div className="upload-area" onClick={() => document.getElementById('media-input').click()}>
                             <div className="upload-icon">UP</div>
-                            <p className="upload-text">Click to upload or drag & drop</p>
+                            <p className="upload-text">{t("clickUpload")}</p>
                         </div>
                         <input id="media-input" type="file" accept="image/*,video/*" style={{ display: 'none' }} onChange={handleFileUpload} />
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Priority</label>
+                        <label className="form-label">{t("priority")}</label>
                         <div className="priority-buttons">
                             {priorities.map((p) => (
                                 <button key={p.id} className={`priority-btn priority-${p.id} ${formData.priority === p.id ? 'active' : ''}`} onClick={() => handlePriorityChange(p.id)}>
@@ -318,24 +320,24 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
 
                     <div className="date-row">
                         <div className="form-group">
-                            <label className="form-label">Start Date</label>
+                            <label className="form-label">{t("startDate")}</label>
                             <input type="date" className="form-input date-input" value={formData.startDate} onChange={(e) => handleDateChange('startDate', e.target.value)} />
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Archive Date</label>
+                            <label className="form-label">{t("archiveDate")}</label>
                             <input type="date" className="form-input date-input" value={formData.archiveDate} onChange={(e) => handleDateChange('archiveDate', e.target.value)} />
                         </div>
                     </div>
 
                     <div className="form-group event-dates-group">
-                        <label className="form-label">Event Date(s) (Optional)</label>
+                        <label className="form-label">{t("eventDatesOptional")}</label>
                         <label className="device-checkbox" style={{ marginBottom: '10px' }}>
                             <input
                                 type="checkbox"
                                 checked={formData.eventEnabled}
                                 onChange={(e) => handleEventEnabledChange(e.target.checked)}
                             />
-                            <span>Enable Event Dates</span>
+                            <span>{t("enableEventDates")}</span>
                         </label>
 
                         {formData.eventEnabled && (
@@ -346,21 +348,21 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                                         className={`preview-tab ${formData.eventMode === 1 ? 'active' : ''}`}
                                         onClick={() => handleEventModeChange(1)}
                                     >
-                                        Single Date
+                                        {t("singleDate")}
                                     </button>
                                     <button
                                         type="button"
                                         className={`preview-tab ${formData.eventMode === 2 ? 'active' : ''}`}
                                         onClick={() => handleEventModeChange(2)}
                                     >
-                                        Date Range
+                                        {t("dateRange")}
                                     </button>
                                     <button
                                         type="button"
                                         className={`preview-tab ${formData.eventMode === 3 ? 'active' : ''}`}
                                         onClick={() => handleEventModeChange(3)}
                                     >
-                                        Multiple Dates
+                                        {t("multipleDates")}
                                     </button>
                                 </div>
 
@@ -376,7 +378,7 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                                 {formData.eventMode === 2 && (
                                     <div className="date-row">
                                         <div className="form-group">
-                                            <label className="form-label">Event Start Date</label>
+                                            <label className="form-label">{t("eventStartDate")}</label>
                                             <input
                                                 type="date"
                                                 className="form-input date-input"
@@ -385,7 +387,7 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                                             />
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Event End Date</label>
+                                            <label className="form-label">{t("eventEndDate")}</label>
                                             <input
                                                 type="date"
                                                 className="form-input date-input"
@@ -412,12 +414,12 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                                                     onClick={() => handleRemoveEventDate(index)}
                                                     disabled={formData.eventDates.length === 1}
                                                 >
-                                                    Remove
+                                                    {t("remove")}
                                                 </button>
                                             </div>
                                         ))}
                                         <button type="button" className="btn-submit" onClick={handleAddEventDate}>
-                                            Add Date
+                                            {t("addDate")}
                                         </button>
                                     </div>
                                 )}
@@ -432,13 +434,13 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                                 checked={formData.publish}
                                 onChange={(e) => handleFieldChange('publish', e.target.checked)}
                             />
-                            <span>Publish</span>
+                            <span>{t("publish")}</span>
                         </label>
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Target Devices</label>
-                        {devicesStatus === 'loading' && <p className="upload-text">Loading devices...</p>}
+                        <label className="form-label">{t("targetDevices")}</label>
+                        {devicesStatus === 'loading' && <p className="upload-text">{t("loadingDevices")}</p>}
                         {devicesStatus === 'failed' && <p className="upload-text">{devicesError}</p>}
                         <div className="device-list">
                             {devices.map((device) => (
@@ -457,8 +459,8 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                 <div className="form-right">
                     <div className="preview-section">
                         <div className="view-mode-toggles">
-                            <button className={`view-mode-btn ${viewMode === 'web' ? 'active' : ''}`} onClick={() => setViewMode('web')}>Web View</button>
-                            <button className={`view-mode-btn ${viewMode === 'totem' ? 'active' : ''}`} onClick={() => setViewMode('totem')}>Totem View</button>
+                            <button className={`view-mode-btn ${viewMode === 'web' ? 'active' : ''}`} onClick={() => setViewMode('web')}>{t("webView")}</button>
+                            <button className={`view-mode-btn ${viewMode === 'totem' ? 'active' : ''}`} onClick={() => setViewMode('totem')}>{t("totemView")}</button>
                         </div>
 
                         {viewMode === 'web' ? (
@@ -491,8 +493,8 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                         ) : (
                             <>
                                 <div className="preview-tabs">
-                                    <button className={`preview-tab ${orientation === 'landscape' ? 'active' : ''}`} onClick={() => setOrientation('landscape')}>Landscape</button>
-                                    <button className={`preview-tab ${orientation === 'portrait' ? 'active' : ''}`} onClick={() => setOrientation('portrait')}>Portrait</button>
+                                    <button className={`preview-tab ${orientation === 'landscape' ? 'active' : ''}`} onClick={() => setOrientation('landscape')}>{t("Landscape")}</button>
+                                    <button className={`preview-tab ${orientation === 'portrait' ? 'active' : ''}`} onClick={() => setOrientation('portrait')}>{t("Portrait")}</button>
                                 </div>
 
                                 <div className={`preview-container ${orientation} ${viewMode}`}>
@@ -506,7 +508,7 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                                         </div>
                                     ) : (
                                         <div className="preview-placeholder">
-                                            <p>Totem View</p>
+                                            <p>{t("totemView")}</p>
                                             <p className="placeholder-text">{orientation.toUpperCase()}</p>
                                         </div>
                                     )}
@@ -515,17 +517,17 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                         )}
 
                         <div className="note-section">
-                            <span>Note: Slide will be added to </span>
+                            <span>{t("noteSlideAdded")} </span>
                             <span className="note-category">{categoryName}</span>
-                            <span> pool</span>
+                            <span> {t("pool")}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div className="form-actions">
-                <button className="btn-cancel" onClick={onCancel}>Cancel</button>
-                <button className="btn-submit" onClick={handleSubmit} disabled={submitting}>{submitting ? 'Creating...' : 'Create Slide'}</button>
+                <button className="btn-cancel" onClick={onCancel}>{t("cancel")}</button>
+                <button className="btn-submit" onClick={handleSubmit} disabled={submitting}>{submitting ? t("creating") : t("createSlide")}</button>
             </div>
         </div>
     );

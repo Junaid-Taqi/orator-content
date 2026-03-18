@@ -3,28 +3,30 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faLayerGroup} from '@fortawesome/free-solid-svg-icons';
 import '../styles/SlideTypeSelector.css';
 import {faImage} from "@fortawesome/free-solid-svg-icons/faImage";
+import { useTranslation } from "../Services/Localization/Localization";
 
 const SlideTypeSelector = ({onSelectType, onCancel}) => {
+    const { t } = useTranslation();
     const slideTypes = [
         {
             id: 'fullscreen',
-            title: 'Fullscreen Slide',
+            title: t("FullscreenSlide"),
             icon: faLayerGroup, // FontAwesome icon object
-            description: 'Display image or video as-is without any template structure.',
+            description: t("TemplateStructure"),
             color: 'orange'
         },
         {
             id: 'template',
-            title: 'Template Slide',
+            title: t("TemplateSlide"),
             icon: faImage, // FontAwesome icon object
-            description: 'Category-based template with structured layout and dynamic fields.',
+            description: t("CategoryBased"),
             color: 'purple'
         }
     ];
 
     return (
         <div className="slide-type-selector">
-            <h2 className="selector-title">Choose Slide Type</h2>
+            <h2 className="selector-title">{t("TemplateSlide")}</h2>
             <div className="slide-types-grid">
                 {slideTypes.map((type) => (
                     <div
@@ -42,7 +44,7 @@ const SlideTypeSelector = ({onSelectType, onCancel}) => {
                 ))}
             </div>
             <button className="cancel-btn" onClick={onCancel}>
-                Cancel
+                {t("cancel")}
             </button>
         </div>
     );
