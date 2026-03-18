@@ -962,6 +962,38 @@ const SlidesPage = ({ user }) => {
                         mode="edit"
                     />
                 )}
+                {slideToEdit && slideToEdit.slideType === 2 && (
+                    <TemplateSlideForm
+                        category={{ title: slideToEdit.category }}
+                        user={user}
+                        onCancel={handleCancelEdit}
+                        onSubmit={() => {}}
+                        submitting
+                        hideTargets
+                        initialValues={{
+                            title: slideToEdit.title || '',
+                            subtitle: slideToEdit.subtitle || '',
+                            webDescription: slideToEdit.webDescription || '',
+                            totemDescription: slideToEdit.totemDescription || '',
+                            articleUrl: slideToEdit.articleUrl || '',
+                            linkUrl: slideToEdit.linkUrl || '',
+                            configJSON: slideToEdit.configJSON || '',
+                            priority: normalizePriorityKey(slideToEdit.priorityRaw),
+                            durationSeconds: slideToEdit.durationSeconds || durationMap[normalizePriorityKey(slideToEdit.priorityRaw)] || 30,
+                            startDate: toInputDate(slideToEdit.startDateRaw),
+                            archiveDate: toInputDate(slideToEdit.archiveDateRaw),
+                            publish: slideToEdit.publish !== false,
+                            eventEnabled: Boolean(slideToEdit.eventEnabled),
+                            eventMode: Number(slideToEdit.eventMode || 1),
+                            eventStartDate: toInputDate(slideToEdit.eventStartDate),
+                            eventEndDate: toInputDate(slideToEdit.eventEndDate),
+                            eventDates: parseEventDates(slideToEdit.eventDatesJson),
+                            devices: (slideToEdit.displays || []).map((d) => String(d.displayId)),
+                        }}
+                        existingCoverUrl={slideToEdit.fileURLCover}
+                        mode="edit"
+                    />
+                )}
             </Modal>
 
             <Modal

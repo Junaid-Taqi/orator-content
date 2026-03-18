@@ -28,7 +28,18 @@ const TAG_OPTIONS = [
     '\uD83D\uDCBC Economy',
 ];
 
-const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = false, submitError = '' }) => {
+const TemplateSlideForm = ({
+    category,
+    user,
+    onCancel,
+    onSubmit,
+    submitting = false,
+    submitError = '',
+    initialValues = null,
+    existingCoverUrl = '',
+    hideTargets = false,
+    mode = 'create',
+}) => {
     const { t } = useTranslation();
     const VARCHAR_200_MAX = 200;
     const VARCHAR_300_MAX = 300;
@@ -165,6 +176,38 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
 
         fetchDevices();
     }, [user]);
+
+    useEffect(() => {
+        setFormData((prev) => {
+            if (initialValues) {
+                let parsedCfg = {};
+                try {
+                    parsedCfg = initialValues.configJSON ? JSON.parse(initialValues.configJSON) : {};
+                } catch (e) {
+                    parsedCfg = {};
+                }
+                const parsedTags = Array.isArray(parsedCfg.tags) ? parsedCfg.tags : prev.tags;
+                const parsedUseCover = parsedCfg.useCoverImageInTotem ?? prev.useCoverImageInTotem;
+
+                const merged = {
+                    ...prev,
+                    ...initialValues,
+                    eventDates: initialValues.eventDates ? normalizeEventDateItems(initialValues.eventDates) : prev.eventDates,
+                    devices: initialValues.devices || prev.devices,
+                    tags: initialValues.tags ?? parsedTags,
+                    useCoverImageInTotem: initialValues.useCoverImageInTotem ?? parsedUseCover,
+                };
+                return merged;
+            }
+            return prev;
+        });
+    }, [initialValues]);
+
+    useEffect(() => {
+        if (!coverPreviewUrl && existingCoverUrl) {
+            setCoverPreviewUrl(existingCoverUrl);
+        }
+    }, [existingCoverUrl, coverPreviewUrl]);
 
     useEffect(() => {
         setFormData((prev) => {
@@ -594,7 +637,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                                 type="checkbox"
                                 checked={formData.useCoverImageInTotem}
                                 onChange={(e) => handleChange('useCoverImageInTotem', e.target.checked)}
-                                disabled={!formData.coverImageFile}
+                                disabled={!(formData.coverImageFile || coverPreviewUrl)}
                             />
                             <span>{t("useAsTotemCover")}</span>
                         </label>
@@ -808,23 +851,25 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                         </label>
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">{t("targetDevices")}</label>
-                        {devicesStatus === 'loading' && <p className="upload-text">{t("loadingDevices")}</p>}
-                        {devicesStatus === 'failed' && <p className="upload-text">{devicesError}</p>}
-                        <div className="device-list">
-                            {devices.map((device) => (
-                                <label key={device.id} className="device-checkbox">
-                                    <input
-                                        type="checkbox"
-                                        checked={isDeviceChecked(device.id)}
-                                        onChange={() => handleDeviceToggle(device.id)}
-                                    />
-                                    <span>{device.label}</span>
-                                </label>
-                            ))}
+                    {!hideTargets && (
+                        <div className="form-group">
+                            <label className="form-label">{t("targetDevices")}</label>
+                            {devicesStatus === 'loading' && <p className="upload-text">{t("loadingDevices")}</p>}
+                            {devicesStatus === 'failed' && <p className="upload-text">{devicesError}</p>}
+                            <div className="device-list">
+                                {devices.map((device) => (
+                                    <label key={device.id} className="device-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            checked={isDeviceChecked(device.id)}
+                                            onChange={() => handleDeviceToggle(device.id)}
+                                        />
+                                        <span>{device.label}</span>
+                                    </label>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {!!validationError && <p className="upload-text template-error">{validationError}</p>}
                     {!validationError && !!submitError && <p className="upload-text template-error">{submitError}</p>}
