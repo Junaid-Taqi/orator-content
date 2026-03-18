@@ -22,17 +22,27 @@ const parseDateValue = (value) => {
     return null;
 };
 
+const normalizeEventDateItems = (dates = []) => dates.map((item) => {
+    if (typeof item === 'string') {
+        return { date: item, label: '' };
+    }
+    if (item && typeof item === 'object') {
+        return { date: item.date || '', label: item.label || '' };
+    }
+    return { date: '', label: '' };
+});
+
 const getNextEventDates = (dates, maxCount = 2) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const parsed = (dates || [])
-        .map((d) => parseDateValue(d))
-        .filter(Boolean)
-        .sort((a, b) => a.getTime() - b.getTime());
+    const parsed = normalizeEventDateItems(dates || [])
+        .map((d) => ({ ...d, parsed: parseDateValue(d.date) }))
+        .filter((d) => d.parsed)
+        .sort((a, b) => a.parsed.getTime() - b.parsed.getTime());
     if (!parsed.length) return [];
-    const upcoming = parsed.filter((d) => d.getTime() >= today.getTime());
+    const upcoming = parsed.filter((d) => d.parsed.getTime() >= today.getTime());
     const pool = upcoming.length ? upcoming : parsed;
-    return pool.slice(0, maxCount);
+    return pool.slice(0, maxCount).map((d) => ({ date: d.date, label: d.label }));
 };
 
 const MAX_MULTIPLE_EVENT_DATES = 8;
@@ -142,7 +152,7 @@ const TemplateDocumentView = ({
         if (normalizedEventMode === 3) {
             return {
                 leftLabel: 'EVENT DATE',
-                leftValue: multipleEventDates[0] ? formatDisplayDate(multipleEventDates[0]) : '--.--',
+                leftValue: multipleEventDates[0] ? formatDisplayDate(multipleEventDates[0].date) : '--.--',
                 rightLabel: '',
                 rightValue: '',
             };
@@ -217,10 +227,10 @@ const TemplateDocumentView = ({
 
                 <div className={`template-dates ${isMultipleEventMode ? 'multiple' : ''}`}>
                     {isMultipleEventMode ? (
-                        (multipleEventDates.length ? multipleEventDates : [null]).map((dateValue, index) => (
+                        (multipleEventDates.length ? multipleEventDates : [{ date: '', label: '' }]).map((eventItem, index) => (
                             <div key={`event-date-${index}`} className="template-date-block">
-                                <span>{`EVENT DATE ${index + 1}`}</span>
-                                <strong>{dateValue ? formatDisplayDate(dateValue) : '--.--'}</strong>
+                                <span>{eventItem.label || `EVENT DATE ${index + 1}`}</span>
+                                <strong>{eventItem.date ? formatDisplayDate(eventItem.date) : '--.--'}</strong>
                             </div>
                         ))
                     ) : (

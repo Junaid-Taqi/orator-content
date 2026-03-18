@@ -26,7 +26,7 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
         eventMode: 1, // 1: single, 2: range, 3: multiple
         eventStartDate: '',
         eventEndDate: '',
-        eventDates: [''],
+        eventDates: [{ date: '', label: '' }],
     });
     const [devices, setDevices] = useState([{ id: 'all-devices', label: 'All Devices' }]);
     const [devicesStatus, setDevicesStatus] = useState('idle');
@@ -35,6 +35,7 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
     const [preview, setPreview] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [validationError, setValidationError] = useState('');
+    const [multiEventError, setMultiEventError] = useState('');
     const [orientation, setOrientation] = useState('landscape');
     const [viewMode, setViewMode] = useState('web');
 
@@ -45,6 +46,17 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
         { id: 'medium', label: 'Medium', duration: '30s' },
         { id: 'high', label: 'High', duration: '45s' },
     ];
+    const safeTrim = (value) => String(value ?? '').trim();
+    const createEmptyEventDate = () => ({ date: '', label: '' });
+    const normalizeEventDateItems = (dates = []) => dates.map((item) => {
+        if (typeof item === 'string') {
+            return { date: item, label: '' };
+        }
+        if (item && typeof item === 'object') {
+            return { date: item.date || '', label: item.label || '' };
+        }
+        return createEmptyEventDate();
+    });
     const toInputDate = (date) => {
         const offsetMs = date.getTimezoneOffset() * 60 * 1000;
         const local = new Date(date.getTime() - offsetMs);
@@ -162,6 +174,7 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
 
     const handleEventEnabledChange = (checked) => {
         setValidationError('');
+        setMultiEventError('');
         setFormData((prev) => ({
             ...prev,
             eventEnabled: checked,
@@ -171,31 +184,51 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
 
     const handleEventModeChange = (mode) => {
         setValidationError('');
+        setMultiEventError('');
         setFormData((prev) => ({
             ...prev,
             eventMode: mode,
             eventStartDate: mode === 3 ? '' : prev.eventStartDate,
             eventEndDate: mode === 2 ? prev.eventEndDate : '',
-            eventDates: mode === 3 ? (prev.eventDates.length ? prev.eventDates : ['']) : [''],
+            eventDates: mode === 3
+                ? (prev.eventDates.length ? normalizeEventDateItems(prev.eventDates) : [createEmptyEventDate()])
+                : [createEmptyEventDate()],
         }));
     };
 
-    const handleEventDateChange = (index, value) => {
+    const handleEventDateChange = (index, field, value) => {
         setValidationError('');
-        const updatedDates = [...formData.eventDates];
-        updatedDates[index] = value;
-        setFormData({ ...formData, eventDates: updatedDates });
+        setMultiEventError('');
+        setFormData((prev) => {
+            const updatedDates = normalizeEventDateItems(prev.eventDates);
+            updatedDates[index] = { ...updatedDates[index], [field]: value };
+            return { ...prev, eventDates: updatedDates };
+        });
     };
 
     const handleAddEventDate = () => {
         setValidationError('');
-        setFormData({ ...formData, eventDates: [...formData.eventDates, ''] });
+        setFormData((prev) => {
+            const normalized = normalizeEventDateItems(prev.eventDates);
+            const last = normalized[normalized.length - 1] || createEmptyEventDate();
+            if (!safeTrim(last.date) || !safeTrim(last.label)) {
+                setMultiEventError('Please enter both date and label before adding another event.');
+                return prev;
+            }
+            if (normalized.length >= 8) {
+                setMultiEventError('You can select up to 8 dates.');
+                return prev;
+            }
+            setMultiEventError('');
+            return { ...prev, eventDates: [...normalized, createEmptyEventDate()] };
+        });
     };
 
     const handleRemoveEventDate = (index) => {
         setValidationError('');
-        const updatedDates = formData.eventDates.filter((_, i) => i !== index);
-        setFormData({ ...formData, eventDates: updatedDates.length ? updatedDates : [''] });
+        setMultiEventError('');
+        const updatedDates = normalizeEventDateItems(formData.eventDates).filter((_, i) => i !== index);
+        setFormData({ ...formData, eventDates: updatedDates.length ? updatedDates : [createEmptyEventDate()] });
     };
 
     const handleSubmit = () => {
@@ -219,6 +252,7 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
             setValidationError('Please select at least one target device.');
             return;
         }
+        let normalizedEventDates = [];
         if (formData.eventEnabled) {
             if (formData.eventMode === 1 && !formData.eventStartDate) {
                 setValidationError('Event single date is required.');
@@ -235,16 +269,26 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                 }
             }
             if (formData.eventMode === 3) {
-                const validEventDates = formData.eventDates.map((d) => d.trim()).filter(Boolean);
-                if (!validEventDates.length) {
+                const normalizedDates = normalizeEventDateItems(formData.eventDates)
+                    .map((d) => ({ date: safeTrim(d.date), label: safeTrim(d.label) }))
+                    .filter((d) => d.date || d.label);
+                if (!normalizedDates.length) {
                     setValidationError('At least one event date is required for multiple dates mode.');
                     return;
                 }
+                if (normalizedDates.some((d) => !d.date || !d.label)) {
+                    setValidationError('Please enter a label for each event date.');
+                    return;
+                }
+                if (normalizedDates.length > 8) {
+                    setValidationError('You can select up to 8 dates.');
+                    return;
+                }
+                normalizedEventDates = normalizedDates;
             }
         }
 
         setValidationError('');
-        const normalizedEventDates = formData.eventDates.map((d) => d.trim()).filter(Boolean);
         onSubmit({
             ...formData,
             title: formData.title.trim(),
@@ -415,33 +459,47 @@ const FullscreenSlideForm = ({ category, user, onCancel, onSubmit, submitting = 
                                     </div>
                                 )}
 
-                                {formData.eventMode === 3 && (
-                                    <div className="multi-event-dates">
-                                        {formData.eventDates.map((date, index) => (
-                                            <div key={`event-date-${index}`} className="multi-event-row">
-                                                <input
-                                                    type="date"
-                                                    className="form-input date-input"
-                                                    value={date}
-                                                    onChange={(e) => handleEventDateChange(index, e.target.value)}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="btn-cancel"
-                                                    onClick={() => handleRemoveEventDate(index)}
-                                                    disabled={formData.eventDates.length === 1}
-                                                >
-                                                    {t("remove")}
-                                                </button>
+                                        {formData.eventMode === 3 && (
+                                            <div className="multi-event-dates">
+                                                {formData.eventDates.map((eventDate, index) => (
+                                                    <div key={`event-date-${index}`} className="multi-event-row">
+                                                        <input
+                                                            type="date"
+                                                            className="form-input date-input"
+                                                            value={eventDate.date}
+                                                            onChange={(e) => handleEventDateChange(index, 'date', e.target.value)}
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            className="form-input"
+                                                            placeholder={t("label")}
+                                                            value={eventDate.label}
+                                                            onChange={(e) => handleEventDateChange(index, 'label', e.target.value)}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="btn-cancel"
+                                                            onClick={() => handleRemoveEventDate(index)}
+                                                            disabled={formData.eventDates.length === 1}
+                                                        >
+                                                            {t("remove")}
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                <div className="multi-event-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <button type="button" className="btn-submit" onClick={handleAddEventDate}>
+                                                        {t("addDate")}
+                                                    </button>
+                                                    {!!multiEventError && (
+                                                        <span className="template-error" style={{ color: '#ff9aa2', fontSize: '0.9rem' }}>
+                                                            {multiEventError}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
-                                        ))}
-                                        <button type="button" className="btn-submit" onClick={handleAddEventDate}>
-                                            {t("addDate")}
-                                        </button>
+                                        )}
                                     </div>
                                 )}
-                            </div>
-                        )}
                     </div>
 
                     <div className="form-group">

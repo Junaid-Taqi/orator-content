@@ -37,6 +37,18 @@ const durationMap = {
     high: 45,
 };
 
+const safeTrim = (value) => String(value ?? '').trim();
+const createEmptyEventDate = () => ({ date: '', label: '' });
+const normalizeEventDateItems = (dates = []) => dates.map((item) => {
+    if (typeof item === 'string') {
+        return { date: safeTrim(item), label: '' };
+    }
+    if (item && typeof item === 'object') {
+        return { date: safeTrim(item.date), label: safeTrim(item.label) };
+    }
+    return createEmptyEventDate();
+});
+
 const normalizePriorityKey = (priority) => {
     if (priority === 'high' || priority === 'medium' || priority === 'low') {
         return priority;
@@ -79,21 +91,24 @@ const toInputDate = (value) => {
 };
 
 const parseEventDates = (value) => {
-    if (!value) return [''];
+    const normalizeArray = (arr) => {
+        const normalized = normalizeEventDateItems(arr).filter((d) => d.date || d.label);
+        return normalized.length ? normalized : [createEmptyEventDate()];
+    };
+
+    if (!value) return [createEmptyEventDate()];
     if (Array.isArray(value)) {
-        const valid = value.map((d) => String(d || '').trim()).filter(Boolean);
-        return valid.length ? valid : [''];
+        return normalizeArray(value);
     }
     try {
         const parsed = JSON.parse(value);
         if (Array.isArray(parsed)) {
-            const valid = parsed.map((d) => String(d || '').trim()).filter(Boolean);
-            return valid.length ? valid : [''];
+            return normalizeArray(parsed);
         }
     } catch (e) {
         // ignore and fallback
     }
-    return [''];
+    return [createEmptyEventDate()];
 };
 
 const parseConfigJson = (value) => {
@@ -147,7 +162,7 @@ const SlidesPage = ({ user }) => {
         eventMode: 1,
         eventStartDate: '',
         eventEndDate: '',
-        eventDates: [''],
+        eventDates: [createEmptyEventDate()],
     });
 
     const { status: createFullscreenStatus, error: createFullscreenError } = useSelector((state) => state.AddFullScreenSlide);
@@ -290,23 +305,38 @@ const SlidesPage = ({ user }) => {
             eventMode: mode,
             eventStartDate: mode === 3 ? '' : prev.eventStartDate,
             eventEndDate: mode === 2 ? prev.eventEndDate : '',
-            eventDates: mode === 3 ? (prev.eventDates.length ? prev.eventDates : ['']) : [''],
+            eventDates: mode === 3
+                ? (prev.eventDates.length ? normalizeEventDateItems(prev.eventDates) : [createEmptyEventDate()])
+                : [createEmptyEventDate()],
         }));
     };
 
-    const handleEditEventDateChange = (index, value) => {
-        const updated = [...editForm.eventDates];
-        updated[index] = value;
+    const handleEditEventDateChange = (index, field, value) => {
+        const updated = normalizeEventDateItems(editForm.eventDates);
+        updated[index] = { ...updated[index], [field]: value };
         handleEditFieldChange('eventDates', updated);
     };
 
     const handleAddEditEventDate = () => {
-        handleEditFieldChange('eventDates', [...editForm.eventDates, '']);
+        setEditValidationError('');
+        setEditForm((prev) => {
+            const normalized = normalizeEventDateItems(prev.eventDates);
+            const last = normalized[normalized.length - 1] || createEmptyEventDate();
+            if (!safeTrim(last.date) || !safeTrim(last.label)) {
+                setEditValidationError('Please enter both date and label before adding another event.');
+                return prev;
+            }
+            if (normalized.length >= 8) {
+                setEditValidationError('You can select up to 8 dates.');
+                return prev;
+            }
+            return { ...prev, eventDates: [...normalized, createEmptyEventDate()] };
+        });
     };
 
     const handleRemoveEditEventDate = (index) => {
-        const updated = editForm.eventDates.filter((_, i) => i !== index);
-        handleEditFieldChange('eventDates', updated.length ? updated : ['']);
+        const updated = normalizeEventDateItems(editForm.eventDates).filter((_, i) => i !== index);
+        handleEditFieldChange('eventDates', updated.length ? updated : [createEmptyEventDate()]);
     };
 
     const handleSaveEdit = async () => {
@@ -323,6 +353,7 @@ const SlidesPage = ({ user }) => {
             setEditValidationError('Archive date must be greater than or equal to start date.');
             return;
         }
+        let normalizedEventDates = [];
         if (editForm.eventEnabled) {
             if (editForm.eventMode === 1 && !editForm.eventStartDate) {
                 setEditValidationError('Event single date is required.');
@@ -339,11 +370,22 @@ const SlidesPage = ({ user }) => {
                 }
             }
             if (editForm.eventMode === 3) {
-                const validEventDates = editForm.eventDates.map((d) => d.trim()).filter(Boolean);
-                if (!validEventDates.length) {
+                const normalizedDates = normalizeEventDateItems(editForm.eventDates)
+                    .map((d) => ({ date: safeTrim(d.date), label: safeTrim(d.label) }))
+                    .filter((d) => d.date || d.label);
+                if (!normalizedDates.length) {
                     setEditValidationError('At least one event date is required for multiple dates mode.');
                     return;
                 }
+                if (normalizedDates.some((d) => !d.date || !d.label)) {
+                    setEditValidationError('Please enter a label for each event date.');
+                    return;
+                }
+                if (normalizedDates.length > 8) {
+                    setEditValidationError('You can select up to 8 dates.');
+                    return;
+                }
+                normalizedEventDates = normalizedDates;
             }
         }
 
@@ -355,7 +397,6 @@ const SlidesPage = ({ user }) => {
 
         const priority = priorityMap[normalizePriorityKey(editForm.priority)] || 2;
         const durationSeconds = durationMap[normalizePriorityKey(editForm.priority)] || 30;
-        const normalizedEventDates = editForm.eventDates.map((d) => d.trim()).filter(Boolean);
 
         const basePayload = {
             groupId: String(currentGroupId),
@@ -1007,13 +1048,20 @@ const SlidesPage = ({ user }) => {
 
                                         {editForm.eventMode === 3 && (
                                             <div className="multi-event-dates">
-                                                {editForm.eventDates.map((date, index) => (
+                                                {editForm.eventDates.map((eventDate, index) => (
                                                     <div key={`edit-event-date-${index}`} className="multi-event-row">
                                                         <input
                                                             type="date"
                                                             className="form-input"
-                                                            value={date}
-                                                            onChange={(e) => handleEditEventDateChange(index, e.target.value)}
+                                                            value={eventDate.date}
+                                                            onChange={(e) => handleEditEventDateChange(index, 'date', e.target.value)}
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            className="form-input"
+                                                            placeholder={t('label')}
+                                                            value={eventDate.label}
+                                                            onChange={(e) => handleEditEventDateChange(index, 'label', e.target.value)}
                                                         />
                                                         <button
                                                             type="button"
