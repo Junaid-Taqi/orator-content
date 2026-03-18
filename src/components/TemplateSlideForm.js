@@ -457,7 +457,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">{t('subtitle')}</label>
+                        <label className="form-label">{t('SubTitle')}</label>
                         <input
                             type="text"
                             maxLength={130}
@@ -492,7 +492,7 @@ const TemplateSlideForm = ({ category, user, onCancel, onSubmit, submitting = fa
 
                     <div className="form-group template-inline-grid">
                         <div>
-                            <label className="form-label">{t('articleUrl')}</label>
+                            <label className="form-label">{t('articleURL')}</label>
                             <input
                                 type="text"
                                 maxLength={VARCHAR_300_MAX}
