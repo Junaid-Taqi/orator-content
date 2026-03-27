@@ -34,7 +34,7 @@ const FullscreenSlideForm = ({
         startDate: '',
         archiveDate: '',
         devices: ['all-devices'],
-        publish: true,
+        publish: false,
         eventEnabled: false,
         eventMode: 1, // 1: single, 2: range, 3: multiple
         eventStartDate: '',
@@ -349,6 +349,18 @@ const FullscreenSlideForm = ({
         return formData.devices.includes('all-devices') || formData.devices.includes(deviceId);
     };
 
+    const isAlwaysOnPool = Boolean(category?.alwaysOn || formData.contentPoolAlwaysOn);
+
+    useEffect(() => {
+        if (isAlwaysOnPool) {
+            setFormData((prev) => ({
+                ...prev,
+                publish: false,
+                eventEnabled: false,
+            }));
+        }
+    }, [isAlwaysOnPool]);
+
     return (
         <div className="fullscreen-slide-form">
             <h2 className="form-title">{t("createFullscreenSlide")}</h2>
@@ -439,9 +451,15 @@ const FullscreenSlideForm = ({
                                 type="checkbox"
                                 checked={formData.eventEnabled}
                                 onChange={(e) => handleEventEnabledChange(e.target.checked)}
+                                disabled={isAlwaysOnPool}
                             />
                             <span>{t("enableEventDates")}</span>
                         </label>
+                        {isAlwaysOnPool && (
+                            <div className="small text-muted" style={{ marginTop: '6px' }}>
+                                {t("categoryAlwaysOnDisablesScheduling", "This category is always-on; event scheduling is disabled.")}
+                            </div>
+                        )}
 
                         {formData.eventEnabled && (
                             <div className="event-date-block">
@@ -550,9 +568,15 @@ const FullscreenSlideForm = ({
                                 type="checkbox"
                                 checked={formData.publish}
                                 onChange={(e) => handleFieldChange('publish', e.target.checked)}
+                                disabled={isAlwaysOnPool}
                             />
                             <span>{t("publish")}</span>
                         </label>
+                        {isAlwaysOnPool && (
+                            <div className="small text-muted" style={{ marginTop: '6px' }}>
+                                {t("categoryAlwaysOnDisablesPublish", "This category is always-on; publish is locked off.")}
+                            </div>
+                        )}
                     </div>
 
                     {!hideTargets && (

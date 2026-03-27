@@ -64,7 +64,7 @@ const TemplateSlideForm = ({
         startDate: '',
         archiveDate: '',
         devices: ['all-devices'],
-        publish: true,
+        publish: false,
         eventEnabled: false,
         eventMode: 1, // 1: single, 2: range, 3: multiple
         eventStartDate: '',
@@ -350,6 +350,21 @@ const TemplateSlideForm = ({
         const updatedDates = normalizeEventDateItems(formData.eventDates).filter((_, i) => i !== index);
         setFormData((prev) => ({ ...prev, eventDates: updatedDates.length ? updatedDates : [createEmptyEventDate()] }));
     };
+
+    console.log("category", category)
+    const isAlwaysOnPool = Boolean(category?.alwaysOn || formData.contentPoolAlwaysOn);
+
+    useEffect(() => {
+        if (isAlwaysOnPool) {
+            setFormData((prev) => ({
+                ...prev,
+                publish: false,
+                eventEnabled: false,
+            }));
+        }
+    }, [isAlwaysOnPool]);
+
+    console.log("isAlwaysOnPool", isAlwaysOnPool);
 
     const waitForImageLoad = (src) => new Promise((resolve) => {
         if (!src) {
@@ -727,9 +742,15 @@ const TemplateSlideForm = ({
                                 type="checkbox"
                                 checked={formData.eventEnabled}
                                 onChange={(e) => handleEventEnabledChange(e.target.checked)}
+                                disabled={isAlwaysOnPool}
                             />
                             <span>{t("enableEventDates")}</span>
                         </label>
+                        {isAlwaysOnPool && (
+                            <div className="small text-muted" style={{ marginTop: '6px' }}>
+                                {t("categoryAlwaysOnDisablesScheduling", "This category is always-on; event scheduling is disabled.")}
+                            </div>
+                        )}
 
                         {formData.eventEnabled && (
                             <div className="event-date-block">
@@ -846,9 +867,15 @@ const TemplateSlideForm = ({
                                 type="checkbox"
                                 checked={formData.publish}
                                 onChange={(e) => handleChange('publish', e.target.checked)}
+                                disabled={isAlwaysOnPool}
                             />
                             <span>{t("publish")}</span>
                         </label>
+                        {isAlwaysOnPool && (
+                            <div className="small text-muted" style={{ marginTop: '6px' }}>
+                                {t("categoryAlwaysOnDisablesPublish", "This category is always-on; publish is locked off.")}
+                            </div>
+                        )}
                     </div>
 
                     {!hideTargets && (

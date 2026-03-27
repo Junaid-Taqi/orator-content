@@ -133,6 +133,7 @@ const SlidesPage = ({ user }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState('type');
     const [selectedCategory, setSelectedCategory] = useState(null);
+    console.log("selectedCategory", selectedCategory);
     const [selectedSlideType, setSelectedSlideType] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -690,6 +691,7 @@ const SlidesPage = ({ user }) => {
                 url: slide.url,
                 fileURLCover: slide.fileURLCover || '',
                 bgImage: Boolean(slide.bgImage),
+                contentPoolAlwaysOn: Boolean(slide.contentPoolAlwaysOn),
                 devicesText: displayNames.length ? displayNames.join(', ') : '-',
             };
         }),
@@ -976,7 +978,11 @@ const SlidesPage = ({ user }) => {
             >
                 {slideToEdit && slideToEdit.slideType === 1 && (
                     <FullscreenSlideForm
-                        category={{ title: slideToEdit.category }}
+                        category={{
+                            title: slideToEdit.category,
+                            alwaysOn: slideToEdit.contentPoolAlwaysOn,
+                            contentPoolId: slideToEdit.contentPoolId,
+                        }}
                         user={user}
                         onCancel={handleCancelEdit}
                         onSubmit={handleSubmitEditFullscreen}
@@ -999,6 +1005,7 @@ const SlidesPage = ({ user }) => {
                             eventDates: parseEventDates(slideToEdit.eventDatesJson),
                             devices: (slideToEdit.displays || []).map((d) => String(d.displayId)),
                             mediaName: slideToEdit.title,
+                            contentPoolAlwaysOn: Boolean(slideToEdit.contentPoolAlwaysOn),
                         }}
                         existingMediaUrl={slideToEdit.url}
                         requireFile={false}
@@ -1007,7 +1014,11 @@ const SlidesPage = ({ user }) => {
                 )}
                 {slideToEdit && slideToEdit.slideType === 2 && (
                     <TemplateSlideForm
-                        category={{ title: slideToEdit.category }}
+                        category={{
+                            title: slideToEdit.category,
+                            alwaysOn: slideToEdit.contentPoolAlwaysOn,
+                            contentPoolId: slideToEdit.contentPoolId,
+                        }}
                         user={user}
                         onCancel={handleCancelEdit}
                         onSubmit={handleSubmitEditTemplate}
@@ -1033,6 +1044,7 @@ const SlidesPage = ({ user }) => {
                             eventEndDate: toInputDate(slideToEdit.eventEndDate),
                             eventDates: parseEventDates(slideToEdit.eventDatesJson),
                             devices: (slideToEdit.displays || []).map((d) => String(d.displayId)),
+                            contentPoolAlwaysOn: Boolean(slideToEdit.contentPoolAlwaysOn),
                         }}
                         existingCoverUrl={slideToEdit.fileURLCover}
                         mode="edit"

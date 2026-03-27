@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+﻿import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import '../styles/CategorySelector.css';
 import {serverUrl} from '../Services/Constants/Constants';
@@ -55,6 +55,8 @@ const CategorySelector = ({onSelectCategory, onBack, user}) => {
                     title: pool.name,
                     color: pool.color,
                     description: pool.description,
+                    alwaysOn: Boolean(pool.alwaysOn),
+                    contentPoolId: pool.contentPoolId,
                 }));
 
                 setCategories(mapped);
@@ -99,7 +101,7 @@ const CategorySelector = ({onSelectCategory, onBack, user}) => {
                     onClick={() => onSelectCategory(c)}
                 >
                     <div className="category-icon" style={{color: dotColor}}>
-                        {leadingEmoji || '•'}
+                        {leadingEmoji || '\u2022'}
                     </div>
                     <div className="category-name">{cleanTitle || c.title}</div>
                 </div>

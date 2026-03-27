@@ -222,5 +222,7 @@
   "EventStartDate": "Event Start Date",
   "EventEndDate": "Event End Date",
   "NoteSlide" : "Note: Slide will be added to ",
-  "submit" : "submit"
+  "submit" : "submit",
+  "categoryAlwaysOnDisablesScheduling": "This category is always-on; event scheduling is disabled.",
+  "categoryAlwaysOnDisablesPublish": "This category is always-on; publish is locked off."
 }
