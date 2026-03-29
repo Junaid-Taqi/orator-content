@@ -45,6 +45,8 @@ const TemplateSlideForm = ({
     const VARCHAR_300_MAX = 300;
     const VARCHAR_600_MAX = 600;
     const TEXT_MAX = 65535;
+    const TOTEM_DESCRIPTION_MAX = 270;
+    const TOTEM_MAX_LINES = 10;
     const MAX_MULTIPLE_EVENT_DATES = 8;
     const durationMap = {
         low: 15,
@@ -223,6 +225,13 @@ const TemplateSlideForm = ({
 
     const handleChange = (field, value) => {
         setValidationError('');
+        if (field === 'totemDescription') {
+            const limited = String(value ?? '').slice(0, TOTEM_DESCRIPTION_MAX);
+            const lines = limited.split('\n').slice(0, TOTEM_MAX_LINES);
+            const next = lines.join('\n').slice(0, TOTEM_DESCRIPTION_MAX);
+            setFormData((prev) => ({ ...prev, totemDescription: next }));
+            return;
+        }
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
@@ -593,11 +602,14 @@ const TemplateSlideForm = ({
                         <label className="form-label">{t('totemDescription')}</label>
                         <textarea
                             className="form-input template-textarea"
-                            maxLength={460}
+                            maxLength={TOTEM_DESCRIPTION_MAX}
                             placeholder={t('enterTotemDescription')}
                             value={formData.totemDescription}
                             onChange={(e) => handleChange('totemDescription', e.target.value)}
                         />
+                        <small className="template-helper-text">
+                            {formData.totemDescription.length}/{TOTEM_DESCRIPTION_MAX} · {formData.totemDescription.split('\n').length}/{TOTEM_MAX_LINES} lines
+                        </small>
                     </div>
 
                     <div className="form-group template-inline-grid">

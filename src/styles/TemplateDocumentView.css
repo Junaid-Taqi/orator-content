@@ -200,6 +200,7 @@
   line-height: 1.36;
   text-align: justify;
   margin-top: 50px;
+  white-space: pre-line;
 }
 
 .template-dates {
