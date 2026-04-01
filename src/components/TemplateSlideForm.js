@@ -360,7 +360,6 @@ const TemplateSlideForm = ({
         setFormData((prev) => ({ ...prev, eventDates: updatedDates.length ? updatedDates : [createEmptyEventDate()] }));
     };
 
-    console.log("category", category)
     const isAlwaysOnPool = Boolean(category?.alwaysOn || formData.contentPoolAlwaysOn);
 
     useEffect(() => {
@@ -373,7 +372,6 @@ const TemplateSlideForm = ({
         }
     }, [isAlwaysOnPool]);
 
-    console.log("isAlwaysOnPool", isAlwaysOnPool);
 
     const waitForImageLoad = (src) => new Promise((resolve) => {
         if (!src) {

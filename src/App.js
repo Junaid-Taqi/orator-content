@@ -18,13 +18,13 @@ function AppContent() {
   const { token, expiresIn, status, error } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('slides');
   const user = JSON.parse(sessionStorage.getItem("liferayUser")) || {
-    "userId": "25180",
-    "fullName": "admin multan",
-    "email": "admin@multan.com",
+    "userId": "28497",
+    "fullName": "Admin Opcina",
+    "email": "admin@opcina.hr",
     "groups": [
       {
-        "id": "24598",
-        "name": "Municipility Two"
+        "id": "27182",
+        "name": "Općina Tisno"
       }
     ]
   }

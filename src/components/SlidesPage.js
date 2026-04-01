@@ -133,7 +133,6 @@ const SlidesPage = ({ user }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState('type');
     const [selectedCategory, setSelectedCategory] = useState(null);
-    console.log("selectedCategory", selectedCategory);
     const [selectedSlideType, setSelectedSlideType] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -270,16 +269,34 @@ const SlidesPage = ({ user }) => {
         const userId = user?.userId;
         if (!currentGroupId || !userId) return;
 
+        const normalizeDateYMD = (v) => {
+            if (!v) return undefined;
+            const s = String(v).trim();
+            if (!s || s.toLowerCase() === 'null' || s.toLowerCase() === 'undefined') return undefined;
+            const parsed = new Date(s);
+            if (Number.isNaN(parsed.getTime())) return undefined;
+            const offsetMs = parsed.getTimezoneOffset() * 60 * 1000;
+            const local = new Date(parsed.getTime() - offsetMs);
+            return local.toISOString().split('T')[0]; // yyyy-MM-dd
+        };
+
+        const mappingByDisplayId = (slideToEdit.displays || []).reduce((acc, d) => {
+            acc[String(d.displayId)] = d;
+            return acc;
+        }, {});
+
         const selectedDevices = formData.devices?.includes('all-devices')
             ? formData.availableDevices || []
             : (formData.availableDevices || []).filter((d) => formData.devices?.includes(d.id));
 
         const targetDevices = selectedDevices.map((device) => ({
+            slideDisplayId: String(mappingByDisplayId[String(device.id)]?.slideDisplayId) || null,
             displayId: String(device.id),
-            startTime: device.wakeTime,
-            endTime: device.sleepTime,
-            startDate: formData.startDate,
-            archiveDate: formData.archiveDate,
+            startTime: mappingByDisplayId[String(device.id)]?.startTime || device.wakeTime,
+            endTime: mappingByDisplayId[String(device.id)]?.endTime || device.sleepTime,
+            startDate: normalizeDateYMD(mappingByDisplayId[String(device.id)]?.startDate) || normalizeDateYMD(formData.startDate),
+            archiveDate: normalizeDateYMD(mappingByDisplayId[String(device.id)]?.archiveDate) || normalizeDateYMD(formData.archiveDate),
+            status: mappingByDisplayId[String(device.id)]?.status ?? 1,
         }));
 
         const payload = {
@@ -321,6 +338,38 @@ const SlidesPage = ({ user }) => {
         const userId = user?.userId;
         if (!currentGroupId || !userId) return;
 
+        const normalizeDateYMD = (v) => {
+            if (!v) return undefined;
+            const s = String(v).trim();
+            if (!s || s.toLowerCase() === 'null' || s.toLowerCase() === 'undefined') return undefined;
+            const parsed = new Date(s);
+            if (Number.isNaN(parsed.getTime())) return undefined;
+            const offsetMs = parsed.getTimezoneOffset() * 60 * 1000;
+            const local = new Date(parsed.getTime() - offsetMs);
+            return local.toISOString().split('T')[0]; // yyyy-MM-dd
+        };
+
+        const mappingByDisplayId = (slideToEdit.displays || []).reduce((acc, d) => {
+            acc[String(d.displayId)] = d;
+            return acc;
+        }, {});
+
+        const selectedDevices = formData.devices?.includes('all-devices')
+            ? formData.availableDevices || []
+            : (formData.availableDevices || []).filter((d) => formData.devices?.includes(d.id));
+
+        const targetDevices = selectedDevices.map((device) => ({
+            slideDisplayId: String(mappingByDisplayId[String(device.id)]?.slideDisplayId) || null,
+            displayId: String(device.id),
+            startTime: mappingByDisplayId[String(device.id)]?.startTime || device.wakeTime,
+            endTime: mappingByDisplayId[String(device.id)]?.endTime || device.sleepTime,
+            startDate: normalizeDateYMD(mappingByDisplayId[String(device.id)]?.startDate) || normalizeDateYMD(formData.startDate),
+            archiveDate: normalizeDateYMD(mappingByDisplayId[String(device.id)]?.archiveDate) || normalizeDateYMD(formData.archiveDate),
+            status: mappingByDisplayId[String(device.id)]?.status ?? 1,
+        }));
+
+        console.log("targetDevices", targetDevices);
+
         const payload = {
             groupId: String(currentGroupId),
             userId: String(userId),
@@ -344,7 +393,7 @@ const SlidesPage = ({ user }) => {
             eventDates: formData.eventEnabled ? (formData.eventDates || []) : [],
             renderedTemplateFile: formData.renderedTemplateFile || null,
             coverImageFile: formData.coverImageFile || null,
-            targetDevices: [],
+            targetDevices,
         };
 
         const result = await dispatch(editTemplateSlide(payload));
@@ -988,7 +1037,7 @@ const SlidesPage = ({ user }) => {
                         onSubmit={handleSubmitEditFullscreen}
                         submitting={editFullscreenStatus === 'loading'}
                         submitError={editFullscreenError || editValidationError}
-                        hideTargets
+                        hideTargets={false}
                         initialValues={{
                             title: slideToEdit.title || '',
                             subtitle: slideToEdit.subtitle || '',
@@ -1024,7 +1073,7 @@ const SlidesPage = ({ user }) => {
                         onSubmit={handleSubmitEditTemplate}
                         submitting={editTemplateStatus === 'loading'}
                         submitError={editTemplateError || editValidationError}
-                        hideTargets
+                        hideTargets={false}
                         initialValues={{
                             title: slideToEdit.title || '',
                             subtitle: slideToEdit.subtitle || '',
