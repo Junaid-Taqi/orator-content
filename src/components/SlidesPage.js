@@ -368,8 +368,6 @@ const SlidesPage = ({ user }) => {
             status: mappingByDisplayId[String(device.id)]?.status ?? 1,
         }));
 
-        console.log("targetDevices", targetDevices);
-
         const payload = {
             groupId: String(currentGroupId),
             userId: String(userId),
