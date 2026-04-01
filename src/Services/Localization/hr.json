@@ -1,4 +1,4 @@
-﻿{
+{
   "municipality": "Op\u0107ina",
   "monitorNetwork": "Pratite svoju mre\u017eu digitalnih natpisa",
   "slides": "Slajdovi",
@@ -153,11 +153,11 @@
 
   "ChooseSlideType": "Odaberite vrstu slajda",
   "FullscreenSlide":"Slajd preko cijelog zaslona",
-  "TemplateSlide" : "PredloÅ¾ak slajdova",
+  "TemplateSlide" : "Predložak slajdova",
   "TemplateStructure" : "PrikaÅ¾ite sliku ili videozapis kakvi jesu, bez ikakve strukture predloÅ¡ka.",
-  "CategoryBased": "PredloÅ¾ak temeljen na kategorijama sa strukturiranim izgledom i dinamiÄkim poljima.",
+  "CategoryBased": "Predložak temeljen na kategorijama sa strukturiranim izgledom i dinamiÄkim poljima.",
   "selectCategory": "Odaberite kategoriju",
-  "categoryDescription": "Odaberite kategoriju za svoj slajd. PredloÅ¾ak Ä‡e se temeljiti na odabranoj kategoriji.",
+  "categoryDescription": "Odaberite kategoriju za svoj slajd. Predložak Ä‡e se temeljiti na odabranoj kategoriji.",
   "loadingCategories": "UÄitavanje aktivnih kategorija...",
   "errorLoadingCategories": "Nije moguÄ‡e uÄitati kategorije.",
   "noCategories": "Nema aktivnih kategorija.",
@@ -177,7 +177,7 @@
   "Landscape": "Krajolik",
   "Portrait" : "Portret",
 
-  "createTemplateSlide": "Kreiraj predloÅ¾ak slajda",
+  "createTemplateSlide": "Kreiraj Predložak slajda",
   "category": "Kategorija",
   "slideTitle": "Naslov slajda",
   "subTitle": "Podnaslov",
