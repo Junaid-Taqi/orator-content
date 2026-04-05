@@ -254,6 +254,7 @@
   line-height: 1.7;
   font-size: 14px;
   margin: 0;
+  white-space: pre-line;
 }
 
 @media (max-width: 768px) {

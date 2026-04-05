@@ -118,6 +118,7 @@ const TemplateDocumentView = ({
     const mainTitle = (title || 'Title');
     const subTitle = (subtitle || 'Sub Title');
     const bodyText = description || 'Description';
+    const bodyLines = bodyText.split(/\r?\n/);
     const badgeText = (categoryLabel || 'Events').toUpperCase();
     const catehgoryStyle = categoryColor.toLowerCase();
     const qrCodeValue = qrValue || SCAN_QR_HARDCODED_URL;
@@ -222,7 +223,14 @@ const TemplateDocumentView = ({
                 <div>
                     <h1 className="template-title">{mainTitle}</h1>
                     <h2 className="template-subtitle">{subTitle}</h2>
-                    <p className="template-description">{bodyText}</p>
+                    <p className="template-description">
+                        {bodyLines.map((line, index) => (
+                            <React.Fragment key={`desc-line-${index}`}>
+                                {line}
+                                {index < bodyLines.length - 1 ? <br /> : null}
+                            </React.Fragment>
+                        ))}
+                    </p>
                 </div>
 
                 <div className={`template-dates ${isMultipleEventMode ? 'multiple' : ''}`}>
