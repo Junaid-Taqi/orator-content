@@ -306,8 +306,8 @@ const SlidesPage = ({ user }) => {
             displayId: String(device.id),
             startTime: mappingByDisplayId[String(device.id)]?.startTime || device.wakeTime,
             endTime: mappingByDisplayId[String(device.id)]?.endTime || device.sleepTime,
-            startDate: normalizeDateYMD(mappingByDisplayId[String(device.id)]?.startDate) || normalizeDateYMD(formData.startDate),
-            archiveDate: normalizeDateYMD(mappingByDisplayId[String(device.id)]?.archiveDate) || normalizeDateYMD(formData.archiveDate),
+            startDate: formData.startDate,
+            archiveDate: formData.archiveDate,
             status: mappingByDisplayId[String(device.id)]?.status ?? 1,
         }));
 
