@@ -118,10 +118,29 @@ const TemplateSlideForm = ({
         }
         return createEmptyEventDate();
     });
-    const toInputDate = (date) => {
-        const offsetMs = date.getTimezoneOffset() * 60 * 1000;
-        const local = new Date(date.getTime() - offsetMs);
-        return local.toISOString().split('T')[0];
+    const toInputDate = (value) => {
+        if (!value) return '';
+        if (typeof value === 'string') {
+            const trimmed = value.trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+                return trimmed;
+            }
+            const apiDateMatch = trimmed.match(/^([A-Za-z]{3})\s+(\d{1,2}),\s+(\d{4})/);
+            if (apiDateMatch) {
+                const [, monthLabel, day, year] = apiDateMatch;
+                const monthIndex = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                    .indexOf(monthLabel);
+                if (monthIndex >= 0) {
+                    return `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(Number(day)).padStart(2, '0')}`;
+                }
+            }
+        }
+        const parsed = value instanceof Date ? value : new Date(value);
+        if (Number.isNaN(parsed.getTime())) return '';
+        const year = parsed.getFullYear();
+        const month = String(parsed.getMonth() + 1).padStart(2, '0');
+        const day = String(parsed.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     };
 
     const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
@@ -444,7 +463,6 @@ const TemplateSlideForm = ({
     };
 
     const handleSubmit = async () => {
-        console.log("submit", formData);
         if (!safeTrim(formData.title)) {
             setValidationError('Slide title is required.');
             return;

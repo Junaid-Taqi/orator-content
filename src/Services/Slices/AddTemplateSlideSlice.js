@@ -60,7 +60,6 @@ export const addNewTemplateSlide = createAsyncThunk(
                 },
             };
 
-            console.log("formData " , formData)
             const response = await axios.post(
                 `${serverUrl}/o/slidesApplication/addNewTemplateSlide`,
                 formData,

@@ -79,15 +79,27 @@ const isVideoUrl = (url) => {
 
 const toInputDate = (value) => {
     if (!value) return '';
-    const parsed = new Date(value);
-    if (!Number.isNaN(parsed.getTime())) {
-        return parsed.toISOString().slice(0, 10);
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+            return trimmed;
+        }
+        const apiDateMatch = trimmed.match(/^([A-Za-z]{3})\s+(\d{1,2}),\s+(\d{4})/);
+        if (apiDateMatch) {
+            const [, monthLabel, day, year] = apiDateMatch;
+            const monthIndex = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                .indexOf(monthLabel);
+            if (monthIndex >= 0) {
+                return `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(Number(day)).padStart(2, '0')}`;
+            }
+        }
     }
-    const asString = String(value);
-    if (/^\d{4}-\d{2}-\d{2}$/.test(asString)) {
-        return asString;
-    }
-    return '';
+    const parsed = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '';
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const day = String(parsed.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 const parseEventDates = (value) => {
@@ -363,8 +375,8 @@ const SlidesPage = ({ user }) => {
             displayId: String(device.id),
             startTime: mappingByDisplayId[String(device.id)]?.startTime || device.wakeTime,
             endTime: mappingByDisplayId[String(device.id)]?.endTime || device.sleepTime,
-            startDate: normalizeDateYMD(mappingByDisplayId[String(device.id)]?.startDate) || normalizeDateYMD(formData.startDate),
-            archiveDate: normalizeDateYMD(mappingByDisplayId[String(device.id)]?.archiveDate) || normalizeDateYMD(formData.archiveDate),
+            startDate: formData.startDate,
+            archiveDate: formData.archiveDate,
             status: mappingByDisplayId[String(device.id)]?.status ?? 1,
         }));
 
@@ -414,157 +426,6 @@ const SlidesPage = ({ user }) => {
         setIsEditModalOpen(false);
         setSlideToEdit(null);
         setEditValidationError('');
-    };
-
-    const handleEditFieldChange = (field, value) => {
-        setEditValidationError('');
-        setEditForm((prev) => ({ ...prev, [field]: value }));
-    };
-
-    const handleEditEventModeChange = (mode) => {
-        setEditValidationError('');
-        setEditForm((prev) => ({
-            ...prev,
-            eventMode: mode,
-            eventStartDate: mode === 3 ? '' : prev.eventStartDate,
-            eventEndDate: mode === 2 ? prev.eventEndDate : '',
-            eventDates: mode === 3
-                ? (prev.eventDates.length ? normalizeEventDateItems(prev.eventDates) : [createEmptyEventDate()])
-                : [createEmptyEventDate()],
-        }));
-    };
-
-    const handleEditEventDateChange = (index, field, value) => {
-        const updated = normalizeEventDateItems(editForm.eventDates);
-        updated[index] = { ...updated[index], [field]: value };
-        handleEditFieldChange('eventDates', updated);
-    };
-
-    const handleAddEditEventDate = () => {
-        setEditValidationError('');
-        setEditForm((prev) => {
-            const normalized = normalizeEventDateItems(prev.eventDates);
-            const last = normalized[normalized.length - 1] || createEmptyEventDate();
-            if (!safeTrim(last.date) || !safeTrim(last.label)) {
-                setEditValidationError('Please enter both date and label before adding another event.');
-                return prev;
-            }
-            if (normalized.length >= 8) {
-                setEditValidationError('You can select up to 8 dates.');
-                return prev;
-            }
-            return { ...prev, eventDates: [...normalized, createEmptyEventDate()] };
-        });
-    };
-
-    const handleRemoveEditEventDate = (index) => {
-        const updated = normalizeEventDateItems(editForm.eventDates).filter((_, i) => i !== index);
-        handleEditFieldChange('eventDates', updated.length ? updated : [createEmptyEventDate()]);
-    };
-
-    const handleSaveEdit = async () => {
-        if (!slideToEdit) return;
-        if (!editForm.title.trim()) {
-            setEditValidationError('Slide title is required.');
-            return;
-        }
-        if (!editForm.startDate || !editForm.archiveDate) {
-            setEditValidationError('Start date and archive date are required.');
-            return;
-        }
-        if (editForm.archiveDate < editForm.startDate) {
-            setEditValidationError('Archive date must be greater than or equal to start date.');
-            return;
-        }
-        let normalizedEventDates = [];
-        if (editForm.eventEnabled) {
-            if (editForm.eventMode === 1 && !editForm.eventStartDate) {
-                setEditValidationError('Event single date is required.');
-                return;
-            }
-            if (editForm.eventMode === 2) {
-                if (!editForm.eventStartDate || !editForm.eventEndDate) {
-                    setEditValidationError('Event start and end dates are required for date range.');
-                    return;
-                }
-                if (editForm.eventEndDate < editForm.eventStartDate) {
-                    setEditValidationError('Event end date must be greater than or equal to event start date.');
-                    return;
-                }
-            }
-            if (editForm.eventMode === 3) {
-                const normalizedDates = normalizeEventDateItems(editForm.eventDates)
-                    .map((d) => ({ date: safeTrim(d.date), label: safeTrim(d.label) }))
-                    .filter((d) => d.date || d.label);
-                if (!normalizedDates.length) {
-                    setEditValidationError('At least one event date is required for multiple dates mode.');
-                    return;
-                }
-                if (normalizedDates.some((d) => !d.date || !d.label)) {
-                    setEditValidationError('Please enter a label for each event date.');
-                    return;
-                }
-                if (normalizedDates.length > 8) {
-                    setEditValidationError('You can select up to 8 dates.');
-                    return;
-                }
-                normalizedEventDates = normalizedDates;
-            }
-        }
-
-        const currentGroupId = user?.groups?.[0]?.id;
-        const userId = user?.userId;
-        if (!currentGroupId || !userId || !slideToEdit?.id) {
-            return;
-        }
-
-        const priority = priorityMap[normalizePriorityKey(editForm.priority)] || 2;
-        const durationSeconds = Number(editForm.durationSeconds) || durationMap[normalizePriorityKey(editForm.priority)] || 30;
-
-        const basePayload = {
-            groupId: String(currentGroupId),
-            userId: String(userId),
-            slideId: String(slideToEdit.id),
-            title: editForm.title.trim(),
-            subtitle: (editForm.subtitle || '').trim(),
-            webDescription: (editForm.webDescription || '').trim(),
-            priority,
-            durationSeconds,
-            startDate: editForm.startDate,
-            archiveDate: editForm.archiveDate,
-            publish: editForm.publish !== false,
-            eventEnabled: Boolean(editForm.eventEnabled),
-            eventMode: editForm.eventEnabled ? Number(editForm.eventMode || 1) : 0,
-            eventStartDate: editForm.eventEnabled ? (editForm.eventStartDate || '') : '',
-            eventEndDate: editForm.eventEnabled ? (editForm.eventEndDate || '') : '',
-            eventDates: editForm.eventEnabled ? normalizedEventDates : [],
-        };
-
-        let result;
-        if (slideToEdit.slideType === 2) {
-            result = await dispatch(editTemplateSlide({
-                ...basePayload,
-                articleUrl: (editForm.articleUrl || '').trim(),
-                totemDescription: (editForm.totemDescription || '').trim(),
-                linkUrl: (editForm.linkUrl || '').trim(),
-                configJSON: (editForm.configJSON || '').trim(),
-            }));
-            if (editTemplateSlide.fulfilled.match(result) && result.payload?.success) {
-                setIsEditModalOpen(false);
-                setSlideToEdit(null);
-                setEditValidationError('');
-                dispatch(getAllSlides({ groupId: String(currentGroupId) }));
-            }
-            return;
-        }
-
-        result = await dispatch(editFullScreenSlide(basePayload));
-        if (editFullScreenSlide.fulfilled.match(result) && result.payload?.success) {
-            setIsEditModalOpen(false);
-            setSlideToEdit(null);
-            setEditValidationError('');
-            dispatch(getAllSlides({ groupId: String(currentGroupId) }));
-        }
     };
 
     const handleSelectType = (typeId) => {
